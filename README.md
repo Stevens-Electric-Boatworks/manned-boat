@@ -16,8 +16,8 @@ To get started, visit the [wiki home](https://github.com/Stevens-Electric-Boatwo
 ![](/_readme_imgs/shore_ss.png) 
 The software for the shore side can be found at the following links, including build instructions, and deployments.
 
-* Website: [`Dakdot/eboat-client`](https://github.com/Dakdot/eboat-client)
-* Backend Server: [`Dakdot/eboat-server`](https://github.com/Dakdot/eboat-server)
+* Website: [`Stevens-Electric-Boatworks/shore-client`](https://github.com/Stevens-Electric-Boatworks/shore-client)
+* Backend Server: [`Stevens-Electric-Boatworks/shore-server`](https://github.com/Stevens-Electric-Boatworks/shore-server)
 
 ## Contact
 Ishaan Sayal - [isayal@stevens.edu](mailto:isayal@stevens.edu)
