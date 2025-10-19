@@ -18,3 +18,6 @@ The software for the shore side can be found at the following links, including b
 
 * Website: [`Dakdot/eboat-client`](https://github.com/Dakdot/eboat-client)
 * Backend Server: [`Dakdot/eboat-server`](https://github.com/Dakdot/eboat-server)
+
+## Contact
+Ishaan Sayal - [isayal@stevens.edu](mailto:isayal@stevens.edu)
