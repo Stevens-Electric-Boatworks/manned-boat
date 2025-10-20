@@ -1,5 +1,6 @@
 import threading
 import time
+from typing import Callable
 
 import serial
 from rclpy.node import Node
@@ -9,12 +10,24 @@ from boat_common_libs.alarm_lib.alarm_helper import AlarmPublisher
 from boat_common_libs.alarm_lib.alarms import Alarm
 
 
+class SerialData:
+    def __init__(self, data:bytes):
+        self.data = data
+
+    def to_utf_8(self) -> str:
+        return self.data.decode('utf-8').strip()
+
+    def to_bytes(self) -> bytes:
+        return self.data
+
+
+
 class SerialDevice:
     """
     Represents a serial device that is intended to work within the ROS ecosystem.
     """
 
-    def __init__(self, node:Node, serial_port:str, on_msg_rec, alarm_manager: AlarmPublisher, baudrate:int = 115200, timeout:int = 1, polling_duration=0.1):
+    def __init__(self, node:Node, serial_port:str, on_msg_rec:Callable[[SerialData], None], alarm_manager: AlarmPublisher, baudrate:int = 115200, timeout:int = 1, polling_duration=0.1):
         """
 
         param: node - The ROS2 node that is using the serial device
@@ -60,15 +73,3 @@ class SerialDevice:
         while self.device.in_waiting > 0:
             data = SerialData(self.device.readline())
             self.on_msg_rec(data)
-
-
-
-class SerialData:
-    def __init__(self, data:bytes):
-        self.data = data
-
-    def to_utf_8(self) -> str:
-        return self.data.decode('utf-8').strip()
-
-    def to_bytes(self) -> bytes:
-        return self.data

@@ -1,15 +1,11 @@
-import pynmea2
 import rclpy
 from rclpy.executors import ExternalShutdownException
 from rclpy.node import Node
 
 from boat_common_libs.alarm_lib.alarm_helper import AlarmPublisher
-from boat_common_libs.serial_lib.serial_device import SerialDevice, SerialData
-from boat_data_interfaces.msg import MotionData, BoatAlarm, GPSData
+from boat_common_libs.serial_lib.devices.gps_serial_device import GPGGAResult, GPSDevice
+from boat_data_interfaces.msg import GPSData
 
-import random
-import json
-import serial
 
 #pip install --break-system-packages pynmea2
 
@@ -19,7 +15,7 @@ class MotionNode(Node):
         self.publisher_ = self.create_publisher(GPSData, '/motion/gps', 10)
         self._logger.info("Attempting to read REAL GPS Data")
         self.alarm_pub = AlarmPublisher(self)
-        self.dev = SerialDevice(self, "/dev/ttyUSB1", self._dev_callback, self.alarm_pub, polling_duration=0.3)
+        self.dev = GPSDevice(self, self.alarm_pub, self._dev_callback)
         # self.dev = serial.Serial(
         #     port='/dev/ttyUSB1',
         #     baudrate=115200,
@@ -29,29 +25,8 @@ class MotionNode(Node):
         #     timeout=1
         # )
 
-    def _dev_callback(self, data:SerialData):
-        if data.to_utf_8().startswith("$GPGGA"):
-            gps_str = pynmea2.parse(data.to_utf_8())
-            if gps_str.lat != '':
-                if gps_str.lat_dir == 'N':
-                    lat = float(gps_str.lat)
-                else:
-                    lat = -float(gps_str.lat)
-
-                if gps_str.lon_dir == 'W':
-                    lon = -float(gps_str.lon)
-                else:
-                    lon = float(gps_str.lon)
-
-                msg = GPSData()
-                msg.lat = lat
-                msg.lon = lon
-                self.publisher_.publish(msg)
-            else:
-                msg = GPSData()
-                msg.lat = float(0)
-                msg.lon = float(0)
-                self.publisher_.publish(msg)
+    def _dev_callback(self, data:GPGGAResult):
+        self.publisher_.publish(GPSData(lat=data.lat, lon=data.lon))
 
 
 def main(args=None):
