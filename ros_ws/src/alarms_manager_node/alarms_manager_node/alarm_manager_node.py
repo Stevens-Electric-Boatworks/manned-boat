@@ -37,10 +37,13 @@ class AlarmsWatchdog(Node):
         error_type = self.codes[alarm.error_code][0]
         error_message = self.codes[alarm.error_code][1]
         sticky = self.codes[alarm.error_code][3]
-        if error_type == "FAULT":
-            self._logger.error("Alarm was raised:\n\tError Code: " + str(error_code) + "\n\tDescription: " + error_message + "\n\tSeverity: " + error_type)
-        else:
-            self._logger.warn("Alarm was raised:\n\tError Code: " + str(error_code) + "\tDescription: " + error_message + "\tSeverity: " + error_type)
+        if not sticky:
+            if error_type == "FAULT":
+                self._logger.error("Alarm was raised:\n\tError Code: " + str(
+                    error_code) + "\n\tDescription: " + error_message + "\n\tSeverity: " + error_type)
+            else:
+                self._logger.warn("Alarm was raised:\n\tError Code: " + str(
+                    error_code) + "\tDescription: " + error_message + "\tSeverity: " + error_type)
 
         already_raised = self.raised_sticky_alarms.__contains__(error_code)
         if sticky and already_raised:
