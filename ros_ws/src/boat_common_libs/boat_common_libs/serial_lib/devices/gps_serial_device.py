@@ -5,7 +5,7 @@ from rclpy.node import Node
 
 from boat_common_libs.alarm_lib.alarm_helper import AlarmPublisher
 from boat_data_interfaces.msg import GPSData
-from serial_lib.serial_device import SerialDevice, SerialData
+from boat_common_libs.serial_lib.serial_device import SerialDevice, SerialData
 
 
 def convert_to_degrees(raw_value, direction):

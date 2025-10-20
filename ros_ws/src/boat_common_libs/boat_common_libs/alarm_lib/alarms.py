@@ -40,4 +40,7 @@ class Alarm(Enum):
     """FAULT: Failed to open a serial device because it does not exist"""
 
     GENERIC_SERIAL_DEVICE_ERROR = 16
-    """FAULT: There was some kind of generic serial device error"""
+    """FAULT: There is some kind of generic serial device error."""
+
+    SERIAL_DEVICE_IN_USE = 17
+    """FAULT: The serial device is use"""

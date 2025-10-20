@@ -54,17 +54,24 @@ class SerialDevice:
                 self.device = serial.Serial(self.serial_port, self.baudrate, timeout=self.timeout)
                 self.device.flush()
                 self.valid = True
+                self._unlatch_all()
                 break
             except SerialException as e:
                 self.valid = False
                 if e.errno == 2:
                     self.alarm_manager.publish_alarm(Alarm.SERIAL_DEVICE_DOES_NOT_EXIST)
+                elif e.errno == 16:
+                    self.alarm_manager.publish_alarm(Alarm.SERIAL_DEVICE_IN_USE)
                 else:
                     self.alarm_manager.publish_alarm(Alarm.GENERIC_SERIAL_DEVICE_ERROR)
 
                 self.logger.warning(f"[SERIAL LIB] Unable to connect to '{self.serial_port}'\nAttempting to reconnect to the device after 3 seconds...")
                 time.sleep(3)
 
+    def _unlatch_all(self):
+        self.alarm_manager.delatch_alarm(Alarm.SERIAL_DEVICE_IN_USE)
+        self.alarm_manager.delatch_alarm(Alarm.GENERIC_SERIAL_DEVICE_ERROR)
+        self.alarm_manager.delatch_alarm(Alarm.SERIAL_DEVICE_DOES_NOT_EXIST)
 
     def _poll_serial_device(self):
         if not self.valid:
