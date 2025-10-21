@@ -55,6 +55,7 @@ class SerialDevice:
                 self.device.flush()
                 self.valid = True
                 self._unlatch_all()
+                self.logger.info(f"Connected to serial device at '{self.serial_port} with baudrate {self.baudrate}!'")
                 break
             except SerialException as e:
                 self.valid = False
