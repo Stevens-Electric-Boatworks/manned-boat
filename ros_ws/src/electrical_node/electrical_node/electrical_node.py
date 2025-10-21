@@ -18,8 +18,8 @@ class ElectricalNode(Node):
 
         self.alarm_pub = AlarmPublisher(self)
         # Verify serial directory with pi
-        self.dev_a = SerialDevice(self, "/dev/ttyACM0", self._on_ser_read, self.alarm_pub)
-        self.dev_a = SerialDevice(self, "/dev/ttyACM1", self._on_ser_read, self.alarm_pub)
+        SerialDevice(self, "/dev/ttyACM0", self._on_ser_read, self.alarm_pub)
+        SerialDevice(self, "/dev/ttyACM1", self._on_ser_read, self.alarm_pub)
 
     def _on_ser_read(self, data:SerialData):
         self._pub_data(data.to_utf_8())
