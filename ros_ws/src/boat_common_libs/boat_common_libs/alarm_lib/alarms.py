@@ -35,3 +35,12 @@ class Alarm(Enum):
 
     FAILED_CAN_NETWORK_INIT = 14
     """FAULT: Failed CAN Network Init — Failed to initialize `canopen.Network()`."""
+
+    SERIAL_DEVICE_DOES_NOT_EXIST = 15
+    """FAULT: Failed to open a serial device because it does not exist"""
+
+    GENERIC_SERIAL_DEVICE_ERROR = 16
+    """FAULT: There is some kind of generic serial device error."""
+
+    SERIAL_DEVICE_IN_USE = 17
+    """FAULT: The serial device is use"""
