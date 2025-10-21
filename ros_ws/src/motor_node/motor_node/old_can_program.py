@@ -163,7 +163,6 @@ class OldCanProgram:
                     return
 
                 self.publish_sdo_data(publisher)
-                self.can_bus_state = CANBusStatus.ONLINE
                 time.sleep(0.3)
             except Exception as e:
                 time.sleep(0.8)
@@ -185,9 +184,13 @@ class OldCanProgram:
         try:
             value = self.node.sdo[index][subindex].raw
             self.unlatch_all_alarms()
+            self.can_bus_state = CANBusStatus.ONLINE
             return value
         except Exception as e:
-            self.logger.error(f"Error reading SDO [{hex(index)}:{subindex}]: {e}")
+            if e.error_code == 105:
+                self.logger.error(f"CAN bus buffer full.")
+            else:
+                self.logger.error(f"Error reading SDO [{hex(index)}:{subindex}]: {e}")
             self.declare_alarm(Alarm.ERROR_READING_CAN_SDO)
             self.can_bus_state = CANBusStatus.OFFLINE
             return 0
@@ -218,8 +221,10 @@ class OldCanProgram:
         msg.motor_temp = int(temperature)
         msg.current = int(current)
         msg.power = int(power)
-
-        publisher.publish(msg)
+        
+        
+        if self.can_bus_state == CANBusStatus.ONLINE:
+            publisher.publish(msg)
 
 
     def get_bus_state(self):
