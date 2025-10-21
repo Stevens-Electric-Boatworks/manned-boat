@@ -86,6 +86,7 @@ class SerialDevice:
                 self.alarm_manager.publish_alarm(Alarm.SERIAL_IO_ERROR)
                 time.sleep(0.5)
                 self.valid = False
+                self.device.close()
                 self.device = None
                 threading.Thread(target=self._device_connect_thread, daemon=True).start()
 
