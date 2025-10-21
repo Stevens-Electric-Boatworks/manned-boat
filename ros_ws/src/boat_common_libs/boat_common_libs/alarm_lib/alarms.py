@@ -44,3 +44,6 @@ class Alarm(Enum):
 
     SERIAL_DEVICE_IN_USE = 17
     """FAULT: The serial device is use"""
+
+    SERIAL_IO_ERROR = 18
+    """FAULT: There was an serial IO error"""

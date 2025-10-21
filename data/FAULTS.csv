@@ -13,3 +13,4 @@ ID,Type,Message,Condition,Sticky
 15,FAULT,Serial device does not exist,Failed to open a serial device because it doesn't exist, true
 16,FAULT,Generic Serial Device Error,There was some kind of generic serial device error tht could not be attributed to a single error, false
 17,FAULT,Serial Device In-Use,The serial device is in use and is locked, true
+18,FAULT,Serial Device IO Error,There was an IO error thrown when trying to read from the serial device, false

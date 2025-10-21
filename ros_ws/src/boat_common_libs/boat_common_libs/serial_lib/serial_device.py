@@ -55,6 +55,7 @@ class SerialDevice:
                 self.device.flush()
                 self.valid = True
                 self._unlatch_all()
+                self.logger.info(f"Connected to serial device at '{self.serial_port} with baudrate {self.baudrate}!'")
                 break
             except SerialException as e:
                 self.valid = False
@@ -76,7 +77,17 @@ class SerialDevice:
     def _poll_serial_device(self):
         if not self.valid:
             return
+        try:
+            while self.device.in_waiting > 0:
+                data = SerialData(self.device.readline())
+                self.on_msg_rec(data)
+        except OSError as e:
+            if e.errno == 5:
+                self.logger.error(f"There was a serial IO error for '{self.serial_port}'. Sleeping for 0.5s, then reconnecting")
+                self.alarm_manager.publish_alarm(Alarm.SERIAL_IO_ERROR)
+                time.sleep(0.5)
+                self.valid = False
+                self.device.close()
+                self.device = None
+                threading.Thread(target=self._device_connect_thread, daemon=True).start()
 
-        while self.device.in_waiting > 0:
-            data = SerialData(self.device.readline())
-            self.on_msg_rec(data)
