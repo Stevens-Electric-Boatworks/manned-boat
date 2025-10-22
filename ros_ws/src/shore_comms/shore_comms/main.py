@@ -33,23 +33,42 @@ class ShoreDataCollector(Node):
         self.alarms = []
         self.create_sub(BoatAlarm, "/alarm/shore/publish", self.alarms_collector)
 
+        self.declare_parameter("data_send", 0.1, ParameterDescriptor(
+            description='How often shore_comms should send data to the shore server.'))
+
+        self.declare_parameter("replay_mode", False,
+                               ParameterDescriptor(description='Is the shore node trying to replay data?'))
+
         self.websocket:WebSocketClientProtocol = None
         self.data = {}
         self.logs = []
         self.can_bus_state = CANBusStatus.OFFLINE
 
         self.alarm_publisher = alarm_helper.create_alarm_publisher(self)
-        self.create_sub(Log, "/rosout", self.logs_collector)
+
+        ros_out_topic = "/rosout"
+        if self.get_parameter("replay_mode").get_parameter_value().bool_value:
+            self._logger.info("The SHORE node is in replay mode. Now replaying log files from /logout")
+            ros_out_topic = "/logout"
+            logged_data = {
+                "timestamp": get_time_in_ms(self._clock.now().to_msg()),
+                "msg": "The shore node is in REPLAY MODE",
+                "file": "REPLAY MODE",
+                "function": "REPLAY MODE",
+                "line": 0,
+                "level": 40,
+                "name": "REPLAY MODE"
+            }
+            self.logs.append(logged_data)
+
+        self.create_sub(Log, ros_out_topic, self.logs_collector)
         self.create_sub(InletCoolantData, "/electrical/temp_sensors/in", self.electrical_coolant_temp_collector_inlet)
         self.create_sub(OutletCoolantData, "/electrical/temp_sensors/out", self.electrical_coolant_temp_collector_outlet)
         self.create_sub(GPSData, "/motion/gps", self.motion_collector)
         self.create_sub(CANMotorData, "/motors/can_motor_data", self.motor_collector)
         self.create_sub(CANBusStatus, "/motors/can_bus_state", self.bus_state_collector)
         self.wss_watchdog = self.create_timer(5, self.watchdog_callback)
-
-        self.declare_parameter("data_send", 0.1, ParameterDescriptor(description='How often shore_comms should send data to the shore server.'))
         self.add_on_set_parameters_callback(self.on_param_change_callback)
-
         threading.Thread(target=self._run_asyncio_loop, daemon=True).start()
 
     def on_param_change_callback(self, param_list):

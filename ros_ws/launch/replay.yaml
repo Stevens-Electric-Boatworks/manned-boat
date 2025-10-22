@@ -1,5 +1,8 @@
 %YAML 1.2
 ---
+# To replay data, use the following command
+# ros2 bag play --publish-service-requests {BAG_FILE} --remap /rosout:=/logout
+
 launch:
   - node:
       pkg: "shore_comms"
@@ -8,6 +11,8 @@ launch:
       param:
         - name: "data_send"
           value: 0.1
+        - name: "replay_mode"
+          value: true
   - node:
       pkg: "alarms_manager_node"
       exec: "main"
@@ -15,3 +20,5 @@ launch:
       param:
         - name: "faults_file"
           value: "~/eboat_src/data/FAULTS.csv"
+        - name: "replay_mode"
+          value: true

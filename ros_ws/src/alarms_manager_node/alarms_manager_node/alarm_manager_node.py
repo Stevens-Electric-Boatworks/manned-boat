@@ -1,7 +1,10 @@
+from rclpy import QoSProfile
+from rclpy.service_introspection import ServiceIntrospectionState
+
 import json
 import os
 import rclpy
-from rcl_interfaces.msg import ParameterDescriptor
+from rcl_interfaces.msg import ParameterDescriptor, ParameterType
 from rclpy.node import Node
 from rclpy.executors import ExternalShutdownException
 from boat_data_interfaces.msg import BoatAlarm
@@ -16,14 +19,25 @@ class AlarmsWatchdog(Node):
         super().__init__('alarms_watchdog')
         description = ParameterDescriptor(description='Defines where to find the exact file for the fault codes csv')
         self.declare_parameter('faults_file', '~/eboat_src/data/FAULTS.csv', description)
+        self.declare_parameter('replay_mode', False, ParameterDescriptor(description="Sets the node into a replay mode, where it doesn't send out data to the shore."))
+
         # Error Code, Type, Message
         self.codes = {}
         self.load_csv_file()
         self.raised_sticky_alarms = set({})
 
-        self.create_service(AlarmRaise, "/alarm/raise", self.on_alarm_raise)
-        self.create_service(AlarmDelatch, "/alarm/delatch", self.on_alarm_delatch)
+
+        a = self.create_service(AlarmRaise, "/alarm/raise", self.on_alarm_raise)
+        b = self.create_service(AlarmDelatch, "/alarm/delatch", self.on_alarm_delatch)
+        # Service introspection is needed for us to be
+        a.configure_introspection(self._clock, service_event_qos_profile=QoSProfile(depth=10), introspection_state=ServiceIntrospectionState.CONTENTS)
+        b.configure_introspection(self._clock, service_event_qos_profile=QoSProfile(depth=10), introspection_state=ServiceIntrospectionState.CONTENTS)
+
+
         self.shore_pub = self.create_publisher(BoatAlarm, "/alarm/shore/publish", 10)
+
+        if bool(self.get_parameter("replay_mode").get_parameter_value().bool_value):
+            self._logger.info("Watchdog node is in replay mode!")
 
 
     def on_alarm_raise(self, request:AlarmRaise.Request, response: AlarmRaise.Response) -> AlarmRaise.Response:
@@ -51,12 +65,18 @@ class AlarmsWatchdog(Node):
             response.result = AlarmRaise.Response.STICKY_ALREADY_RAISED
             return response
         elif sticky and not already_raised:
+            if error_type == "FAULT":
+                self._logger.error("Alarm was raised:\n\tError Code: " + str(
+                    error_code) + "\n\tDescription: " + error_message + "\n\tSeverity: " + error_type)
+            else:
+                self._logger.warn("Alarm was raised:\n\tError Code: " + str(
+                    error_code) + "\tDescription: " + error_message + "\tSeverity: " + error_type)
             response.result = AlarmRaise.Response.STICKY_NOT_RAISED_BEFORE
             self.raised_sticky_alarms.add(error_code)
         else:
             response.result = AlarmRaise.Response.RAISED
-
-        self.shore_pub.publish(alarm)
+        if not bool(self.get_parameter("replay_mode").get_parameter_value().bool_value):
+            self.shore_pub.publish(alarm)
         return response
 
     def on_alarm_delatch(self, request:AlarmDelatch.Request, response: AlarmDelatch.Response) -> AlarmDelatch.Response:
