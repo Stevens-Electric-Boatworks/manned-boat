@@ -5,7 +5,7 @@ from rclpy.node import Node
 from rclpy.executors import ExternalShutdownException
 
 from boat_common_libs.smooth_random import SmoothRandom
-from boat_data_interfaces.msg import CANMotorData, CANBusStatus, CoolantData
+from boat_data_interfaces.msg import OutletCoolantData, InletCoolantData
 
 
 class ElectricalTestingDataNode(Node):
@@ -16,15 +16,18 @@ class ElectricalTestingDataNode(Node):
             "inlet_temp": SmoothRandom(20, 0.8, -30, 50),
             "outlet_temp": SmoothRandom(30, 0.5, -30, 50),
         }
-        self._temp_publisher = self.create_publisher(CoolantData, '/electrical/temp_sensors', 10)
+        self._out_pub = self.create_publisher(OutletCoolantData, '/electrical/temp_sensors/out', 10)
+        self._in_pub = self.create_publisher(InletCoolantData, '/electrical/temp_sensors/in', 10)
         self.create_timer(0.5, self.publish_test_data)
 
     def publish_test_data(self):
-        msg = CoolantData()
-        msg.inlet_temp = int(self.randoms["inlet_temp"].next())
-        msg.outlet_temp = int(self.randoms["outlet_temp"].next())
+        msg_out = OutletCoolantData()
+        msg_in = InletCoolantData()
+        msg_in.inlet_temp = self.randoms["inlet_temp"].next()
+        msg_out.outlet_temp = self.randoms["outlet_temp"].next()
 
-        self._temp_publisher.publish(msg)
+        self._out_pub.publish(msg_out)
+        self._in_pub.publish(msg_in)
 
 def main(args=None):
     try:
