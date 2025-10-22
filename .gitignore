@@ -3,10 +3,6 @@
 README_IF_ON_TEAMS.md
 
 ros_ws/.vscode/browse.vc.db
-data_extractor_scripts/input_rosbag/*
-*.mcap
-
-
 .obsidian
 .idea/
 */__pycache__/

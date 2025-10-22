@@ -1,4 +1,0 @@
-[submodule "eboat-server"]
-	branch = main
-[submodule "eboat-client"]
-	branch = main

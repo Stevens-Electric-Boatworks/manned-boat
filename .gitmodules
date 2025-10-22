@@ -1,6 +1,0 @@
-[submodule "shore_code/eboat-server"]
-	path = shore_code/eboat-server
-	url = https://github.com/Dakdot/eboat-server
-[submodule "shore_code/eboat-client"]
-	path = shore_code/eboat-client
-	url = https://github.com/Dakdot/eboat-client
