@@ -10,4 +10,4 @@ class SmoothRandom:
     def next(self):
         change = random.uniform(-self.step, self.step)
         self.value = min(max(self.value + change, self.low), self.high)
-        return round(self.value, 2)
+        return self.value

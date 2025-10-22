@@ -18,8 +18,8 @@ class MotionNode(Node):
 
         # GPS coordinates initialized near Hoboken, NJ for realistic test data.
         # The step is very small to simulate realistic movement.
-        self.gps_lat = SmoothRandom(start=40.744, step=0.001, low=40.73, high=40.76)
-        self.gps_long = SmoothRandom(start=-74.032, step=0.001, low=-74.06, high=-74.02)
+        self.gps_lat = SmoothRandom(start=40.744, step=0.0001, low=40.73, high=40.76)
+        self.gps_long = SmoothRandom(start=-74.032, step=0.0001, low=-74.06, high=-74.02)
         self.speed = SmoothRandom(start=5, step=0.5, low=-10, high=40)
         self.timer = self.create_timer(timer_period, self.timer_callback)
 
