@@ -31,6 +31,7 @@ rosidl_generate_interfaces(${PROJECT_NAME}
   "msg/GPIOData.msg"
   "msg/MotionData.msg"
   "msg/GPSData.msg"
+  "msg/GPSSpeed.msg"
   "msg/MotorData.msg"
   "msg/BoatAlarm.msg"
   "msg/CANMotorData.msg"
