@@ -20,7 +20,7 @@ $ pip install --break-system-packages pandas mcap-ros2-support
 		1) Reminder that you can use `$ ros2 topic echo {topic}` to find that topic, and see what data it is outputting
 	3) This data be a comma-separated list
 3) Then, with your specific data, run the following command
-	1) `$ ./extract-generic.sh {topic_comma_seperated_list} {.mcap file in rosbag}
+	1) `$ ./extract-generic.sh {topic_comma_seperated_list} {.mcap file in rosbag}`
 	2) Example: 
 		1) `$ ./extract-generic.sh /electrical/temp_sensors/out.outlet_temp,/electrical/temp_sensors/in.inlet_temp input_rosbag/rosbag2_2025_10_21-19_41_03/rosbag2_2025_10_21-19_41_03_0.mcap`
 4) You will now have a `.csv` file in `output_csv`
