@@ -7,7 +7,7 @@ from rclpy.node import Node
 
 from boat_common_libs.alarm_lib.alarms import Alarm
 from boat_data_interfaces.msg import ElectricalData, MotionData, BoatAlarm, \
-    CANMotorData, CANBusStatus, GPSData, OutletCoolantData, InletCoolantData
+    CANMotorData, CANBusStatus, GPSData, OutletCoolantData, InletCoolantData, GPSSpeed
 from rcl_interfaces.msg import Log, ParameterDescriptor, SetParametersResult
 from boat_common_libs.alarm_lib import alarm_helper
 
@@ -42,7 +42,8 @@ class ShoreDataCollector(Node):
         self.create_sub(Log, "/rosout", self.logs_collector)
         self.create_sub(InletCoolantData, "/electrical/temp_sensors/in", self.electrical_coolant_temp_collector_inlet)
         self.create_sub(OutletCoolantData, "/electrical/temp_sensors/out", self.electrical_coolant_temp_collector_outlet)
-        self.create_sub(GPSData, "/motion/gps", self.motion_collector)
+        self.create_sub(GPSData, "/motion/gps", self.gps_location_collector)
+        self.create_sub(GPSSpeed, "/motion/speed", self.gps_speed_collector)
         self.create_sub(CANMotorData, "/motors/can_motor_data", self.motor_collector)
         self.create_sub(CANBusStatus, "/motors/can_bus_state", self.bus_state_collector)
         self.wss_watchdog = self.create_timer(5, self.watchdog_callback)
@@ -199,10 +200,12 @@ class ShoreDataCollector(Node):
     def electrical_coolant_temp_collector_outlet(self, msg:OutletCoolantData):
         self.add_data("outlet_temp", msg.outlet_temp)
 
-    def motion_collector(self, msg:GPSData):
+    def gps_location_collector(self, msg:GPSData):
         self.add_data("lat", msg.lat)
         self.add_data("long", msg.lon)
-        self.add_data("speed", -1) # TODO: MAKE REAL
+
+    def gps_speed_collector(self, msg:GPSSpeed):
+        self.add_data("speed", msg.speed)
 
     def motor_collector(self, msg:CANMotorData):
         self.add_data("voltage", msg.voltage)
