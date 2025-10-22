@@ -8,7 +8,8 @@ from mcap_ros2.reader import read_ros2_messages
 
 def extract(topics, bag_file, csv_file):
     records = []
-    for msg in read_ros2_messages(bag_file):
+    ros_topics = list(map(lambda x: x.split(".")[0], topics))
+    for msg in read_ros2_messages(bag_file, topics=ros_topics):
         ros_msg = msg.ros_msg
         for attr in topics:
             topic = attr.split(".")[0]
