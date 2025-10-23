@@ -25,8 +25,9 @@ class GPGGAResult:
         self.lon = lon
 
 class GPVTGResult:
-    def __init__(self, speed_knots):
+    def __init__(self, speed_knots, true_track):
         self.speed_knots = speed_knots
+        self.true_track = true_track
 
 
 class GPSDevice(SerialDevice):
@@ -46,5 +47,5 @@ class GPSDevice(SerialDevice):
 
         elif data.to_utf_8().startswith("$GPVTG"):
             gps_str = pynmea2.parse(data.to_utf_8())
-            if not type(gps_str.spd_over_grnd_kts) == NoneType:
-                self._vtg_callback(GPVTGResult(float(gps_str.spd_over_grnd_kts)))
+            if not type(gps_str.spd_over_grnd_kts) == NoneType and not type(gps_str.track):
+                self._vtg_callback(GPVTGResult(float(gps_str.spd_over_grnd_kts), float(gps_str.true_track)))
