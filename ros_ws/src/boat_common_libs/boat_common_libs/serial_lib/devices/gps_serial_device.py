@@ -37,7 +37,6 @@ class GPSDevice(SerialDevice):
         self.node = node
 
     def _on_gps_msg_rec(self, data:SerialData):
-        self.node.get_logger().info("DATA RECIEVED: " + str(data.to_utf_8()))
         if data.to_utf_8().startswith("$GPGGA"):
             gps_str = pynmea2.parse(data.to_utf_8())
             if gps_str.lat != '':
@@ -46,7 +45,6 @@ class GPSDevice(SerialDevice):
                 self._gga_callback(GPGGAResult(lat, lon))
 
         elif data.to_utf_8().startswith("$GPVTG"):
-            self.node.get_logger().info("$GPVTG DATA RECIEVED: " + str(data.to_utf_8()))
             gps_str = pynmea2.parse(data.to_utf_8())
             if not type(gps_str.spd_over_grnd_kts) == NoneType:
                 self._vtg_callback(GPVTGResult(float(gps_str.spd_over_grnd_kts)))
