@@ -10,12 +10,14 @@ find_package(ament_cmake REQUIRED)
 find_package(rclcpp REQUIRED)
 find_package(std_msgs REQUIRED)
 find_package(boat_data_interfaces REQUIRED)
+find_package(websocketpp REQUIRED)
+
 # uncomment the following section in order to fill in
 # further dependencies manually.
 # find_package(<dependency> REQUIRED)
 
 add_executable(shore src/shore_comms.cpp)
-target_link_libraries(shore PUBLIC rclcpp::rclcpp ${std_msgs_TARGETS} ${boat_data_interfaces_TARGETS})
+target_link_libraries(shore PUBLIC rclcpp::rclcpp websocketpp ${std_msgs_TARGETS} ${boat_data_interfaces_TARGETS})
 
 install(TARGETS
         shore
