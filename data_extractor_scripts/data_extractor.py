@@ -7,6 +7,7 @@ from mcap_ros2.reader import read_ros2_messages
 
 
 def extract(topics, bag_file, csv_file):
+    # TODO: add ros bag time
     records = []
     ros_topics = list(map(lambda x: x.split(".")[0], topics))
     for msg in read_ros2_messages(bag_file, topics=ros_topics):
