@@ -55,7 +55,7 @@ class ShoreDataCollector(Node):
                 "msg": "The shore node is in REPLAY MODE",
                 "file": "REPLAY MODE",
                 "function": "REPLAY MODE",
-                "line": 0,
+                "line": 67,
                 "level": 40,
                 "name": "REPLAY MODE"
             }
@@ -68,6 +68,7 @@ class ShoreDataCollector(Node):
         self.create_sub(GPSVTGData, "/motion/vtg", self.gps_speed_collector)
         self.create_sub(CANMotorData, "/motors/can_motor_data", self.motor_collector)
         self.create_sub(CANBusStatus, "/motors/can_bus_state", self.bus_state_collector)
+        self.create_sub(Time, "/boat_time", self.time_collector)
         self.wss_watchdog = self.create_timer(5, self.watchdog_callback)
         self.add_on_set_parameters_callback(self.on_param_change_callback)
         threading.Thread(target=self._run_asyncio_loop, daemon=True).start()
@@ -239,6 +240,9 @@ class ShoreDataCollector(Node):
 
     def bus_state_collector(self, msg:CANBusStatus):
         self.can_bus_state = msg.bus_state
+
+    def time_collector(self, msg:Time):
+        self.add_data("boat_time", get_time_in_ms(msg))
 
 
     def alarms_collector(self, msg:BoatAlarm):
