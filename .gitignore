@@ -3,6 +3,7 @@
 README_IF_ON_TEAMS.md
 
 ros_ws/.vscode/browse.vc.db
+.vscode
 .obsidian
 .idea/
 */__pycache__/

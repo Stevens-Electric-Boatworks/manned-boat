@@ -51,7 +51,7 @@ private:
                     RCLCPP_INFO(this->get_logger(), "Connection established");
                 } else if (msg->type == ix::WebSocketMessageType::Error) {
                     // Maybe SSL is not configured properly
-                    RCLCPP_INFO(this->get_logger(), "Connection error: %s", msg->errorInfo.reason.c_str());
+                    RCLCPP_ERROR(this->get_logger(), "Connection error: %s", msg->errorInfo.reason.c_str());
                 }
             }
         );
@@ -60,7 +60,7 @@ private:
 
     void send_websocket_data() {
         if (this->connectionOpened) {
-            websocket.send("{\"type\":\"data\",\"payload\":{\"speed\":7}, \"replay\": true}");
+            websocket.send("{\"type\":\"data\",\"payload\":{\"speed\":7,\"boat_time\":71727162638.2}, \"replay\": true}");
         }
         else {
             RCLCPP_INFO(this->get_logger(), "Websocket is not opened yet.");
