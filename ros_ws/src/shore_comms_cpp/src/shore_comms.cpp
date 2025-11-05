@@ -3,74 +3,68 @@
 //
 
 #include <memory>
-#include <websocketpp/config/asio_client.hpp>
-#include <websocketpp/client.hpp>
-#include <memory>
 
+#include "ixwebsocket/IXWebSocket.h"
 #include "rclcpp/rclcpp.hpp"
 #include "std_msgs/msg/string.hpp"
 #include "boat_data_interfaces/msg/inlet_coolant_data.hpp"
 
 // Needs sudo apt install libwebsocketpp
 
-typedef websocketpp::client<websocketpp::config::asio_tls_client> client;
-
 class ShoreCommsNode : public rclcpp::Node {
 public:
     ShoreCommsNode()
         : Node("minimal_subscriber") {
+
+        auto timer_callback =
+              [this]() -> void {
+                  this->send_websocket_data();
+        };
+        auto timer_ = this->create_wall_timer(std::chrono::milliseconds(500), timer_callback);
+        this->timers_.push_back(timer_);
         this->configureWebsocket();
 
-        this->log_topic<boat_data_interfaces::msg::InletCoolantData>("/electrical/temp_sensors/in",
-                                                                     &ShoreCommsNode::electrical_data_collector);
+        // this->log_topic<boat_data_interfaces::msg::InletCoolantData>("/electrical/temp_sensors/in",
+        //                                                              &ShoreCommsNode::electrical_data_collector);
     }
 
-
-    void electrical_data_collector(const boat_data_interfaces::msg::InletCoolantData::SharedPtr msg) {
-        RCLCPP_INFO(this->get_logger(), "Sending %f to websocket", msg->inlet_temp);
-        this->websocket.send(hdl, "TEST!!!", websocketpp::frame::opcode::text);
-    }
+    //
+    // void electrical_data_collector(const boat_data_interfaces::msg::InletCoolantData::SharedPtr msg) {
+    //     RCLCPP_INFO(this->get_logger(), "Sending %f to websocket", msg->inlet_temp);
+    // }
 
 private:
-    ix::WebSocket ws;
-    client websocket;
-    std::vector<std::shared_ptr<rclcpp::SubscriptionBase> > subscriptions_;
+    std::vector<std::shared_ptr<rclcpp::TimerBase>> timers_;
+    std::vector<std::shared_ptr<rclcpp::SubscriptionBase>> subscriptions_;
+    ix::WebSocket websocket;
+    bool connectionOpened = false;
 
     void configureWebsocket() {
-        websocket.clear_access_channels(websocketpp::log::alevel::all);
-        websocket.clear_error_channels(websocketpp::log::elevel::all);
-
-        websocket.init_asio();
-        websocket.start_perpetual();
-
-        websocketpp::lib::error_code ec;
-        const std::string uri = "wss://shore.stevenseboat.org/api";
-        const client::connection_ptr ptr = websocket.get_connection(uri, ec);
-
-        if (ec) {
-            RCLCPP_ERROR(this->get_logger(), "Unable to open the Websocket because '%d'", ec.value());
-            RCLCPP_ERROR(this->get_logger(), "Human Readable Error Message: '%s'", ec.message().c_str());
-
-            return;
-        }
-        websocket.connect(ptr);
-
-        websocket.set_message_handler([&](websocketpp::connection_hdl, client::message_ptr msg) {
-            std::cout << "Received: " << msg->get_payload() << std::endl;
-        });
-        websocket.set_open_handler([&](websocketpp::connection_hdl hdl) {
-            this->hdl = hdl;
-        });
-        websocket.set_tls_init_handler([](websocketpp::connection_hdl hdl) {
-            auto ctx = std::make_shared<boost::asio::ssl::context>(boost::asio::ssl::context::sslv23);
-            try {
-                ctx->set_default_verify_paths(); // system CA
-                ctx->set_verify_mode(boost::asio::ssl::verify_peer);
-            } catch (const std::exception &e) {
-                std::cerr << "TLS context setup failed: " << e.what() << std::endl;
+        const std::string url("wss://shore.stevenseboat.org/api");
+        websocket.setUrl(url);
+        RCLCPP_INFO(this->get_logger(), "Connection to URL '%s'", url.c_str());
+        websocket.setOnMessageCallback([this](const ix::WebSocketMessagePtr &msg) {
+                if (msg->type == ix::WebSocketMessageType::Message) {
+                    RCLCPP_INFO(this->get_logger(), "received message: %s", msg->str.c_str());
+                } else if (msg->type == ix::WebSocketMessageType::Open) {
+                    this->connectionOpened = true;
+                    RCLCPP_INFO(this->get_logger(), "Connection established");
+                } else if (msg->type == ix::WebSocketMessageType::Error) {
+                    // Maybe SSL is not configured properly
+                    RCLCPP_INFO(this->get_logger(), "Connection error: %s", msg->errorInfo.reason.c_str());
+                }
             }
-            return ctx;
-        });
+        );
+        websocket.start();
+    }
+
+    void send_websocket_data() {
+        if (this->connectionOpened) {
+            websocket.send("{\"type\":\"data\",\"payload\":{\"speed\":7}, \"replay\": true}");
+        }
+        else {
+            RCLCPP_INFO(this->get_logger(), "Websocket is not opened yet.");
+        }
     }
 
     template<typename T, typename M>
