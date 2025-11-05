@@ -32,3 +32,8 @@ launch:
       pkg: "electrical_node"
       exec: "electrical"
       name: "electrical_node"
+  - node:
+      pkg: "time_node"
+      exec: "time_node"
+      name: "time"
+
