@@ -12,6 +12,7 @@ find_package(ament_cmake REQUIRED)
 find_package(rclcpp REQUIRED)
 find_package(std_msgs REQUIRED)
 find_package(boat_data_interfaces REQUIRED)
+find_package(boat_common_libs_cpp REQUIRED)
 add_subdirectory(${CMAKE_SOURCE_DIR}/../IXWebSocket IXWebSocket_build)
 
 # uncomment the following section in order to fill in
@@ -23,6 +24,7 @@ target_link_libraries(shore
         rclcpp::rclcpp
         ${std_msgs_TARGETS}
         ${boat_data_interfaces_TARGETS}
+        ${boat_common_libs_cpp_TARGETS}
         ixwebsocket
 )
 

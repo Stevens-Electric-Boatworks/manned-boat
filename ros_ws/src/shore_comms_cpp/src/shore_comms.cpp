@@ -19,7 +19,9 @@ using json = nlohmann::json;
 #include "boat_data_interfaces/msg/can_bus_status.hpp"
 #include "boat_data_interfaces/msg/boat_alarm.hpp"
 #include "rcl_interfaces/msg/log.hpp"
+#include "boat_common_libs_cpp/AlarmPublisher.hpp"
 #include "builtin_interfaces/msg/time.hpp"
+
 
 struct LogData {
     double_t timestamp;
@@ -39,7 +41,7 @@ class ShoreCommsNode : public rclcpp::Node {
 public:
     ShoreCommsNode()
         : Node("shore_comms_cpp") {
-
+        auto pub = std::make_shared<AlarmPublisher>(this);
         //replay mode config
         auto param_replay = rcl_interfaces::msg::ParameterDescriptor{};
         param_replay.description = "Is it in replay mode?";
@@ -53,7 +55,6 @@ public:
             addLog(LogData{timestamp, "The shore server is in REPLAY MODE", "REPLAY MODE", "REPLAY MODE",67,40});
             RCLCPP_INFO(this->get_logger(), "The shore server is in REPLAY mode");
         }
-
         //websocket config
         auto param_data_send = rcl_interfaces::msg::ParameterDescriptor{};
         param_data_send.description = "The data send rate in MS";
