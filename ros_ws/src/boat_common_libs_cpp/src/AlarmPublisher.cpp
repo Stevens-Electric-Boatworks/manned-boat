@@ -24,3 +24,9 @@ void AlarmPublisher::publishAlarm(const Faults fault) const {
     request->alarm = alarm;
     this->alarmRaiseClient->async_send_request(request);
 }
+
+void AlarmPublisher::delatchAlarm(Faults fault) const {
+    const auto request = std::make_shared<boat_data_interfaces::srv::AlarmDelatch::Request>();
+    request->error_code = static_cast<int8_t>(fault);
+    this->alarmDeLatchClient->async_send_request(request);
+}

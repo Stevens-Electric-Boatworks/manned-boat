@@ -178,12 +178,17 @@ private:
     void configureWebsocket() {
         const std::string url("wss://shore.stevenseboat.org/api");
         websocket.setUrl(url);
+        websocket.setMaxWaitBetweenReconnectionRetries(5);
         RCLCPP_INFO(this->get_logger(), "Connecting to %s", url.c_str());
         websocket.setOnMessageCallback([this](const ix::WebSocketMessagePtr &msg) {
             if (msg->type == ix::WebSocketMessageType::Open) {
                 this->connectionOpened = true;
                 this->openedInitally = true;
                 RCLCPP_INFO(this->get_logger(), "WebSocket connection established.");
+                alarmPub->delatchAlarm(Faults::WEBSOCKET_CONNECTION_CLOSED);
+                alarmPub->delatchAlarm(Faults::WEBSOCKET_INITIAL_CONNECTION_FAILURE);
+                alarmPub->delatchAlarm(Faults::WEBSOCKET_NOT_OPENED);
+                alarmPub->delatchAlarm(Faults::WEBSOCKET_IS_NOT_INITIALLY_OPENED_YET);
             } else if (msg->type == ix::WebSocketMessageType::Error) {
                 this->connectionOpened = false;
                 RCLCPP_ERROR(this->get_logger(), "WebSocket error: %s", msg->errorInfo.reason.c_str());
@@ -192,6 +197,9 @@ private:
                 } else {
                     alarmPub->publishAlarm(Faults::WEBSOCKET_CONNECTION_CLOSED);
                 }
+            }
+            else {
+                RCLCPP_INFO(this->get_logger(), "Something happened? %s", msg->errorInfo.reason.c_str());
             }
         });
         websocket.start();

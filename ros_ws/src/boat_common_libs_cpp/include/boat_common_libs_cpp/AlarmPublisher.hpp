@@ -31,6 +31,7 @@ public:
     explicit AlarmPublisher(rclcpp::Node* node);
 
     void publishAlarm(Faults fault) const;
+    void delatchAlarm(Faults fault) const;
 private:
     const rclcpp::Node *node;
     rclcpp::Client<boat_data_interfaces::srv::AlarmRaise>::SharedPtr alarmRaiseClient;
