@@ -22,13 +22,20 @@ using json = nlohmann::json;
 #include "rcl_interfaces/msg/log.hpp"
 #include "builtin_interfaces/msg/time.hpp"
 
+struct LogData {
+    double_t timestamp;
+    std::string msg;
+    std::string filename;
+    std::string function;
+    uint32_t line;
+    uint8_t level;
+};
 
 // Needs sudo apt install nlohmann-json3-dev
 class ShoreCommsNode : public rclcpp::Node {
 public:
     ShoreCommsNode()
-        : Node("shore_comms_cpp")
-    {
+        : Node("shore_comms_cpp") {
         auto timer_callback = [this]() -> void {
             this->send_websocket_data();
         };
@@ -39,21 +46,21 @@ public:
 
         // Register collectors
         this->log_topic<boat_data_interfaces::msg::InletCoolantData>("/electrical/temp_sensors/in",
-            &ShoreCommsNode::electrical_coolant_temp_collector_inlet);
+                                                                     &ShoreCommsNode::electrical_coolant_temp_collector_inlet);
         this->log_topic<boat_data_interfaces::msg::OutletCoolantData>("/electrical/temp_sensors/out",
-            &ShoreCommsNode::electrical_coolant_temp_collector_outlet);
+                                                                      &ShoreCommsNode::electrical_coolant_temp_collector_outlet);
         this->log_topic<boat_data_interfaces::msg::GPSData>("/motion/gps",
-            &ShoreCommsNode::gps_location_collector);
+                                                            &ShoreCommsNode::gps_location_collector);
         this->log_topic<boat_data_interfaces::msg::GPSSpeed>("/motion/speed",
-            &ShoreCommsNode::gps_speed_collector);
+                                                             &ShoreCommsNode::gps_speed_collector);
         this->log_topic<boat_data_interfaces::msg::CANMotorData>("/motors/can_motor_data",
-            &ShoreCommsNode::motor_collector);
+                                                                 &ShoreCommsNode::motor_collector);
         this->log_topic<boat_data_interfaces::msg::CANBusStatus>("/motors/can_bus_state",
-            &ShoreCommsNode::bus_state_collector);
+                                                                 &ShoreCommsNode::bus_state_collector);
         this->log_topic<boat_data_interfaces::msg::BoatAlarm>("/alarm/shore/publish",
-            &ShoreCommsNode::alarms_collector);
+                                                              &ShoreCommsNode::alarms_collector);
         this->log_topic<rcl_interfaces::msg::Log>("/rosout",
-            &ShoreCommsNode::logs_collector);
+                                                  &ShoreCommsNode::logs_collector);
     }
 
     void electrical_coolant_temp_collector_inlet(const boat_data_interfaces::msg::InletCoolantData::SharedPtr msg) {
@@ -97,21 +104,21 @@ public:
     }
 
     void logs_collector(const rcl_interfaces::msg::Log::SharedPtr msg) {
-        json log_entry = {
-            {"timestamp", (msg->stamp.sec * 1000) + (msg->stamp.nanosec / 1e6)},
-            {"msg", msg->msg},
-            {"file", msg->file},
-            {"function", msg->function},
-            {"line", msg->line},
-            {"level", msg->level},
-            {"name", msg->name}
-        };
-        addData("log", log_entry);
+        auto const timestamp = msg->stamp.sec * 1000.0 + msg->stamp.nanosec / 1.0e6;
+        addLog(LogData{timestamp, msg->msg, msg->file,msg->function,msg->line, msg->level});
+    }
+
+    void send_websocket_data() {
+        if (this->connectionOpened && !data.empty()) {
+            this->sendData_();
+            this->sendLogs();
+        }
     }
 
 private:
-    std::vector<std::shared_ptr<rclcpp::TimerBase>> timers_;
-    std::vector<std::shared_ptr<rclcpp::SubscriptionBase>> subscriptions_;
+    std::vector<std::shared_ptr<rclcpp::TimerBase> > timers_;
+    std::vector<std::shared_ptr<rclcpp::SubscriptionBase> > subscriptions_;
+    std::vector<LogData> logs_;
     json data;
     ix::WebSocket websocket;
     bool connectionOpened = false;
@@ -123,7 +130,7 @@ private:
         websocket.setOnMessageCallback([this](const ix::WebSocketMessagePtr &msg) {
             if (msg->type == ix::WebSocketMessageType::Open) {
                 this->connectionOpened = true;
-                RCLCPP_INFO(this->get_logger(), "WebSocket connection established ✅");
+                RCLCPP_INFO(this->get_logger(), "WebSocket connection established.");
             } else if (msg->type == ix::WebSocketMessageType::Error) {
                 RCLCPP_ERROR(this->get_logger(), "WebSocket error: %s", msg->errorInfo.reason.c_str());
             }
@@ -131,18 +138,42 @@ private:
         websocket.start();
     }
 
-    void send_websocket_data() {
-        if (this->connectionOpened && !data.empty()) {
-            json j;
-            j["type"] = "data";
-            j["payload"] = data;
-            websocket.send(j.dump());
-            data.clear();
-        }
+    void sendData_() {
+        json j;
+        j["type"] = "data";
+        j["payload"] = data;
+        websocket.send(j.dump());
+        data.clear();
     }
+
+    void sendLogs() {
+        if (this->logs_.size() == 0) return;
+        std::vector<json> logs;
+        json j = {
+            {"type", "log"}
+        };
+        for (LogData data: logs_) {
+            logs.push_back({
+                {"timestamp", data.timestamp},
+                {"msg", data.msg},
+                {"file", data.filename},
+                {"function", data.function},
+                {"line", data.line},
+                {"level", data.level},
+            });
+        }
+        this->logs_.clear();
+        j["payload"] = logs;
+        websocket.send(j.dump());
+    }
+
 
     void addData(const std::string &name, const json &value) {
         this->data[name] = value;
+    }
+
+    void addLog(const LogData &log) {
+        this->logs_.push_back(log);
     }
 
     template<typename T, typename M>
