@@ -12,10 +12,8 @@
 // for convenience
 using json = nlohmann::json;
 #include "boat_data_interfaces/msg/inlet_coolant_data.hpp"
-#include "boat_data_interfaces/msg/inlet_coolant_data.hpp"
 #include "boat_data_interfaces/msg/outlet_coolant_data.hpp"
 #include "boat_data_interfaces/msg/gps_data.hpp"
-#include "boat_data_interfaces/msg/gps_speed.hpp"
 #include "boat_data_interfaces/msg/can_motor_data.hpp"
 #include "boat_data_interfaces/msg/can_bus_status.hpp"
 #include "boat_data_interfaces/msg/boat_alarm.hpp"
@@ -51,8 +49,6 @@ public:
                                                                       &ShoreCommsNode::electrical_coolant_temp_collector_outlet);
         this->log_topic<boat_data_interfaces::msg::GPSData>("/motion/gps",
                                                             &ShoreCommsNode::gps_location_collector);
-        this->log_topic<boat_data_interfaces::msg::GPSSpeed>("/motion/speed",
-                                                             &ShoreCommsNode::gps_speed_collector);
         this->log_topic<boat_data_interfaces::msg::CANMotorData>("/motors/can_motor_data",
                                                                  &ShoreCommsNode::motor_collector);
         this->log_topic<boat_data_interfaces::msg::CANBusStatus>("/motors/can_bus_state",
@@ -61,6 +57,8 @@ public:
                                                               &ShoreCommsNode::alarms_collector);
         this->log_topic<rcl_interfaces::msg::Log>("/rosout",
                                                   &ShoreCommsNode::logs_collector);
+        this->log_topic<builtin_interfaces::msg::Time>("/boat_time",
+                                          &ShoreCommsNode::boat_time_collector);
     }
 
     void electrical_coolant_temp_collector_inlet(const boat_data_interfaces::msg::InletCoolantData::SharedPtr msg) {
@@ -76,9 +74,9 @@ public:
         addData("long", msg->lon);
     }
 
-    void gps_speed_collector(const boat_data_interfaces::msg::GPSSpeed::SharedPtr msg) {
-        addData("speed", msg->speed);
-    }
+    // void gps_speed_collector(const boat_data_interfaces::msg::GPSSpeed::SharedPtr msg) {
+    //     addData("speed", msg->speed);
+    // }
 
     void motor_collector(const boat_data_interfaces::msg::CANMotorData::SharedPtr msg) {
         addData("voltage", msg->voltage);
@@ -94,6 +92,9 @@ public:
     void bus_state_collector(const boat_data_interfaces::msg::CANBusStatus::SharedPtr msg) {
         this->CANBusState = msg->bus_state;
     }
+    void boat_time_collector(const builtin_interfaces::msg::Time::SharedPtr msg) {
+        addData("boat_time", getTimeFromMsg(*msg));
+    };
 
     void alarms_collector(const boat_data_interfaces::msg::BoatAlarm::SharedPtr msg) {
         json alarm_json = {
@@ -104,8 +105,7 @@ public:
     }
 
     void logs_collector(const rcl_interfaces::msg::Log::SharedPtr msg) {
-        auto const timestamp = msg->stamp.sec * 1000.0 + msg->stamp.nanosec / 1.0e6;
-        addLog(LogData{timestamp, msg->msg, msg->file,msg->function,msg->line, msg->level});
+        addLog(LogData{getTimeFromMsg(msg->stamp), msg->msg, msg->file,msg->function,msg->line, msg->level});
     }
 
     void send_websocket_data() {
@@ -190,6 +190,12 @@ private:
     }
 
 
+    static double getTimeFromMsg(const builtin_interfaces::msg::Time& time) {
+        return time.sec * 1000.0 + time.nanosec / 1.0e6;
+
+    }
+
+
     template<typename T, typename M>
     void log_topic(const std::string &topic_name, M callback) {
         auto bound = std::bind(callback, this, std::placeholders::_1);
@@ -198,6 +204,8 @@ private:
         RCLCPP_INFO(this->get_logger(), "Listening on '%s'", topic_name.c_str());
     }
 };
+
+
 
 
 int main(int argc, char *argv[]) {
