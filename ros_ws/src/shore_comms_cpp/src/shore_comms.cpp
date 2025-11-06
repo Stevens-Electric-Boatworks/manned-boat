@@ -14,6 +14,7 @@ using json = nlohmann::json;
 #include "boat_data_interfaces/msg/inlet_coolant_data.hpp"
 #include "boat_data_interfaces/msg/outlet_coolant_data.hpp"
 #include "boat_data_interfaces/msg/gps_data.hpp"
+#include "boat_data_interfaces/msg/gpsvtg_data.hpp"
 #include "boat_data_interfaces/msg/can_motor_data.hpp"
 #include "boat_data_interfaces/msg/can_bus_status.hpp"
 #include "boat_data_interfaces/msg/boat_alarm.hpp"
@@ -49,6 +50,8 @@ public:
                                                                       &ShoreCommsNode::electrical_coolant_temp_collector_outlet);
         this->log_topic<boat_data_interfaces::msg::GPSData>("/motion/gps",
                                                             &ShoreCommsNode::gps_location_collector);
+        this->log_topic<boat_data_interfaces::msg::GPSVTGData>("/motion/vtg",
+                                                    &ShoreCommsNode::gps_vtg_collector);
         this->log_topic<boat_data_interfaces::msg::CANMotorData>("/motors/can_motor_data",
                                                                  &ShoreCommsNode::motor_collector);
         this->log_topic<boat_data_interfaces::msg::CANBusStatus>("/motors/can_bus_state",
@@ -74,9 +77,9 @@ public:
         addData("long", msg->lon);
     }
 
-    // void gps_speed_collector(const boat_data_interfaces::msg::GPSSpeed::SharedPtr msg) {
-    //     addData("speed", msg->speed);
-    // }
+    void gps_vtg_collector(const boat_data_interfaces::msg::GPSVTGData::SharedPtr msg) {
+        addData("speed", msg->speed);
+    }
 
     void motor_collector(const boat_data_interfaces::msg::CANMotorData::SharedPtr msg) {
         addData("voltage", msg->voltage);
