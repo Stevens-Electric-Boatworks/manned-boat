@@ -4,6 +4,8 @@ import rclpy
 from rclpy.node import Node
 from rclpy.executors import ExternalShutdownException
 
+from boat_common_libs.alarm_lib.alarm_helper import AlarmPublisher
+from boat_common_libs.alarm_lib.alarms import Alarm
 from boat_common_libs.smooth_random import SmoothRandom
 from boat_data_interfaces.msg import OutletCoolantData, InletCoolantData
 
@@ -18,6 +20,7 @@ class ElectricalTestingDataNode(Node):
         }
         self._out_pub = self.create_publisher(OutletCoolantData, '/electrical/temp_sensors/out', 10)
         self._in_pub = self.create_publisher(InletCoolantData, '/electrical/temp_sensors/in', 10)
+        self.alarm_pub = AlarmPublisher(self)
         self.create_timer(0.5, self.publish_test_data)
 
     def publish_test_data(self):
@@ -28,6 +31,10 @@ class ElectricalTestingDataNode(Node):
 
         self._out_pub.publish(msg_out)
         self._in_pub.publish(msg_in)
+
+        self.alarm_pub.publish_alarm(Alarm.ERROR_READING_CAN_SDO)
+
+
 
 def main(args=None):
     try:

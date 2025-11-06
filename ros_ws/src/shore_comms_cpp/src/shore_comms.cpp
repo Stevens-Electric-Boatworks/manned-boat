@@ -29,6 +29,10 @@ struct LogData {
     uint32_t line;
     uint8_t level;
 };
+struct Alarm {
+    int16_t id;
+    double_t timestamp;
+};
 
 // Needs sudo apt install nlohmann-json3-dev
 class ShoreCommsNode : public rclcpp::Node {
@@ -100,11 +104,7 @@ public:
     };
 
     void alarms_collector(const boat_data_interfaces::msg::BoatAlarm::SharedPtr msg) {
-        json alarm_json = {
-            {"error_code", msg->error_code},
-            {"timestamp", (msg->timestamp.sec * 1000) + (msg->timestamp.nanosec / 1e6)}
-        };
-        addData("alarm", alarm_json);
+        addAlarm(Alarm{msg->error_code, getTimeFromMsg(msg->timestamp)});
     }
 
     void logs_collector(const rcl_interfaces::msg::Log::SharedPtr msg) {
@@ -113,7 +113,8 @@ public:
 
     void send_websocket_data() {
         if (this->connectionOpened && !data.empty()) {
-            this->sendData_();
+            this->sendData();
+            this->sendAlarms();
             this->sendLogs();
             this->sendCANBusState();
         }
@@ -125,6 +126,7 @@ private:
 
     //Data that we will send to the shore
     std::vector<LogData> logs_;
+    std::vector<Alarm> alarms_;
     json data;
     uint8_t CANBusState = boat_data_interfaces::msg::CANBusStatus::OFFLINE;
 
@@ -146,7 +148,7 @@ private:
         websocket.start();
     }
 
-    void sendData_() {
+    void sendData() {
         json j;
         j["type"] = "data";
         j["payload"] = data;
@@ -175,6 +177,27 @@ private:
         websocket.send(j.dump());
     }
 
+    void sendAlarms() {
+        if (this->alarms_.size() == 0) return;
+        std::vector<json> alarms;
+
+        for (Alarm data: alarms_) {
+            json j = {
+                {"type", "alarm"},
+                {"action", "set"}
+            };
+            json payload = {
+                {"id", data.id},
+                {"timestamp", data.timestamp},
+                {"message", "Not supported yet..."},
+                {"type", "error"}
+            };
+            j["payload"] = payload;
+            websocket.send(j.dump());
+        }
+        this->alarms_.clear();
+    }
+
     void sendCANBusState() {
         const json j = {
             {"type", "can_bus"},
@@ -192,6 +215,9 @@ private:
         this->logs_.push_back(log);
     }
 
+    void addAlarm(const Alarm &alarm) {
+        this->alarms_.push_back(alarm);
+    }
 
     static double getTimeFromMsg(const builtin_interfaces::msg::Time& time) {
         return time.sec * 1000.0 + time.nanosec / 1.0e6;
