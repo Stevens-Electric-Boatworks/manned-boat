@@ -8,8 +8,8 @@ launch:
         param:
           - name: "data_send"
             value: 100
-#          - name: "replay_mode"
-#            value: true
+          - name: "replay_mode"
+            value: false
 
   - node:
       pkg: "alarms_manager_node"

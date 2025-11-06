@@ -39,13 +39,31 @@ class ShoreCommsNode : public rclcpp::Node {
 public:
     ShoreCommsNode()
         : Node("shore_comms_cpp") {
+
+        //replay mode config
+        auto param_replay = rcl_interfaces::msg::ParameterDescriptor{};
+        param_replay.description = "Is it in replay mode?";
+        this->declare_parameter("replay_mode", false, param_replay);
+
+        std::string logTopicName = "/rosout";
+        if (this->get_parameter("replay_mode").as_bool()) {
+            this->replay_mode = true;
+            logTopicName = "/logout";
+            double const timestamp = getTimeFromMsg(this->get_clock()->now());
+            addLog(LogData{timestamp, "The shore server is in REPLAY MODE", "REPLAY MODE", "REPLAY MODE",67,40});
+            RCLCPP_INFO(this->get_logger(), "The shore server is in REPLAY mode");
+        }
+
+        //websocket config
+        auto param_data_send = rcl_interfaces::msg::ParameterDescriptor{};
+        param_data_send.description = "The data send rate in MS";
+        this->declare_parameter("data_send", 100, param_data_send);
         auto timer_callback = [this]() -> void {
             this->send_websocket_data();
         };
-        auto param_desc = rcl_interfaces::msg::ParameterDescriptor{};
-        param_desc.description = "The data send rate in MS";
-        this->declare_parameter("data_send", 100, param_desc);
-        auto timer_ = this->create_wall_timer(std::chrono::milliseconds(this->get_parameter("data_send").as_int()), timer_callback);
+        auto timer_ = this->create_wall_timer(std::chrono::milliseconds
+            (this->get_parameter("data_send").as_int()), timer_callback);
+
         this->timers_.push_back(timer_);
         this->configureWebsocket();
 
@@ -64,7 +82,7 @@ public:
                                                                  &ShoreCommsNode::bus_state_collector);
         this->log_topic<boat_data_interfaces::msg::BoatAlarm>("/alarm/shore/publish",
                                                               &ShoreCommsNode::alarms_collector);
-        this->log_topic<rcl_interfaces::msg::Log>("/rosout",
+        this->log_topic<rcl_interfaces::msg::Log>(logTopicName,
                                                   &ShoreCommsNode::logs_collector);
         this->log_topic<builtin_interfaces::msg::Time>("/boat_time",
                                           &ShoreCommsNode::boat_time_collector);
@@ -114,7 +132,7 @@ public:
     }
 
     void send_websocket_data() {
-        if (this->connectionOpened && !data.empty()) {
+        if (this->connectionOpened) {
             this->sendData();
             this->sendAlarms();
             this->sendLogs();
@@ -130,6 +148,7 @@ private:
     std::vector<LogData> logs_;
     std::vector<Alarm> alarms_;
     json data;
+    bool replay_mode = false;
     uint8_t CANBusState = boat_data_interfaces::msg::CANBusStatus::OFFLINE;
 
     ix::WebSocket websocket;
@@ -153,6 +172,9 @@ private:
     void sendData() {
         json j;
         j["type"] = "data";
+        if (this->replay_mode) {
+            data["replay"] = true;
+        }
         j["payload"] = data;
         websocket.send(j.dump());
         data.clear();
