@@ -42,9 +42,11 @@ public:
         auto timer_callback = [this]() -> void {
             this->send_websocket_data();
         };
-        auto timer_ = this->create_wall_timer(std::chrono::milliseconds(100), timer_callback);
+        auto param_desc = rcl_interfaces::msg::ParameterDescriptor{};
+        param_desc.description = "The data send rate in MS";
+        this->declare_parameter("data_send", 100, param_desc);
+        auto timer_ = this->create_wall_timer(std::chrono::milliseconds(this->get_parameter("data_send").as_int()), timer_callback);
         this->timers_.push_back(timer_);
-
         this->configureWebsocket();
 
         // Register collectors

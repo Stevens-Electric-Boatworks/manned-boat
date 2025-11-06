@@ -20,7 +20,6 @@ class ElectricalTestingDataNode(Node):
         }
         self._out_pub = self.create_publisher(OutletCoolantData, '/electrical/temp_sensors/out', 10)
         self._in_pub = self.create_publisher(InletCoolantData, '/electrical/temp_sensors/in', 10)
-        self.alarm_pub = AlarmPublisher(self)
         self.create_timer(0.5, self.publish_test_data)
 
     def publish_test_data(self):
@@ -31,8 +30,6 @@ class ElectricalTestingDataNode(Node):
 
         self._out_pub.publish(msg_out)
         self._in_pub.publish(msg_in)
-
-        self.alarm_pub.publish_alarm(Alarm.ERROR_READING_CAN_SDO)
 
 
 

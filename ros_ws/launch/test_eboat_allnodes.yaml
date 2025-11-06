@@ -5,6 +5,11 @@ launch:
         pkg: "shore_comms_cpp"
         exec: "shore"
         name: "shore_comms"
+        param:
+          - name: "data_send"
+            value: 100
+#          - name: "replay_mode"
+#            value: true
 
   - node:
       pkg: "alarms_manager_node"
