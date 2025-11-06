@@ -92,7 +92,7 @@ public:
     }
 
     void bus_state_collector(const boat_data_interfaces::msg::CANBusStatus::SharedPtr msg) {
-        addData("can_bus_state", msg->bus_state);
+        this->CANBusState = msg->bus_state;
     }
 
     void alarms_collector(const boat_data_interfaces::msg::BoatAlarm::SharedPtr msg) {
@@ -112,14 +112,19 @@ public:
         if (this->connectionOpened && !data.empty()) {
             this->sendData_();
             this->sendLogs();
+            this->sendCANBusState();
         }
     }
 
 private:
     std::vector<std::shared_ptr<rclcpp::TimerBase> > timers_;
     std::vector<std::shared_ptr<rclcpp::SubscriptionBase> > subscriptions_;
+
+    //Data that we will send to the shore
     std::vector<LogData> logs_;
     json data;
+    uint8_t CANBusState = boat_data_interfaces::msg::CANBusStatus::OFFLINE;
+
     ix::WebSocket websocket;
     bool connectionOpened = false;
 
@@ -167,6 +172,14 @@ private:
         websocket.send(j.dump());
     }
 
+    void sendCANBusState() {
+        const json j = {
+            {"type", "can_bus"},
+            {"state", this->CANBusState}
+        };
+        this->websocket.send(j.dump());
+    }
+
 
     void addData(const std::string &name, const json &value) {
         this->data[name] = value;
@@ -175,6 +188,7 @@ private:
     void addLog(const LogData &log) {
         this->logs_.push_back(log);
     }
+
 
     template<typename T, typename M>
     void log_topic(const std::string &topic_name, M callback) {
