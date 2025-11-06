@@ -41,7 +41,7 @@ class ShoreCommsNode : public rclcpp::Node {
 public:
     ShoreCommsNode()
         : Node("shore_comms_cpp") {
-        auto pub = std::make_shared<AlarmPublisher>(this);
+        this->alarmPub = std::make_shared<AlarmPublisher>(this);
         //replay mode config
         auto param_replay = rcl_interfaces::msg::ParameterDescriptor{};
         param_replay.description = "Is it in replay mode?";
@@ -138,12 +138,15 @@ public:
             this->sendAlarms();
             this->sendLogs();
             this->sendCANBusState();
+
+            this->alarmPub->publishAlarm(Faults::SERIAL_IO_ERROR);
         }
     }
 
 private:
     std::vector<std::shared_ptr<rclcpp::TimerBase> > timers_;
     std::vector<std::shared_ptr<rclcpp::SubscriptionBase> > subscriptions_;
+    std::shared_ptr<AlarmPublisher> alarmPub;
 
     //Data that we will send to the shore
     std::vector<LogData> logs_;

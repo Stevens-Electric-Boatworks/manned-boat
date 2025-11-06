@@ -8,7 +8,7 @@ endif()
 # find dependencies
 find_package(ament_cmake REQUIRED)
 find_package(rclcpp REQUIRED)
-
+find_package(boat_data_interfaces REQUIRED)
 ####################################
 # CPP Shared Library Block [BEGIN] #
 # vvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvv #
@@ -17,11 +17,11 @@ find_package(rclcpp REQUIRED)
 # into the same shared library called ${PROJECT_NAME}.
 add_library(${PROJECT_NAME} SHARED
         src/AlarmPublisher.cpp
-
 )
 
 target_link_libraries(boat_common_libs_cpp PUBLIC
         rclcpp::rclcpp
+        ${boat_data_interfaces_TARGETS}
 )
 
 target_include_directories(${PROJECT_NAME}
