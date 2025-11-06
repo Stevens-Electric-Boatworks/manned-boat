@@ -7,7 +7,7 @@ from rclpy.node import Node
 
 from boat_common_libs.alarm_lib.alarms import Alarm
 from boat_data_interfaces.msg import ElectricalData, MotionData, BoatAlarm, \
-    CANMotorData, CANBusStatus, GPSData, OutletCoolantData, InletCoolantData, GPSSpeed
+    CANMotorData, CANBusStatus, GPSData, OutletCoolantData, InletCoolantData, GPSVTGData
 from rcl_interfaces.msg import Log, ParameterDescriptor, SetParametersResult
 from boat_common_libs.alarm_lib import alarm_helper
 
@@ -55,7 +55,7 @@ class ShoreDataCollector(Node):
                 "msg": "The shore node is in REPLAY MODE",
                 "file": "REPLAY MODE",
                 "function": "REPLAY MODE",
-                "line": 0,
+                "line": 67,
                 "level": 40,
                 "name": "REPLAY MODE"
             }
@@ -65,9 +65,10 @@ class ShoreDataCollector(Node):
         self.create_sub(InletCoolantData, "/electrical/temp_sensors/in", self.electrical_coolant_temp_collector_inlet)
         self.create_sub(OutletCoolantData, "/electrical/temp_sensors/out", self.electrical_coolant_temp_collector_outlet)
         self.create_sub(GPSData, "/motion/gps", self.gps_location_collector)
-        self.create_sub(GPSSpeed, "/motion/speed", self.gps_speed_collector)
+        self.create_sub(GPSVTGData, "/motion/vtg", self.gps_speed_collector)
         self.create_sub(CANMotorData, "/motors/can_motor_data", self.motor_collector)
         self.create_sub(CANBusStatus, "/motors/can_bus_state", self.bus_state_collector)
+        self.create_sub(Time, "/boat_time", self.time_collector)
         self.wss_watchdog = self.create_timer(5, self.watchdog_callback)
         self.add_on_set_parameters_callback(self.on_param_change_callback)
         threading.Thread(target=self._run_asyncio_loop, daemon=True).start()
@@ -223,8 +224,9 @@ class ShoreDataCollector(Node):
         self.add_data("lat", msg.lat)
         self.add_data("long", msg.lon)
 
-    def gps_speed_collector(self, msg:GPSSpeed):
+    def gps_speed_collector(self, msg:GPSVTGData):
         self.add_data("speed", msg.speed)
+        self.add_data("heading", msg.true_track)
 
     def motor_collector(self, msg:CANMotorData):
         self.add_data("voltage", msg.voltage)
@@ -238,6 +240,9 @@ class ShoreDataCollector(Node):
 
     def bus_state_collector(self, msg:CANBusStatus):
         self.can_bus_state = msg.bus_state
+
+    def time_collector(self, msg:Time):
+        self.add_data("boat_time", get_time_in_ms(msg))
 
 
     def alarms_collector(self, msg:BoatAlarm):

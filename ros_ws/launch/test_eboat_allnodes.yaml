@@ -27,3 +27,7 @@ launch:
       pkg: "motion_node"
       exec: "test"
       name: "motion_node"
+  - node:
+      pkg: "time_node"
+      exec: "time_node"
+      name: "time"

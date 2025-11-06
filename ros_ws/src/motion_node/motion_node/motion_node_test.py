@@ -3,7 +3,8 @@ from rclpy.executors import ExternalShutdownException
 from rclpy.node import Node
 
 from boat_common_libs.smooth_random import SmoothRandom
-from boat_data_interfaces.msg import MotionData, BoatAlarm, GPSData, GPSSpeed  # type: ignore
+from boat_data_interfaces.msg import (MotionData, BoatAlarm, GPSData, GPSVTGData, )
+                                      #GPSSpeed)  # type: ignore
 
 import random
 import json
@@ -12,7 +13,7 @@ class MotionNode(Node):
     def __init__(self):
         super().__init__('motion_node_test')
         self._gps_pub = self.create_publisher(GPSData, '/motion/gps', 10)
-        self._speed_pub = self.create_publisher(GPSSpeed, '/motion/speed', 10)
+        self._speed_pub = self.create_publisher(GPSVTGData, '/motion/vtg', 10)
         timer_period = random.random() * 0.1
         self._logger.info("Sending test data at a period of " + str(timer_period))
 
@@ -29,7 +30,7 @@ class MotionNode(Node):
         msg.lon = self.gps_long.next()
         msg.lat = self.gps_lat.next()
         self._gps_pub.publish(msg)
-        self._speed_pub.publish(GPSSpeed(speed=float(self.speed.next())))
+        self._speed_pub.publish(GPSVTGData(speed=float(self.speed.next()), true_track=float(14)))
 
 
 def main(args=None):

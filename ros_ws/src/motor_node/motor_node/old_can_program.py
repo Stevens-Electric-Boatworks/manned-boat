@@ -186,11 +186,8 @@ class OldCanProgram:
             self.unlatch_all_alarms()
             self.can_bus_state = CANBusStatus.ONLINE
             return value
-        except Exception as e:
-            if e.error_code == 105:
-                self.logger.error(f"CAN bus buffer full.")
-            else:
-                self.logger.error(f"Error reading SDO [{hex(index)}:{subindex}]: {e}")
+        except RuntimeError as e:
+            self.logger.error(f"Error reading SDO [{hex(index)}:{subindex}]: {e}")
             self.declare_alarm(Alarm.ERROR_READING_CAN_SDO)
             self.can_bus_state = CANBusStatus.OFFLINE
             return 0

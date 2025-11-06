@@ -1,4 +1,5 @@
 from typing import Callable
+from types import NoneType
 
 import pynmea2
 from rclpy.node import Node
@@ -24,8 +25,9 @@ class GPGGAResult:
         self.lon = lon
 
 class GPVTGResult:
-    def __init__(self, speed_knots):
+    def __init__(self, speed_knots, true_track):
         self.speed_knots = speed_knots
+        self.true_track = true_track
 
 
 class GPSDevice(SerialDevice):
@@ -33,6 +35,7 @@ class GPSDevice(SerialDevice):
         super().__init__(node, "/dev/ttyUSB1", self._on_gps_msg_rec, alarm_pub)
         self._gga_callback = on_gpgga_result
         self._vtg_callback = on_gpvtg_result
+        self.node = node
 
     def _on_gps_msg_rec(self, data:SerialData):
         if data.to_utf_8().startswith("$GPGGA"):
@@ -42,7 +45,7 @@ class GPSDevice(SerialDevice):
                 lon = convert_to_degrees(gps_str.lon, gps_str.lon_dir)
                 self._gga_callback(GPGGAResult(lat, lon))
 
-        elif data.to_utf_8().startswith("GPVTG"):
+        elif data.to_utf_8().startswith("$GPVTG"):
             gps_str = pynmea2.parse(data.to_utf_8())
-            if gps_str.spd_over_grnd_kts != '':
-                self._vtg_callback(GPVTGResult(float(gps_str.spd_over_grnd_kts)))
+            if not type(gps_str.spd_over_grnd_kts) == NoneType and not type(gps_str.track):
+                self._vtg_callback(GPVTGResult(float(gps_str.spd_over_grnd_kts), float(gps_str.true_track)))
