@@ -1,0 +1,38 @@
+%YAML 1.2
+---
+launch:
+  - node:
+        pkg: "shore_comms"
+        exec: "shore"
+        name: "shore_comms"
+        param:
+          - name: "data_send"
+            value: 100
+          - name: "replay_mode"
+            value: false
+
+  - node:
+      pkg: "alarms_manager_node"
+      exec: "main"
+      name: "alarms_watchdog"
+      param:
+          - name: "faults_file"
+            value: "~/eboat_src/data/FAULTS.csv"
+
+  - node:
+      pkg: "motor_node"
+      exec: "test"
+      name: "motor_node"
+
+  - node:
+      pkg: "electrical_node"
+      exec: "test"
+      name: "test_electrical_node"
+  - node:
+      pkg: "motion_node"
+      exec: "test"
+      name: "motion_node"
+  - node:
+      pkg: "time_node"
+      exec: "time_node"
+      name: "time"
