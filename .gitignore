@@ -3,6 +3,7 @@
 README_IF_ON_TEAMS.md
 
 ros_ws/.vscode/browse.vc.db
+.vscode
 .obsidian
 .idea/
 */__pycache__/
@@ -61,3 +62,6 @@ ros_ws/*.user
 
 # Catkin custom files
 ros_ws/CATKIN_IGNORE
+
+# Clangd cache files
+.cache
