@@ -62,3 +62,6 @@ ros_ws/*.user
 
 # Catkin custom files
 ros_ws/CATKIN_IGNORE
+
+# Clangd cache files
+.cache
