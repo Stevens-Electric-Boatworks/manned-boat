@@ -19,7 +19,6 @@ using json = nlohmann::json;
 #include "boat_data_interfaces/msg/gpsvtg_data.hpp"
 #include "boat_data_interfaces/msg/inlet_coolant_data.hpp"
 #include "boat_data_interfaces/msg/outlet_coolant_data.hpp"
-#include "builtin_interfaces/msg/time.hpp"
 #include "rcl_interfaces/msg/log.hpp"
 
 struct LogData {
@@ -55,6 +54,10 @@ public:
                      "REPLAY MODE", "REPLAY MODE", 67, 40});
       RCLCPP_INFO(this->get_logger(), "The shore server is in REPLAY mode");
     }
+    this->log_topic<rcl_interfaces::msg::Log>(logTopicName,
+                                          &ShoreCommsNode::logs_collector);
+
+
     // websocket config
     auto param_data_send = rcl_interfaces::msg::ParameterDescriptor{};
     param_data_send.description = "The data send rate in MS";
@@ -89,8 +92,6 @@ public:
         "/motors/can_bus_state", &ShoreCommsNode::bus_state_collector);
     this->log_topic<boat_data_interfaces::msg::BoatAlarm>(
         "/alarm/shore/publish", &ShoreCommsNode::alarms_collector);
-    this->log_topic<rcl_interfaces::msg::Log>(logTopicName,
-                                              &ShoreCommsNode::logs_collector);
     this->log_topic<builtin_interfaces::msg::Time>(
         "/boat_time", &ShoreCommsNode::boat_time_collector);
   }
@@ -212,7 +213,7 @@ private:
           alarmPub->publishAlarm(Faults::WEBSOCKET_CONNECTION_CLOSED);
         }
       } else {
-        RCLCPP_INFO(this->get_logger(), "Something happened? %s",
+        RCLCPP_WARN(this->get_logger(), "Something happened? %s",
                     msg->errorInfo.reason.c_str());
       }
     });
