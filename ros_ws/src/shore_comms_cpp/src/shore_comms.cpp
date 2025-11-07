@@ -195,8 +195,8 @@ private:
         this->openedInitally = true;
         RCLCPP_INFO(this->get_logger(), "WebSocket connection established.");
 
-        json j = {{"type", "alarm"}, {"message", "boat"}};
-        websocket.sendText(j.dump());
+        json j = {{"type", "ident"}, {"message", "boat"}};
+        websocket.send(j.dump());
 
         alarmPub->delatchAlarm(Faults::WEBSOCKET_CONNECTION_CLOSED);
         alarmPub->delatchAlarm(Faults::WEBSOCKET_INITIAL_CONNECTION_FAILURE);
