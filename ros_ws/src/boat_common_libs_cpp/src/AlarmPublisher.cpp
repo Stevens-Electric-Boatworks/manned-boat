@@ -10,7 +10,6 @@
 
 
 AlarmPublisher::AlarmPublisher(rclcpp::Node* node) {
-    RCLCPP_INFO(node->get_logger(), "Hello from the Alarm Library!!");
     this->node = node;
     this->alarmDeLatchClient = node->create_client<boat_data_interfaces::srv::AlarmDelatch>("/alarm/delatch");
     this->alarmRaiseClient = node->create_client<boat_data_interfaces::srv::AlarmRaise>("/alarm/raise");
