@@ -4,6 +4,7 @@
 
 #include <memory>
 
+#include "include/DataLogging.h"
 #include "ixwebsocket/IXWebSocket.h"
 #include "rclcpp/rclcpp.hpp"
 #include "std_msgs/msg/string.hpp"
@@ -76,24 +77,29 @@ public:
     this->configureWebsocket();
 
     // Register collectors
-    this->log_topic<boat_data_interfaces::msg::InletCoolantData>(
-        "/electrical/temp_sensors/in",
-        &ShoreCommsNode::electrical_coolant_temp_collector_inlet);
-    this->log_topic<boat_data_interfaces::msg::OutletCoolantData>(
-        "/electrical/temp_sensors/out",
-        &ShoreCommsNode::electrical_coolant_temp_collector_outlet);
-    this->log_topic<boat_data_interfaces::msg::GPSData>(
-        "/motion/gps", &ShoreCommsNode::gps_location_collector);
-    this->log_topic<boat_data_interfaces::msg::GPSVTGData>(
-        "/motion/vtg", &ShoreCommsNode::gps_vtg_collector);
-    this->log_topic<boat_data_interfaces::msg::CANMotorData>(
-        "/motors/can_motor_data", &ShoreCommsNode::motor_collector);
-    this->log_topic<boat_data_interfaces::msg::CANBusStatus>(
-        "/motors/can_bus_state", &ShoreCommsNode::bus_state_collector);
-    this->log_topic<boat_data_interfaces::msg::BoatAlarm>(
-        "/alarm/shore/publish", &ShoreCommsNode::alarms_collector);
-    this->log_topic<builtin_interfaces::msg::Time>(
-        "/boat_time", &ShoreCommsNode::boat_time_collector);
+    this->dataLogging = std::make_shared<DataLogging>(this->shared_from_this());
+
+    this->dataLogging->logData<CANBusState, >()
+    
+
+    // this->log_topic<boat_data_interfaces::msg::InletCoolantData>(
+    //     "/electrical/temp_sensors/in",
+    //     &ShoreCommsNode::electrical_coolant_temp_collector_inlet);
+    // this->log_topic<boat_data_interfaces::msg::OutletCoolantData>(
+    //     "/electrical/temp_sensors/out",
+    //     &ShoreCommsNode::electrical_coolant_temp_collector_outlet);
+    // this->log_topic<boat_data_interfaces::msg::GPSData>(
+    //     "/motion/gps", &ShoreCommsNode::gps_location_collector);
+    // this->log_topic<boat_data_interfaces::msg::GPSVTGData>(
+    //     "/motion/vtg", &ShoreCommsNode::gps_vtg_collector);
+    // this->log_topic<boat_data_interfaces::msg::CANMotorData>(
+    //     "/motors/can_motor_data", &ShoreCommsNode::motor_collector);
+    // this->log_topic<boat_data_interfaces::msg::CANBusStatus>(
+    //     "/motors/can_bus_state", &ShoreCommsNode::bus_state_collector);
+    // this->log_topic<boat_data_interfaces::msg::BoatAlarm>(
+    //     "/alarm/shore/publish", &ShoreCommsNode::alarms_collector);
+    // this->log_topic<builtin_interfaces::msg::Time>(
+    //     "/boat_time", &ShoreCommsNode::boat_time_collector);
   }
 
   void electrical_coolant_temp_collector_inlet(
@@ -173,6 +179,7 @@ private:
   std::vector<std::shared_ptr<rclcpp::TimerBase>> timers_;
   std::vector<std::shared_ptr<rclcpp::SubscriptionBase>> subscriptions_;
   std::shared_ptr<AlarmPublisher> alarmPub;
+  std::shared_ptr<DataLogging> dataLogging;
 
   // Data that we will send to the shore
   std::vector<LogData> logs_;
