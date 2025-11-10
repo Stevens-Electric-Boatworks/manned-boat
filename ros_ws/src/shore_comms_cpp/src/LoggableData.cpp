@@ -2,7 +2,7 @@
 // Created by ishaan on 11/7/25.
 //
 
-#include "include/LoggableData.h"
+#include "shore_comms_cpp/LoggableData.h"
 #include <rclcpp/node.hpp>
 #include <string>
 

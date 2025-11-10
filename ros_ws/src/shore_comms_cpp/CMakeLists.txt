@@ -6,7 +6,6 @@ if (CMAKE_COMPILER_IS_GNUCXX OR CMAKE_CXX_COMPILER_ID MATCHES "Clang")
 endif ()
 add_executable(shore src/shore_comms.cpp)
 set(USE_TLS ON CACHE BOOL "Enable TLS support for IXWebSocket")
-
 # find dependencies
 find_package(ament_cmake REQUIRED)
 find_package(rclcpp REQUIRED)
@@ -27,6 +26,9 @@ target_link_libraries(shore
         ${boat_common_libs_cpp_TARGETS}
         ixwebsocket
 )
+target_include_directories(shore PUBLIC include)
+target_include_directories(shore PUBLIC src)
+
 
 install(TARGETS
         shore

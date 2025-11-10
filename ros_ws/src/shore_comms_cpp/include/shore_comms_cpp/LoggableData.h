@@ -9,7 +9,7 @@
 #include <rclcpp/node.hpp>
 #include <rclcpp/subscription_base.hpp>
 #include <string>
-#include <nlohmann/json_fwd.hpp>
+#include <nlohmann/json.hpp>
 
 template<typename T>
 class LoggableData : public ILoggableData {
@@ -17,7 +17,7 @@ public:
     LoggableData(
             const std::string& topic_name,
             const rclcpp::Node::SharedPtr& node,
-            const std::function<void(nlohmann::json)> add_data)
+            const std::function<void(nlohmann::json)>& add_data)
         {
             subscription = node->create_subscription<T>(
                 topic_name,

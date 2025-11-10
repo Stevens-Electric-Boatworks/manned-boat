@@ -4,9 +4,10 @@
 
 #include <memory>
 
-#include "include/DataLogging.h"
+#include "shore_comms_cpp/DataLogging.h"
 #include "ixwebsocket/IXWebSocket.h"
 #include "rclcpp/rclcpp.hpp"
+#include "shore_comms_cpp/data_loggers/CANBusLogger.h"
 #include "std_msgs/msg/string.hpp"
 #include <nlohmann/json.hpp>
 
@@ -21,7 +22,6 @@ using json = nlohmann::json;
 #include "boat_data_interfaces/msg/inlet_coolant_data.hpp"
 #include "boat_data_interfaces/msg/outlet_coolant_data.hpp"
 #include "rcl_interfaces/msg/log.hpp"
-
 struct LogData {
   double_t timestamp;
   std::string msg;
@@ -78,8 +78,8 @@ public:
 
     // Register collectors
     this->dataLogging = std::make_shared<DataLogging>(this->shared_from_this());
-
-    this->dataLogging->logData<CANBusState, >()
+    
+    this->dataLogging->logData<boat_data_interfaces::msg::CANBusStatus, CANBusLogger>();
     
 
     // this->log_topic<boat_data_interfaces::msg::InletCoolantData>(
