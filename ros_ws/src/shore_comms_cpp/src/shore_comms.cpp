@@ -4,10 +4,8 @@
 
 #include <memory>
 
-#include "shore_comms_cpp/DataLogging.h"
 #include "ixwebsocket/IXWebSocket.h"
 #include "rclcpp/rclcpp.hpp"
-#include "shore_comms_cpp/data_loggers/CANBusLogger.h"
 #include "std_msgs/msg/string.hpp"
 #include <nlohmann/json.hpp>
 
@@ -77,9 +75,9 @@ public:
     this->configureWebsocket();
 
     // Register collectors
-    this->dataLogging = std::make_shared<DataLogging>(this->shared_from_this());
-    
-    this->dataLogging->logData<boat_data_interfaces::msg::CANBusStatus, CANBusLogger>();
+    // this->dataLogging = std::make_shared<DataLogging>(this->shared_from_this());
+    //
+    // this->dataLogging->logData<boat_data_interfaces::msg::CANBusStatus, CANBusLogger>();
     
 
     // this->log_topic<boat_data_interfaces::msg::InletCoolantData>(
@@ -179,7 +177,6 @@ private:
   std::vector<std::shared_ptr<rclcpp::TimerBase>> timers_;
   std::vector<std::shared_ptr<rclcpp::SubscriptionBase>> subscriptions_;
   std::shared_ptr<AlarmPublisher> alarmPub;
-  std::shared_ptr<DataLogging> dataLogging;
 
   // Data that we will send to the shore
   std::vector<LogData> logs_;
