@@ -6,7 +6,7 @@
 #include "shore_comms_cpp/IDataTransmitter.h"
 #include "ixwebsocket/IXWebSocket.h"
 
-class WebsocketDataTransmitter : IDataTransmitter {
+class WebsocketDataTransmitter : public IDataTransmitter {
 public:
     explicit WebsocketDataTransmitter(const rclcpp::Node::SharedPtr &node);
     void send_data(const nlohmann::json& json) override;

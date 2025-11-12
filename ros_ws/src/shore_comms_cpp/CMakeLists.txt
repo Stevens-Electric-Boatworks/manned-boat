@@ -4,8 +4,15 @@ project(shore_comms_cpp)
 if (CMAKE_COMPILER_IS_GNUCXX OR CMAKE_CXX_COMPILER_ID MATCHES "Clang")
     add_compile_options(-Wall -Wextra -Wpedantic)
 endif ()
-file(GLOB_RECURSE SOURCES "src/*.cpp")
-add_executable(shore ${SOURCES})
+set(shore_comms_cpp_srcs
+        src/data_receivers/ROSDataReceiver.cpp
+        src/data_loggers/CANBusStateLogger.cpp
+        src/data_loggers/MotorDataLogger.cpp
+        src/data_transmitter/WebsocketDataTransmitter.cpp
+        src/DataLoggers.cpp
+)
+add_executable(shore src/shore_comms.cpp ${shore_comms_cpp_srcs})
+target_include_directories(shore PUBLIC include/)
 
 set(USE_TLS ON CACHE BOOL "Enable TLS support for IXWebSocket")
 
@@ -17,8 +24,6 @@ find_package(boat_data_interfaces REQUIRED)
 find_package(boat_common_libs_cpp REQUIRED)
 
 add_subdirectory(${CMAKE_SOURCE_DIR}/../IXWebSocket IXWebSocket_build)
-
-target_include_directories(shore PUBLIC include)
 
 # Create library from sources
 target_link_libraries(shore

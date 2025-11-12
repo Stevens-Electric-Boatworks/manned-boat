@@ -10,7 +10,7 @@ class CANBusStateLogger : public IDataLogger<boat_data_interfaces::msg::CANBusSt
 public:
     using type = boat_data_interfaces::msg::CANBusStatus;
 
-    explicit CANBusStateLogger(const std::shared_ptr<IDataReceiver<type> > &data, const std::shared_ptr<IDataTransmitter>& transmitter);
+    explicit CANBusStateLogger(const std::shared_ptr<IDataReceiver<type>>&, const std::shared_ptr<IDataTransmitter>&);
 
     void on_data(type data) const;
 };
