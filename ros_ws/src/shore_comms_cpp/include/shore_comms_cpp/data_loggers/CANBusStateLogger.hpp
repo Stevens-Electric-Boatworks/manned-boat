@@ -6,11 +6,11 @@
 #include <memory>
 #include <rclcpp/rclcpp.hpp>
 
-class CANBusLogger : public IDataLogger<boat_data_interfaces::msg::CANBusStatus> {
+class CANBusStateLogger : public IDataLogger<boat_data_interfaces::msg::CANBusStatus> {
 public:
     using type = boat_data_interfaces::msg::CANBusStatus;
 
-    explicit CANBusLogger(std::shared_ptr<IDataReceiver<type>> data);
+    explicit CANBusStateLogger(const std::shared_ptr<IDataReceiver<type>> &data);
 
-    void on_data(type data);
+    static void on_data(type data);
 };

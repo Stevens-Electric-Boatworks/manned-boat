@@ -5,7 +5,7 @@ if (CMAKE_COMPILER_IS_GNUCXX OR CMAKE_CXX_COMPILER_ID MATCHES "Clang")
     add_compile_options(-Wall -Wextra -Wpedantic)
 endif ()
 file(GLOB_RECURSE SOURCES "src/*.cpp")
-add_executable(shore ${SOURCES} )
+add_executable(shore ${SOURCES})
 
 set(USE_TLS ON CACHE BOOL "Enable TLS support for IXWebSocket")
 
@@ -19,7 +19,6 @@ find_package(boat_common_libs_cpp REQUIRED)
 add_subdirectory(${CMAKE_SOURCE_DIR}/../IXWebSocket IXWebSocket_build)
 
 target_include_directories(shore PUBLIC include)
-target_include_directories(shore PUBLIC src)
 
 # Create library from sources
 target_link_libraries(shore

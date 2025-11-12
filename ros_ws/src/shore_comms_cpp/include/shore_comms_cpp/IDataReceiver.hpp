@@ -13,16 +13,16 @@ struct IDataReceiverBase {
 
 template<typename T>
 struct IDataReceiver : public IDataReceiverBase {
-    virtual ~IDataReceiver(){}
+    ~IDataReceiver() override= default;
 
     explicit IDataReceiver(const std::string& topic_name) : topic_name(topic_name){};
 
     virtual void on_data(T) = 0;
 
-    virtual void set_callback(std::function<void(T)> callback) {
+    virtual void set_callback(std::function<void(const T&)> callback) {
         this->callback = callback;
     }
 
     std::string topic_name;
-    std::function<void(T)> callback;
+    std::function<void(const T&)> callback;
 };

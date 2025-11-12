@@ -10,6 +10,8 @@
 #include "std_msgs/msg/string.hpp"
 #include <nlohmann/json.hpp>
 
+#include "shore_comms_cpp/data_loggers/MotorDataLogger.hpp"
+
 // for convenience
 using json = nlohmann::json;
 #include "boat_common_libs_cpp/AlarmPublisher.hpp"
@@ -83,7 +85,8 @@ public:
     // this->dataLogging->logData<boat_data_interfaces::msg::CANBusStatus, CANBusLogger>();
 
     this->data_loggers = std::make_shared<DataLoggers>();
-    this->data_loggers->addDataLogger(this->shared_from_this());
+    this->log_data<boat_data_interfaces::msg::CANBusStatus, CANBusStateLogger>("/motors/can_bus_state");
+    this->log_data<boat_data_interfaces::msg::CANMotorData, MotorDataLogger>("/motors/can_motor_data");
 
 
     // this->log_topic<boat_data_interfaces::msg::InletCoolantData>(
@@ -286,6 +289,11 @@ private:
 
   void addData(const std::string &name, const json &value) {
     this->data[name] = value;
+  }
+
+  template <typename T, typename L>
+  void log_data(std::string topic_name) {
+    this->data_loggers->addDataLogger<T, L>(topic_name, this->shared_from_this());
   }
 
   void addLog(const LogData &log) { this->logs_.push_back(log); }

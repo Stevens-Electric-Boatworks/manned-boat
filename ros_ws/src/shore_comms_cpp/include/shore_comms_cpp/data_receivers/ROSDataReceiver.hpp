@@ -9,7 +9,7 @@ template <typename T>
 class ROSDataReceiver : public IDataReceiver<T> {
 public:
     explicit ROSDataReceiver(const std::string& topic_name,
-                             rclcpp::Node::SharedPtr node)
+                             rclcpp::Node::SharedPtr& node)
         : IDataReceiver<T>(topic_name),
           node_(node)
     {
@@ -18,15 +18,12 @@ public:
             topic_name, 10,
             [this](T data_msg) {
                 this->on_data(data_msg);
-                RCLCPP_INFO(this->node_->get_logger(),
-                            "(ROS DataReceiver) Received data!");
             });
     }
 
-    void on_data(T data_msg) override
-    {
+    void on_data(T data_msg) override {
         RCLCPP_INFO(this->node_->get_logger(),
-                    "(ROS DataReceiver) Calling callback!");
+                  "(ROS DataReceiver) Calling callback!");
         if (this->callback) {
             this->callback(data_msg);
         }
