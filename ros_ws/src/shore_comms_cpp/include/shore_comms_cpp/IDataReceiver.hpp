@@ -3,17 +3,26 @@
 //
 
 #pragma once
+#include <functional>
 #include <string>
 
-#include "IDataLogger.hpp"
+struct IDataReceiverBase {
+    virtual ~IDataReceiverBase() = default;
+};
+
 
 template<typename T>
-struct IDataReceiver {
+struct IDataReceiver : public IDataReceiverBase {
     virtual ~IDataReceiver(){}
 
-    explicit IDataReceiver(std::string topic_name){};
+    explicit IDataReceiver(const std::string& topic_name) : topic_name(topic_name){};
 
-    virtual void on_data(std::function<void(T data)>) = 0;
+    virtual void on_data(T) = 0;
+
+    virtual void set_callback(std::function<void(T)> callback) {
+        this->callback = callback;
+    }
 
     std::string topic_name;
+    std::function<void(T)> callback;
 };

@@ -3,16 +3,22 @@
 //
 
 #pragma once
+#include <memory>
+#include <rclcpp/node.hpp>
 #include <rclcpp/rclcpp.hpp>
 
 #include "IDataReceiver.hpp"
 
+struct IDataLoggerBase {
+    virtual ~IDataLoggerBase() = default;
+};
+
 
 template<typename T>
-struct IDataLogger {
-    IDataLogger(rclcpp::Node node, std::string topic_name, IDataReceiver<T> data_receiver){}
+struct IDataLogger : public IDataLoggerBase {
+    IDataLogger(std::shared_ptr<IDataReceiver<T>> data_receiver) :  data_Receiver(data_receiver){}
 
-    virtual void on_data_recieve(T data) = 0;
-
-    virtual rclcpp::Node::SharedPtr get_node() = 0;
+    std::shared_ptr<IDataReceiver<T>> data_Receiver; 
 };
+
+

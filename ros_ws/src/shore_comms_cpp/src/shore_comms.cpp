@@ -6,6 +6,7 @@
 
 #include "ixwebsocket/IXWebSocket.h"
 #include "rclcpp/rclcpp.hpp"
+#include "shore_comms_cpp/DataLoggers.hpp"
 #include "std_msgs/msg/string.hpp"
 #include <nlohmann/json.hpp>
 
@@ -37,8 +38,10 @@ struct Alarm {
 // Needs sudo apt install nlohmann-json3-dev
 class ShoreCommsNode : public rclcpp::Node {
 public:
-  ShoreCommsNode() : Node("shore_comms_cpp") {
-    this->alarmPub = std::make_shared<AlarmPublisher>(this);
+  ShoreCommsNode() : Node("shore_comms_cpp") {}
+
+  void init() {
+    this->alarm_pub = std::make_shared<AlarmPublisher>(this);
     // replay mode config
     auto param_replay = rcl_interfaces::msg::ParameterDescriptor{};
     param_replay.description = "Is it in replay mode?";
@@ -78,7 +81,10 @@ public:
     // this->dataLogging = std::make_shared<DataLogging>(this->shared_from_this());
     //
     // this->dataLogging->logData<boat_data_interfaces::msg::CANBusStatus, CANBusLogger>();
-    
+
+    this->data_loggers = std::make_shared<DataLoggers>();
+    this->data_loggers->addDataLogger(this->shared_from_this());
+
 
     // this->log_topic<boat_data_interfaces::msg::InletCoolantData>(
     //     "/electrical/temp_sensors/in",
@@ -165,18 +171,19 @@ public:
     if (!this->connectionOpened && !this->openedInitally) {
       RCLCPP_ERROR(this->get_logger(),
                    "The websocket is not initally opened yet!");
-      alarmPub->publishAlarm(Faults::WEBSOCKET_IS_NOT_INITIALLY_OPENED_YET);
+      alarm_pub->publishAlarm(Faults::WEBSOCKET_IS_NOT_INITIALLY_OPENED_YET);
     } else if (!this->websocket.getPingInterval()) {
       RCLCPP_ERROR(this->get_logger(),
                    "The websocket connection is now closed!");
-      alarmPub->publishAlarm(Faults::WEBSOCKET_NOT_OPENED);
+      alarm_pub->publishAlarm(Faults::WEBSOCKET_NOT_OPENED);
     }
   }
 
 private:
   std::vector<std::shared_ptr<rclcpp::TimerBase>> timers_;
   std::vector<std::shared_ptr<rclcpp::SubscriptionBase>> subscriptions_;
-  std::shared_ptr<AlarmPublisher> alarmPub;
+  std::shared_ptr<AlarmPublisher> alarm_pub;
+  std::shared_ptr<DataLoggers> data_loggers;
 
   // Data that we will send to the shore
   std::vector<LogData> logs_;
@@ -203,18 +210,18 @@ private:
         json j = {{"type", "ident"}, {"message", "boat"}};
         websocket.send(j.dump());
 
-        alarmPub->delatchAlarm(Faults::WEBSOCKET_CONNECTION_CLOSED);
-        alarmPub->delatchAlarm(Faults::WEBSOCKET_INITIAL_CONNECTION_FAILURE);
-        alarmPub->delatchAlarm(Faults::WEBSOCKET_NOT_OPENED);
-        alarmPub->delatchAlarm(Faults::WEBSOCKET_IS_NOT_INITIALLY_OPENED_YET);
+        alarm_pub->delatchAlarm(Faults::WEBSOCKET_CONNECTION_CLOSED);
+        alarm_pub->delatchAlarm(Faults::WEBSOCKET_INITIAL_CONNECTION_FAILURE);
+        alarm_pub->delatchAlarm(Faults::WEBSOCKET_NOT_OPENED);
+        alarm_pub->delatchAlarm(Faults::WEBSOCKET_IS_NOT_INITIALLY_OPENED_YET);
       } else if (msg->type == ix::WebSocketMessageType::Error) {
         this->connectionOpened = false;
         RCLCPP_ERROR(this->get_logger(), "WebSocket error: %s",
                      msg->errorInfo.reason.c_str());
         if (this->openedInitally) {
-          alarmPub->publishAlarm(Faults::WEBSOCKET_INITIAL_CONNECTION_FAILURE);
+          alarm_pub->publishAlarm(Faults::WEBSOCKET_INITIAL_CONNECTION_FAILURE);
         } else {
-          alarmPub->publishAlarm(Faults::WEBSOCKET_CONNECTION_CLOSED);
+          alarm_pub->publishAlarm(Faults::WEBSOCKET_CONNECTION_CLOSED);
         }
       } else {
         RCLCPP_WARN(this->get_logger(), "Something happened? %s",
@@ -300,7 +307,9 @@ private:
 
 int main(int argc, char *argv[]) {
   rclcpp::init(argc, argv);
-  rclcpp::spin(std::make_shared<ShoreCommsNode>());
+  auto node = std::make_shared<ShoreCommsNode>();
+  node->init();
+  rclcpp::spin(node);
   rclcpp::shutdown();
   return 0;
 }
