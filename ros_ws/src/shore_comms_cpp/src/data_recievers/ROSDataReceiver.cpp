@@ -7,14 +7,14 @@
 #include "shore_comms_cpp/IDataReceiver.h"
 
 template <typename T>
-class ROSDataReceiver : IDataReceiver<T> {
+class ROSDataReceiver : public IDataReceiver<T> {
 public:
-    explicit ROSDataReceiver(std::string& topic_name, rclcpp::Node::SharedPtr node, std::function<void(T)> callback) : IDataReceiver<T>(topic_name, callback) {
+    explicit ROSDataReceiver(std::string& topic_name, rclcpp::Node::SharedPtr node, IDataLogger<T>& logger) : IDataReceiver<T>(topic_name, logger) {
         this->node = node;
         this->sub = node->create_subscription<T>(topic_name, 10, [this](T data) {
             this->send_data(data);
         });
-        this->callback = callback;
+
     }
 
     void send_data(T data) override {
