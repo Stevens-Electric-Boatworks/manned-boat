@@ -4,7 +4,8 @@ project(shore_comms_cpp)
 if (CMAKE_COMPILER_IS_GNUCXX OR CMAKE_CXX_COMPILER_ID MATCHES "Clang")
     add_compile_options(-Wall -Wextra -Wpedantic)
 endif ()
-add_executable(shore src/shore_comms.cpp src/DataLoggers.cpp src/data_loggers/CANBusLogger.cpp src/data_receivers/ROSDataReceiver.cpp )
+file(GLOB_RECURSE SOURCES "src/*.cpp")
+add_executable(shore ${SOURCES} )
 
 set(USE_TLS ON CACHE BOOL "Enable TLS support for IXWebSocket")
 
