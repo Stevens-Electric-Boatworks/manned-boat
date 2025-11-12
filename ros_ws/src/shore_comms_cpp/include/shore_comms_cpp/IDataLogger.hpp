@@ -8,6 +8,7 @@
 #include <rclcpp/rclcpp.hpp>
 
 #include "IDataReceiver.hpp"
+#include "IDataTransmitter.h"
 
 struct IDataLoggerBase {
     virtual ~IDataLoggerBase() = default;
@@ -16,8 +17,10 @@ struct IDataLoggerBase {
 
 template<typename T>
 struct IDataLogger : public IDataLoggerBase {
-    IDataLogger(std::shared_ptr<IDataReceiver<T> > data_receiver) : data_Receiver(data_receiver) {
+    IDataLogger(std::shared_ptr<IDataReceiver<T> > data_receiver, const std::shared_ptr<IDataTransmitter>& data_transmitter) : data_receiver(data_receiver), data_transmitter(data_transmitter) {
     }
 
-    std::shared_ptr<IDataReceiver<T> > data_Receiver;
+    std::shared_ptr<IDataReceiver<T> > data_receiver;
+    std::shared_ptr<IDataTransmitter> data_transmitter;
+
 };

@@ -169,10 +169,10 @@ public:
 
   void send_websocket_data() {
     if (this->connectionOpened) {
-      this->sendData();
-      this->sendAlarms();
-      this->sendLogs();
-      this->sendCANBusState();
+      // this->sendData();
+      // this->sendAlarms();
+      // this->sendLogs();
+      // this->sendCANBusState();
     }
   }
 
