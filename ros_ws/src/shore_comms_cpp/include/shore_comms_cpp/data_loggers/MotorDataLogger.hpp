@@ -8,9 +8,10 @@
 #include <rclcpp/rclcpp.hpp>
 
 using type = boat_data_interfaces::msg::CANMotorData;
+
 class MotorDataLogger : public IDataLogger<type> {
 public:
-    explicit MotorDataLogger(const std::shared_ptr<IDataReceiver<type>> &data);
+    explicit MotorDataLogger(const std::shared_ptr<IDataReceiver<type> > &data);
 
     static void on_data(type data);
 };

@@ -22,10 +22,10 @@ target_include_directories(shore PUBLIC include)
 
 # Create library from sources
 target_link_libraries(shore
-    PUBLIC
+        PUBLIC
         rclcpp::rclcpp
-        ${std_msgs_TARGETS} 
-        ${boat_data_interfaces_TARGETS} 
+        ${std_msgs_TARGETS}
+        ${boat_data_interfaces_TARGETS}
         ${boat_common_libs_cpp_TARGETS}
         ixwebsocket
 )

@@ -16,9 +16,8 @@ struct IDataLoggerBase {
 
 template<typename T>
 struct IDataLogger : public IDataLoggerBase {
-    IDataLogger(std::shared_ptr<IDataReceiver<T>> data_receiver) :  data_Receiver(data_receiver){}
+    IDataLogger(std::shared_ptr<IDataReceiver<T> > data_receiver) : data_Receiver(data_receiver) {
+    }
 
-    std::shared_ptr<IDataReceiver<T>> data_Receiver; 
+    std::shared_ptr<IDataReceiver<T> > data_Receiver;
 };
-
-

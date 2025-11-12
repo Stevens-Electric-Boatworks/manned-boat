@@ -23,6 +23,7 @@ using json = nlohmann::json;
 #include "boat_data_interfaces/msg/inlet_coolant_data.hpp"
 #include "boat_data_interfaces/msg/outlet_coolant_data.hpp"
 #include "rcl_interfaces/msg/log.hpp"
+
 struct LogData {
   double_t timestamp;
   std::string msg;
@@ -40,7 +41,8 @@ struct Alarm {
 // Needs sudo apt install nlohmann-json3-dev
 class ShoreCommsNode : public rclcpp::Node {
 public:
-  ShoreCommsNode() : Node("shore_comms_cpp") {}
+  ShoreCommsNode() : Node("shore_comms_cpp") {
+  }
 
   void init() {
     this->alarm_pub = std::make_shared<AlarmPublisher>(this);
@@ -54,12 +56,14 @@ public:
       this->replay_mode = true;
       logTopicName = "/logout";
       double const timestamp = getTimeFromMsg(this->get_clock()->now());
-      addLog(LogData{timestamp, "The shore server is in REPLAY MODE",
-                     "REPLAY MODE", "REPLAY MODE", 67, 40});
+      addLog(LogData{
+        timestamp, "The shore server is in REPLAY MODE",
+        "REPLAY MODE", "REPLAY MODE", 67, 40
+      });
       RCLCPP_INFO(this->get_logger(), "The shore server is in REPLAY mode");
     }
     this->log_topic<rcl_interfaces::msg::Log>(logTopicName,
-                                          &ShoreCommsNode::logs_collector);
+                                              &ShoreCommsNode::logs_collector);
 
 
     // websocket config
@@ -68,8 +72,8 @@ public:
     this->declare_parameter("data_send", 100, param_data_send);
     auto timer_callback = [this]() -> void { this->send_websocket_data(); };
     auto const timer_ = this->create_wall_timer(
-        std::chrono::milliseconds(this->get_parameter("data_send").as_int()),
-        timer_callback);
+      std::chrono::milliseconds(this->get_parameter("data_send").as_int()),
+      timer_callback);
 
     auto watchdog_callback = [this]() -> void { this->disconnect_watchdog(); };
     auto const _watchdog =
@@ -110,28 +114,28 @@ public:
   }
 
   void electrical_coolant_temp_collector_inlet(
-      const boat_data_interfaces::msg::InletCoolantData::SharedPtr msg) {
+    const boat_data_interfaces::msg::InletCoolantData::SharedPtr msg) {
     addData("inlet_temp", msg->inlet_temp);
   }
 
   void electrical_coolant_temp_collector_outlet(
-      const boat_data_interfaces::msg::OutletCoolantData::SharedPtr msg) {
+    const boat_data_interfaces::msg::OutletCoolantData::SharedPtr msg) {
     addData("outlet_temp", msg->outlet_temp);
   }
 
   void gps_location_collector(
-      const boat_data_interfaces::msg::GPSData::SharedPtr msg) {
+    const boat_data_interfaces::msg::GPSData::SharedPtr msg) {
     addData("lat", msg->lat);
     addData("long", msg->lon);
   }
 
   void gps_vtg_collector(
-      const boat_data_interfaces::msg::GPSVTGData::SharedPtr msg) {
+    const boat_data_interfaces::msg::GPSVTGData::SharedPtr msg) {
     addData("speed", msg->speed);
   }
 
   void motor_collector(
-      const boat_data_interfaces::msg::CANMotorData::SharedPtr msg) {
+    const boat_data_interfaces::msg::CANMotorData::SharedPtr msg) {
     addData("voltage", msg->voltage);
     addData("throttle_mv", msg->throttle_mv);
     addData("throttle_percentage", msg->throttle_percentage);
@@ -143,7 +147,7 @@ public:
   }
 
   void bus_state_collector(
-      const boat_data_interfaces::msg::CANBusStatus::SharedPtr msg) {
+    const boat_data_interfaces::msg::CANBusStatus::SharedPtr msg) {
     this->CANBusState = msg->bus_state;
   }
 
@@ -157,8 +161,10 @@ public:
   }
 
   void logs_collector(const rcl_interfaces::msg::Log::SharedPtr msg) {
-    addLog(LogData{getTimeFromMsg(msg->stamp), msg->msg, msg->file,
-                   msg->function, msg->line, msg->level});
+    addLog(LogData{
+      getTimeFromMsg(msg->stamp), msg->msg, msg->file,
+      msg->function, msg->line, msg->level
+    });
   }
 
   void send_websocket_data() {
@@ -183,8 +189,8 @@ public:
   }
 
 private:
-  std::vector<std::shared_ptr<rclcpp::TimerBase>> timers_;
-  std::vector<std::shared_ptr<rclcpp::SubscriptionBase>> subscriptions_;
+  std::vector<std::shared_ptr<rclcpp::TimerBase> > timers_;
+  std::vector<std::shared_ptr<rclcpp::SubscriptionBase> > subscriptions_;
   std::shared_ptr<AlarmPublisher> alarm_pub;
   std::shared_ptr<DataLoggers> data_loggers;
 
@@ -250,14 +256,14 @@ private:
       return;
     std::vector<json> logs;
     json j = {{"type", "log"}};
-    for (LogData data : logs_) {
+    for (LogData data: logs_) {
       logs.push_back({
-          {"timestamp", data.timestamp},
-          {"msg", data.msg},
-          {"file", data.filename},
-          {"function", data.function},
-          {"line", data.line},
-          {"level", data.level},
+        {"timestamp", data.timestamp},
+        {"msg", data.msg},
+        {"file", data.filename},
+        {"function", data.function},
+        {"line", data.line},
+        {"level", data.level},
       });
     }
     this->logs_.clear();
@@ -270,12 +276,14 @@ private:
       return;
     std::vector<json> alarms;
 
-    for (Alarm data : alarms_) {
+    for (Alarm data: alarms_) {
       json j = {{"type", "alarm"}, {"action", "set"}};
-      json payload = {{"id", data.id},
-                      {"timestamp", data.timestamp},
-                      {"message", "Not supported yet..."},
-                      {"type", "error"}};
+      json payload = {
+        {"id", data.id},
+        {"timestamp", data.timestamp},
+        {"message", "Not supported yet..."},
+        {"type", "error"}
+      };
       j["payload"] = payload;
       websocket.send(j.dump());
     }
@@ -291,7 +299,7 @@ private:
     this->data[name] = value;
   }
 
-  template <typename T, typename L>
+  template<typename T, typename L>
   void log_data(std::string topic_name) {
     this->data_loggers->addDataLogger<T, L>(topic_name, this->shared_from_this());
   }
@@ -304,7 +312,7 @@ private:
     return time.sec * 1000.0 + time.nanosec / 1.0e6;
   }
 
-  template <typename T, typename M>
+  template<typename T, typename M>
   void log_topic(const std::string &topic_name, M callback) {
     auto bound = std::bind(callback, this, std::placeholders::_1);
     auto sub = this->create_subscription<T>(topic_name, 10, bound);
