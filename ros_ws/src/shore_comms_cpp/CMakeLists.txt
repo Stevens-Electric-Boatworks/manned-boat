@@ -11,6 +11,10 @@ set(shore_comms_cpp_srcs
         src/data_loggers/BoatTimeLogger.cpp
         src/data_loggers/ROSOutLogger.cpp
         src/data_loggers/AlarmsLogger.cpp
+        src/data_loggers/InletCoolantLogger.cpp
+        src/data_loggers/OutletCoolantLogger.cpp
+        src/data_loggers/GPSLogger.cpp
+        src/data_loggers/GPSVTGLogger.cpp
         src/data_transmitter/WebsocketDataTransmitter.cpp
         src/DataLoggers.cpp
 )

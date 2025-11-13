@@ -14,6 +14,10 @@
 #include <nlohmann/json.hpp>
 
 #include "shore_comms_cpp/data_loggers/AlarmsLogger.hpp"
+#include "shore_comms_cpp/data_loggers/GPSLogger.hpp"
+#include "shore_comms_cpp/data_loggers/GPSVTGLogger.hpp"
+#include "shore_comms_cpp/data_loggers/InletCoolantLogger.hpp"
+#include "shore_comms_cpp/data_loggers/OutletCoolantLogger.hpp"
   // for convenience
 using json = nlohmann::json;
 #include "boat_data_interfaces/msg/can_motor_data.hpp"
@@ -42,6 +46,11 @@ public:
     this->log_data<boat_data_interfaces::msg::CANMotorData, MotorDataLogger>("/motors/can_motor_data");
     this->log_data<builtin_interfaces::msg::Time, BoatTimeLogger>("/boat_time");
     this->log_data<boat_data_interfaces::msg::BoatAlarm, AlarmsLogger>("/alarm/shore/publish");
+    this->log_data<boat_data_interfaces::msg::InletCoolantData, InletCoolantLogger>("/electrical/temp_sensors/in");
+    this->log_data<boat_data_interfaces::msg::OutletCoolantData, OutletCoolantLogger>("/electrical/temp_sensors/out");
+    this->log_data<boat_data_interfaces::msg::GPSData, GPSLogger>("/motion/gps");
+    this->log_data<boat_data_interfaces::msg::GPSVTGData, GPSVTGLogger>("/motion/vtg");
+
 
     RCLCPP_INFO(this->get_logger(), "Shore Node Initization Complete");
   }

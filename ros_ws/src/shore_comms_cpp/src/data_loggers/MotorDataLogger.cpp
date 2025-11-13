@@ -8,11 +8,16 @@ MotorDataLogger::MotorDataLogger(const std::shared_ptr<IDataReceiver<type> > &da
     });
 }
 
-void MotorDataLogger::on_data(const type data) {
+void MotorDataLogger::on_data(const type data) const {
     nlohmann::json const j = {
         {"rpm", data.rpm},
         {"voltage", data.voltage},
-        {"current", data.current}
+        {"current", data.current},
+        {"throttle_mv", data.throttle_mv},
+        {"throttle_percentage", data.throttle_percentage},
+        {"torque", data.torque},
+        {"motor_temp", data.motor_temp},
+        {"power", data.power}
     };
     this->data_transmitter->send_data(j);
 }

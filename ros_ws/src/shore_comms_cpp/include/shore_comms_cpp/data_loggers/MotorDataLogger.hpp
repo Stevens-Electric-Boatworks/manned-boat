@@ -11,5 +11,5 @@ class MotorDataLogger : public IDataLogger<boat_data_interfaces::msg::CANMotorDa
 public:
     using type = boat_data_interfaces::msg::CANMotorData;
     explicit MotorDataLogger(const std::shared_ptr<IDataReceiver<type>>&, const std::shared_ptr<IDataTransmitter>&, bool);
-    void on_data(const type data);
+    void on_data(const type data) const;
 };
