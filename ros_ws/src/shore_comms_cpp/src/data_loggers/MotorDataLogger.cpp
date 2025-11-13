@@ -9,9 +9,10 @@ MotorDataLogger::MotorDataLogger(const std::shared_ptr<IDataReceiver<type> > &da
 }
 
 void MotorDataLogger::on_data(const type data) {
-    rclcpp::Logger my_logger = rclcpp::get_logger("Motor");
-    nlohmann::json j = {
-        {"rpm", data.rpm}
+    nlohmann::json const j = {
+        {"rpm", data.rpm},
+        {"voltage", data.voltage},
+        {"current", data.current}
     };
     this->data_transmitter->send_data(j);
 }

@@ -25,4 +25,5 @@ public:
     virtual void send_data(const nlohmann::json& json) = 0;
     virtual void send_log(const LogData& log_data) = 0;
     virtual void send_can_bus_state(const uint8_t& can_state) = 0;
+    virtual void send_alarm(const Alarm& alarm) = 0;
 };

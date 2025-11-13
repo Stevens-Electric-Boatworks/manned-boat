@@ -42,10 +42,11 @@ WebsocketDataTransmitter::WebsocketDataTransmitter(const rclcpp::Node::SharedPtr
     });
     websocket_.start();
 
-    auto data_timer = node->create_wall_timer(std::chrono::milliseconds(100), [this]() {
+    const auto data_timer = node->create_wall_timer(std::chrono::milliseconds(100), [this]() {
         this->publish_data();
         this->publish_can_bus_state();
         this->publish_logs();
+        this->publish_alarms();
     });
     this->timers_.push_back(data_timer);
 }
@@ -53,23 +54,21 @@ void WebsocketDataTransmitter::send_data(const nlohmann::json &json) {
     this->data_.merge_patch(json);
 }
 
-void WebsocketDataTransmitter::send_log(const LogData& log) {
-    this->logs_.push_back(log);
+void WebsocketDataTransmitter::send_log(const LogData& log_data) {
+    this->logs_.push_back(log_data);
+}
+
+void WebsocketDataTransmitter::send_alarm(const Alarm &alarm) {
+    this->alarms_.push_back(alarm);
 }
 
 void WebsocketDataTransmitter::send_can_bus_state(const uint8_t& can_state) {
-    // nlohmann::json j = {
-    //     {"type", "can_bus"},
-    //     {"state", can_state}
-    // };
-    // RCLCPP_INFO(this->node->get_logger(), "Sending: %s", j.dump().c_str());
-    // websocket.send(j.dump());
     this->can_bus_state_ = can_state;
 }
 
 void WebsocketDataTransmitter::publish_data() {
     if (!this->data_.empty()) {
-        nlohmann::json j = {
+        const nlohmann::json j = {
             {"type", "data"},
             {"payload", this->data_}
         };
@@ -79,7 +78,7 @@ void WebsocketDataTransmitter::publish_data() {
 }
 
 void WebsocketDataTransmitter::publish_can_bus_state() {
-    nlohmann::json j = {
+    const nlohmann::json j = {
         {"type", "can_bus"},
         {"state", this->can_bus_state_}
     };
@@ -91,14 +90,14 @@ void WebsocketDataTransmitter::publish_logs() {
       return;
     std::vector<nlohmann::json> logs;
     nlohmann::json j = {{"type", "log"}};
-    for (LogData data : logs_) {
+    for (auto [timestamp, msg, filename, function, line, level] : logs_) {
       logs.push_back({
-          {"timestamp", data.timestamp},
-          {"msg", data.msg},
-          {"file", data.filename},
-          {"function", data.function},
-          {"line", data.line},
-          {"level", data.level},
+          {"timestamp", timestamp},
+          {"msg", msg},
+          {"file", filename},
+          {"function", function},
+          {"line", line},
+          {"level", level},
       });
     }
     j["payload"] = logs;
@@ -110,6 +109,23 @@ void WebsocketDataTransmitter::publish_logs() {
 }
 
 void WebsocketDataTransmitter::publish_alarms() {
+
+    if (this->alarms_.size() == 0)
+        return;
+    std::vector<nlohmann::json> alarms;
+
+    for (const auto [id, timestamp] : alarms_) {
+        nlohmann::json j = {{"type", "alarm"}, {"action", "set"}};
+        const nlohmann::json payload = {{"id", id},
+                        {"timestamp", timestamp},
+                        {"message", "Not supported yet..."},
+                        {"type", "error"}};
+        j["payload"] = payload;
+        this->websocket_.send(j.dump());
+    }
+    if(this->connection_opened) {
+        this->alarms_.clear();
+    }
 
 }
 
