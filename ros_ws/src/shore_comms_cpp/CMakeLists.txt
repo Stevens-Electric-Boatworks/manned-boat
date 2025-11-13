@@ -8,6 +8,8 @@ set(shore_comms_cpp_srcs
         src/data_receivers/ROSDataReceiver.cpp
         src/data_loggers/CANBusStateLogger.cpp
         src/data_loggers/MotorDataLogger.cpp
+        src/data_loggers/BoatTimeLogger.cpp
+        src/data_loggers/ROSOutLogger.cpp
         src/data_transmitter/WebsocketDataTransmitter.cpp
         src/DataLoggers.cpp
 )

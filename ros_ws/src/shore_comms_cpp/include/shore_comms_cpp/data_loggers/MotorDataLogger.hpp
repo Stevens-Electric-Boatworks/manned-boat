@@ -1,17 +1,15 @@
 #pragma once
 
-#include "boat_data_interfaces/msg/motor_data.hpp"
 #include "shore_comms_cpp/IDataLogger.hpp"
 #include "shore_comms_cpp/IDataReceiver.hpp"
 #include <memory>
 #include <boat_data_interfaces/msg/detail/can_motor_data__struct.hpp>
 #include <rclcpp/rclcpp.hpp>
 
-using type = boat_data_interfaces::msg::CANMotorData;
 
-class MotorDataLogger : public IDataLogger<type> {
+class MotorDataLogger : public IDataLogger<boat_data_interfaces::msg::CANMotorData> {
 public:
-    explicit MotorDataLogger(const std::shared_ptr<IDataReceiver<type>>&, const std::shared_ptr<IDataTransmitter>&);
-
+    using type = boat_data_interfaces::msg::CANMotorData;
+    explicit MotorDataLogger(const std::shared_ptr<IDataReceiver<type>>&, const std::shared_ptr<IDataTransmitter>&, bool);
     void on_data(const type data);
 };

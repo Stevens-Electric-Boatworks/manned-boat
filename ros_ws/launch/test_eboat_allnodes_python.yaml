@@ -7,7 +7,7 @@ launch:
         name: "shore_comms"
         param:
           - name: "data_send"
-            value: 100
+            value: 0.1
           - name: "replay_mode"
             value: false
 
