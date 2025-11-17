@@ -44,4 +44,26 @@ target_link_libraries(shore
 
 install(TARGETS shore DESTINATION lib/${PROJECT_NAME})
 
+if(BUILD_TESTING)
+    find_package(ament_cmake_gtest REQUIRED)
+    set(tests_libs
+            test/mock/MockDataTransmitter.cpp
+    )
+    set(tests
+            test/tutorial_test.cpp
+    )
+    ament_add_gtest(${PROJECT_NAME}_test ${tests} ${tests_libs} ${shore_comms_cpp_srcs})
+    target_include_directories(${PROJECT_NAME}_test PUBLIC
+            test/include/
+            include/
+    )
+    target_link_libraries(${PROJECT_NAME}_test
+            rclcpp::rclcpp
+            ${std_msgs_TARGETS}
+            ${boat_data_interfaces_TARGETS}
+            ${boat_common_libs_cpp_TARGETS}
+            ixwebsocket
+    )
+endif()
+
 ament_package()
