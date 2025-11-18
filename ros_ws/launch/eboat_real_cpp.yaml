@@ -1,0 +1,39 @@
+%YAML 1.2
+---
+launch:
+  - node:
+      pkg: "shore_comms_cpp"
+      exec: "shore"
+      name: "shore_comms"
+      param:
+          - name: "data_send"
+            value: 100
+
+  - node:
+      pkg: "alarms_manager_node"
+      exec: "main"
+      name: "alarms_watchdog"
+      param:
+          - name: "faults_file"
+            value: "~/eboat_src/data/FAULTS.csv"
+
+  - node:
+      pkg: "motor_node"
+      exec: "motor"
+      name: "can_motor"
+      param:
+          - name: "dummy_epf"
+            value: "~/eboat_src/data/dummy.epf"
+  - node:
+      pkg: "motion_node"
+      exec: "motion"
+      name: "gps"
+  - node:
+      pkg: "electrical_node"
+      exec: "electrical"
+      name: "electrical_node"
+  - node:
+      pkg: "time_node"
+      exec: "time_node"
+      name: "time"
+
