@@ -50,7 +50,8 @@ if(BUILD_TESTING)
             test/mock/MockDataTransmitter.cpp
     )
     set(tests
-            test/tutorial_test.cpp
+            test/data_loggers_test.cpp
+            test/helpers_test.cpp
     )
     ament_add_gtest(${PROJECT_NAME}_test ${tests} ${tests_libs} ${shore_comms_cpp_srcs})
     target_include_directories(${PROJECT_NAME}_test PUBLIC

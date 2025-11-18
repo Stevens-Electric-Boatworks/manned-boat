@@ -4,10 +4,13 @@
 
 #include "shore_comms_cpp_test/mock/MockDataTransmitter.hpp"
 
+#include "gtest/gtest.h"
+
 void MockDataTransmitter::send_alarm(const Alarm &alarm) {
 }
 
 void MockDataTransmitter::send_can_bus_state(const uint8_t &can_state) {
+    this->can_bus_state_ = can_state;
 }
 
 void MockDataTransmitter::send_data(const nlohmann::json &json) {
@@ -17,17 +20,11 @@ void MockDataTransmitter::send_data(const nlohmann::json &json) {
 void MockDataTransmitter::send_log(const LogData &log_data) {
 }
 
-bool MockDataTransmitter::has(const nlohmann::json &json) const {
-    printf("Data: %s", data.dump().c_str());
-    printf("Json: %s", json.dump().c_str());
-
-    if (!json.is_object() || ! data.is_object()) return false;
-
-    for (auto& [key, val] : json.items()) {
-        if (!data.contains(key)) return false;
-        if (data[key] != val) return false;
-    }
-
-    return true;
-
+void MockDataTransmitter::assert_has_can_status(const uint8_t can_state) const {
+    ASSERT_EQ(this->can_bus_state_, can_state);
 }
+
+void MockDataTransmitter::assert_has_data(const nlohmann::json &json) const {
+    ASSERT_EQ(this->data, json);
+}
+

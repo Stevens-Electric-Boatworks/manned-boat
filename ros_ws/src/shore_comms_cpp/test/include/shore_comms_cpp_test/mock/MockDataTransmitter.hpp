@@ -4,6 +4,7 @@
 
 #pragma once
 #include "shore_comms_cpp/IDataTransmitter.h"
+#include "shore_comms_cpp/data_loggers/CANBusStateLogger.hpp"
 
 
 class MockDataTransmitter : public IDataTransmitter {
@@ -13,10 +14,13 @@ public:
     void send_data(const nlohmann::json &json) override;
     void send_log(const LogData &log_data) override;
 
-    bool has(const nlohmann::json &json) const;
+    void assert_has_data(const nlohmann::json &json) const;
+
+    void assert_has_can_status(const uint8_t can_state) const;
 
 private:
     nlohmann::json data;
+    uint8_t can_bus_state_ = 0;
 };
 
 
