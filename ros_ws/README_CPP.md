@@ -7,4 +7,10 @@ To be able to use the new C++ nodes in this workspace, you have to do a few step
 
 
 To build the code, run `$ cpp_build.sh` to compile the code. This script will compile the code in a debug mode with no compiler optimizations. You can modify the build command for a production deployment if you wish.
-If you wish to build AND run the test_node, run `$ cpp_run.sh`
+If you wish to build AND run the `shore_comms_cpp` node, run `$ ./cpp_run.sh`
+
+If you wish to run the unit tests for the `shore_comms_cpp` package, run `$ ./cpp_test.sh`
+
+
+## Contact
+Ishaan Sayal - [isayal@stevens.edu](mailto:isayal@stevens.edu)
