@@ -1,4 +1,4 @@
 #!/bin/bash
 python3 /home/rpi/GPS.py
-sleep 5
+sleep 1
 pon
