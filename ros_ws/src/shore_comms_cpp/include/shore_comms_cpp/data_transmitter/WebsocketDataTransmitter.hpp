@@ -11,7 +11,7 @@
 
 class WebsocketDataTransmitter : public IDataTransmitter {
 public:
-    explicit WebsocketDataTransmitter(const rclcpp::Node::SharedPtr &node, int data_send);
+    explicit WebsocketDataTransmitter(const rclcpp::Node::SharedPtr &node, int data_send_rate, bool replay_mode);
     void send_data(const nlohmann::json& json) override;
     void send_can_bus_state(const uint8_t &can_state) override;
     void send_log(const LogData& log_data) override;
@@ -23,18 +23,17 @@ private:
     void publish_alarms();
     void publish_logs();
     
-    std::shared_ptr<AlarmPublisher> alarm_pub;
+    std::shared_ptr<AlarmPublisher> alarm_pub_;
     ix::WebSocket websocket_;
     rclcpp::Node::SharedPtr node_;
     std::vector<LogData> logs_;
     std::vector<Alarm> alarms_;
     nlohmann::json data_;
-    bool replay_mode_ = false;
     uint8_t can_bus_state_ = boat_data_interfaces::msg::CANBusStatus::OFFLINE;
     std::vector<std::shared_ptr<rclcpp::TimerBase> > timers_;
     
-    int data_send;
-
+    int data_send_;
     bool connection_opened = false;
     bool opened_initally = false;
+    bool replay_mode_;
 };

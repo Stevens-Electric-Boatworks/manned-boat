@@ -22,7 +22,7 @@ public:
     }
 
     void use_websockets(const rclcpp::Node::SharedPtr& node, int data_send) {
-        this->data_transmitter = std::make_shared<WebsocketDataTransmitter>(node, data_send);
+        this->data_transmitter = std::make_shared<WebsocketDataTransmitter>(node, data_send, replay_mode);
     }
 
     void set_replay_mode(bool replay_mode) {

@@ -6,10 +6,11 @@
 #include "shore_comms_cpp/IDataTransmitter.h"
 #include <chrono>
 
-WebsocketDataTransmitter::WebsocketDataTransmitter(const rclcpp::Node::SharedPtr &node, int data_send){
+WebsocketDataTransmitter::WebsocketDataTransmitter(const rclcpp::Node::SharedPtr &node, int data_send_rate, bool replay_mode){
     this->node_ = node;
-    this->data_send = data_send;
-    this->alarm_pub = std::make_shared<AlarmPublisher>(this->node_);
+    this->data_send_ = data_send_rate;
+    this->alarm_pub_ = std::make_shared<AlarmPublisher>(this->node_);
+    this->replay_mode_ = replay_mode;
     const std::string url("wss://shore.stevenseboat.org/api");
     websocket_.setUrl(url);
     websocket_.setMaxWaitBetweenReconnectionRetries(5);
@@ -22,18 +23,18 @@ WebsocketDataTransmitter::WebsocketDataTransmitter(const rclcpp::Node::SharedPtr
           nlohmann::json j = {{"type", "ident"}, {"message", "boat"}};
           this->websocket_.send(j.dump());
 
-          alarm_pub->delatchAlarm(Faults::WEBSOCKET_CONNECTION_CLOSED);
-          alarm_pub->delatchAlarm(Faults::WEBSOCKET_INITIAL_CONNECTION_FAILURE);
-          alarm_pub->delatchAlarm(Faults::WEBSOCKET_NOT_OPENED);
-          alarm_pub->delatchAlarm(Faults::WEBSOCKET_IS_NOT_INITIALLY_OPENED_YET);
+          alarm_pub_->delatchAlarm(Faults::WEBSOCKET_CONNECTION_CLOSED);
+          alarm_pub_->delatchAlarm(Faults::WEBSOCKET_INITIAL_CONNECTION_FAILURE);
+          alarm_pub_->delatchAlarm(Faults::WEBSOCKET_NOT_OPENED);
+          alarm_pub_->delatchAlarm(Faults::WEBSOCKET_IS_NOT_INITIALLY_OPENED_YET);
         } else if (msg->type == ix::WebSocketMessageType::Error) {
           this->connection_opened = false;
           RCLCPP_ERROR(this->node_->get_logger(), "WebSocket error: %s",
                        msg->errorInfo.reason.c_str());
           if (this->opened_initally) {
-            alarm_pub->publishAlarm(Faults::WEBSOCKET_INITIAL_CONNECTION_FAILURE);
+            alarm_pub_->publishAlarm(Faults::WEBSOCKET_INITIAL_CONNECTION_FAILURE);
           } else {
-            alarm_pub->publishAlarm(Faults::WEBSOCKET_CONNECTION_CLOSED);
+            alarm_pub_->publishAlarm(Faults::WEBSOCKET_CONNECTION_CLOSED);
           }
         } else {
           RCLCPP_WARN(this->node_->get_logger(), "Something happened? %s",
@@ -42,7 +43,7 @@ WebsocketDataTransmitter::WebsocketDataTransmitter(const rclcpp::Node::SharedPtr
     });
     websocket_.start();
 
-    const auto data_timer = node->create_wall_timer(std::chrono::milliseconds(100), [this]() {
+    const auto data_timer = node->create_wall_timer(std::chrono::milliseconds(data_send_rate), [this] {
         this->publish_data();
         this->publish_can_bus_state();
         this->publish_logs();
@@ -68,10 +69,15 @@ void WebsocketDataTransmitter::send_can_bus_state(const uint8_t& can_state) {
 
 void WebsocketDataTransmitter::publish_data() {
     if (!this->data_.empty()) {
-        const nlohmann::json j = {
+        nlohmann::json j = {
             {"type", "data"},
             {"payload", this->data_}
         };
+        if (replay_mode_) {
+            j.merge_patch({
+                {"replay", true}
+            });
+        }
         websocket_.send(j.dump());
         this->data_.clear();
     }

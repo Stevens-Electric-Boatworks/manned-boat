@@ -41,7 +41,7 @@ public:
     this->data_loggers = std::make_shared<DataLoggers>();
     this->data_loggers->set_replay_mode(this->get_parameter("replay_mode").as_bool());
     this->data_loggers->use_websockets(this->shared_from_this(), this->get_parameter("data_send").as_int());
-    this->log_data<rcl_interfaces::msg::Log, ROSOutLogger>("/rosout");
+    this->log_data<rcl_interfaces::msg::Log, ROSOutLogger>(this->get_parameter("replay_mode").as_bool() ? "/logout" : "/rosout");
     this->log_data<boat_data_interfaces::msg::CANBusStatus, CANBusStateLogger>("/motors/can_bus_state");
     this->log_data<boat_data_interfaces::msg::CANMotorData, MotorDataLogger>("/motors/can_motor_data");
     this->log_data<builtin_interfaces::msg::Time, BoatTimeLogger>("/boat_time");
