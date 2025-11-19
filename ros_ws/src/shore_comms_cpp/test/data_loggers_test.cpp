@@ -12,7 +12,10 @@
 #include "shore_comms_cpp/data_loggers/AlarmsLogger.hpp"
 #include "shore_comms_cpp/data_loggers/BoatTimeLogger.hpp"
 #include "shore_comms_cpp/data_loggers/CANBusStateLogger.hpp"
+#include "shore_comms_cpp/data_loggers/GPSLogger.hpp"
 #include "shore_comms_cpp/data_loggers/GPSVTGLogger.hpp"
+#include "shore_comms_cpp/data_loggers/InletCoolantLogger.hpp"
+#include "shore_comms_cpp/data_loggers/OutletCoolantLogger.hpp"
 #include "shore_comms_cpp/data_loggers/ROSOutLogger.hpp"
 #include "shore_comms_cpp_test/LoggerTestHelper.hpp"
 builtin_interfaces::msg::Time create_test_time_msg() {
@@ -22,7 +25,7 @@ builtin_interfaces::msg::Time create_test_time_msg() {
     return msg;
 }
 
-TEST(shore_comms_cpp, can_bus_state_logger_test) {
+TEST(shore_comms_cpp, can_motor_data_logger_test) {
     const auto can_logger = LoggerTestHelper<boat_data_interfaces::msg::CANMotorData, MotorDataLogger>(false);
 
     auto msg = boat_data_interfaces::msg::CANMotorData();
@@ -73,6 +76,38 @@ TEST(shore_comms_cpp, gps_vtg_logger_test) {
     can_state_logger.transmitter->assert_has_data({
     {"speed", -5},
     {"heading", 97}
+    });
+}
+
+TEST(shore_comms_cpp, gps_logger_test) {
+    const auto gps_logger = LoggerTestHelper<boat_data_interfaces::msg::GPSData, GPSLogger>(false);
+    auto msg = boat_data_interfaces::msg::GPSData();
+    msg.lat = -27.2712636;
+    msg.lon = 17.283127129;
+    gps_logger.rec->on_data(msg);
+    gps_logger.transmitter->assert_has_data({
+    {"lat", msg.lat},
+    {"long", msg.lon}
+    });
+}
+
+TEST(shore_comms_cpp, inlet_coolant_logger_test) {
+    const auto inlet_logger = LoggerTestHelper<boat_data_interfaces::msg::InletCoolantData, InletCoolantLogger>(false);
+    auto msg = boat_data_interfaces::msg::InletCoolantData();
+    msg.inlet_temp = 27.273;
+    inlet_logger.rec->on_data(msg);
+    inlet_logger.transmitter->assert_has_data({
+    {"inlet_temp", msg.inlet_temp},
+    });
+}
+
+TEST(shore_comms_cpp, outlet_coolant_logger_test) {
+    const auto outlet_logger = LoggerTestHelper<boat_data_interfaces::msg::OutletCoolantData, OutletCoolantLogger>(false);
+    auto msg = boat_data_interfaces::msg::OutletCoolantData();
+    msg.outlet_temp = 83.273;
+    outlet_logger.rec->on_data(msg);
+    outlet_logger.transmitter->assert_has_data({
+    {"outlet_temp", msg.outlet_temp},
     });
 }
 
