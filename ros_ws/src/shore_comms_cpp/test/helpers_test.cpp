@@ -12,6 +12,7 @@ TEST(shore_comms_cpp, helpers_get_time_to_msg_test) {
     constexpr double correct = 1763440019373.3999;
     ASSERT_EQ(get_time_from_msg(time), correct);
 }
+
 int main(int argc, char **argv) {
     testing::InitGoogleTest(&argc, argv);
     return RUN_ALL_TESTS();

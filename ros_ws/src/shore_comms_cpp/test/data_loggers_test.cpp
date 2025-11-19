@@ -18,6 +18,7 @@
 #include "shore_comms_cpp/data_loggers/OutletCoolantLogger.hpp"
 #include "shore_comms_cpp/data_loggers/ROSOutLogger.hpp"
 #include "shore_comms_cpp_test/LoggerTestHelper.hpp"
+
 builtin_interfaces::msg::Time create_test_time_msg() {
     auto msg = builtin_interfaces::msg::Time();
     msg.nanosec = 508282839;
@@ -48,8 +49,8 @@ TEST(shore_comms_cpp, can_motor_data_logger_test) {
         {"torque", 92},
         {"throttle_percentage", 12}
     });
-
 }
+
 TEST(shore_comms_cpp, boat_time_logger_test) {
     const auto time_logger = LoggerTestHelper<builtin_interfaces::msg::Time, BoatTimeLogger>(false);
     auto msg = create_test_time_msg();
@@ -74,8 +75,8 @@ TEST(shore_comms_cpp, gps_vtg_logger_test) {
     msg.true_track = 97;
     can_state_logger.rec->on_data(msg);
     can_state_logger.transmitter->assert_has_data({
-    {"speed", -5},
-    {"heading", 97}
+        {"speed", -5},
+        {"heading", 97}
     });
 }
 
@@ -86,8 +87,8 @@ TEST(shore_comms_cpp, gps_logger_test) {
     msg.lon = 17.283127129;
     gps_logger.rec->on_data(msg);
     gps_logger.transmitter->assert_has_data({
-    {"lat", msg.lat},
-    {"long", msg.lon}
+        {"lat", msg.lat},
+        {"long", msg.lon}
     });
 }
 
@@ -97,17 +98,18 @@ TEST(shore_comms_cpp, inlet_coolant_logger_test) {
     msg.inlet_temp = 27.273;
     inlet_logger.rec->on_data(msg);
     inlet_logger.transmitter->assert_has_data({
-    {"inlet_temp", msg.inlet_temp},
+        {"inlet_temp", msg.inlet_temp},
     });
 }
 
 TEST(shore_comms_cpp, outlet_coolant_logger_test) {
-    const auto outlet_logger = LoggerTestHelper<boat_data_interfaces::msg::OutletCoolantData, OutletCoolantLogger>(false);
+    const auto outlet_logger = LoggerTestHelper<boat_data_interfaces::msg::OutletCoolantData,
+        OutletCoolantLogger>(false);
     auto msg = boat_data_interfaces::msg::OutletCoolantData();
     msg.outlet_temp = 83.273;
     outlet_logger.rec->on_data(msg);
     outlet_logger.transmitter->assert_has_data({
-    {"outlet_temp", msg.outlet_temp},
+        {"outlet_temp", msg.outlet_temp},
     });
 }
 

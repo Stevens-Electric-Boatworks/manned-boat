@@ -10,7 +10,7 @@
 
 class FakeDataTransmitter;
 
-template <typename MsgT, typename LoggerT>
+template<typename MsgT, typename LoggerT>
 struct LoggerTestHelper {
     using RecT = FakeDataReceiver<MsgT>;
 
@@ -19,7 +19,7 @@ struct LoggerTestHelper {
     std::unique_ptr<LoggerT> logger;
 
     template<typename... Args>
-    explicit LoggerTestHelper(Args&&... args) {
+    explicit LoggerTestHelper(Args &&... args) {
         rec = std::make_shared<RecT>();
         transmitter = std::make_shared<FakeDataTransmitter>();
         logger = std::make_unique<LoggerT>(rec, transmitter, std::forward<Args>(args)...);

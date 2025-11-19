@@ -5,6 +5,7 @@
 #include "shore_comms_cpp_test/mock/FakeDataTransmitter.hpp"
 
 #include "gtest/gtest.h"
+
 void FakeDataTransmitter::send_alarm(const Alarm &alarm) {
     this->alarms_.push_back(alarm);
 }
@@ -25,7 +26,7 @@ void FakeDataTransmitter::assert_has_can_status(const uint8_t can_state) const {
     ASSERT_EQ(this->can_bus_state_, can_state);
 }
 
-void FakeDataTransmitter::assert_has_alarm(const Alarm& alarm, const int amount) {
+void FakeDataTransmitter::assert_has_alarm(const Alarm &alarm, const int amount) {
     ASSERT_EQ(this->alarms_.size(), amount);
     ASSERT_TRUE(std::find(alarms_.begin(), alarms_.end(), alarm) != alarms_.end());
 }

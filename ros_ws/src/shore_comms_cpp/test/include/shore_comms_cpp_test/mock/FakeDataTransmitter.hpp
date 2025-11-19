@@ -10,8 +10,11 @@
 class FakeDataTransmitter : public IDataTransmitter {
 public:
     void send_alarm(const Alarm &alarm) override;
+
     void send_can_bus_state(const uint8_t &can_state) override;
+
     void send_data(const nlohmann::json &json) override;
+
     void send_log(const LogData &log_data) override;
 
     void assert_has_data(const nlohmann::json &json) const;
@@ -20,7 +23,7 @@ public:
 
     void assert_has_alarm(const Alarm &alarm, int amount);
 
-    void assert_has_log(const LogData& log_data, int amount);
+    void assert_has_log(const LogData &log_data, int amount);
 
 private:
     nlohmann::json data;

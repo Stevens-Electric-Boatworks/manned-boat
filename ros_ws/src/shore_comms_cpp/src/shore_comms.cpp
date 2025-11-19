@@ -1,8 +1,8 @@
-  //
-  // Created by ishaan on 10/23/25.
-  //
+//
+// Created by ishaan on 10/23/25.
+//
 
-  #include <memory>
+#include <memory>
 
 #include "builtin_interfaces/msg/time.hpp"
 #include "rcl_interfaces/msg/log.hpp"
@@ -18,16 +18,16 @@
 #include "shore_comms_cpp/data_loggers/GPSVTGLogger.hpp"
 #include "shore_comms_cpp/data_loggers/InletCoolantLogger.hpp"
 #include "shore_comms_cpp/data_loggers/OutletCoolantLogger.hpp"
-  // for convenience
+// for convenience
 using json = nlohmann::json;
 #include "boat_data_interfaces/msg/can_motor_data.hpp"
-
 
 
 // Needs sudo apt install nlohmann-json3-dev
 class ShoreCommsNode : public rclcpp::Node {
 public:
-  ShoreCommsNode() : Node("shore_comms_cpp") {}
+  ShoreCommsNode() : Node("shore_comms_cpp") {
+  }
 
   void init() {
     // replay mode config
@@ -41,7 +41,9 @@ public:
     this->data_loggers = std::make_shared<DataLoggers>();
     this->data_loggers->set_replay_mode(this->get_parameter("replay_mode").as_bool());
     this->data_loggers->use_websockets(this->shared_from_this(), this->get_parameter("data_send").as_int());
-    this->log_data<rcl_interfaces::msg::Log, ROSOutLogger>(this->get_parameter("replay_mode").as_bool() ? "/logout" : "/rosout");
+    this->log_data<rcl_interfaces::msg::Log, ROSOutLogger>(this->get_parameter("replay_mode").as_bool()
+                                                             ? "/logout"
+                                                             : "/rosout");
     this->log_data<boat_data_interfaces::msg::CANBusStatus, CANBusStateLogger>("/motors/can_bus_state");
     this->log_data<boat_data_interfaces::msg::CANMotorData, MotorDataLogger>("/motors/can_motor_data");
     this->log_data<builtin_interfaces::msg::Time, BoatTimeLogger>("/boat_time");
@@ -59,7 +61,7 @@ private:
   std::shared_ptr<DataLoggers> data_loggers;
 
   template<typename T, typename L>
-  void log_data(const std::string& topic_name) {
+  void log_data(const std::string &topic_name) {
     this->data_loggers->addDataLogger<T, L>(topic_name, this->shared_from_this());
   }
 };
