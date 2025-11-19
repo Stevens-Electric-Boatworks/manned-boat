@@ -4,8 +4,8 @@
 
 #include <gtest/gtest.h>
 
-#include "shore_comms_cpp_test/mock/MockDataReceiver.hpp"
-#include "shore_comms_cpp_test/mock/MockDataTransmitter.hpp"
+#include "shore_comms_cpp_test/mock/FakeDataReceiver.hpp"
+#include "shore_comms_cpp_test/mock/FakeDataTransmitter.hpp"
 #include "shore_comms_cpp/data_loggers/MotorDataLogger.hpp"
 #include "boat_data_interfaces/msg/can_motor_data.hpp"
 #include "shore_comms_cpp/Helpers.hpp"
@@ -13,6 +13,7 @@
 #include "shore_comms_cpp/data_loggers/BoatTimeLogger.hpp"
 #include "shore_comms_cpp/data_loggers/CANBusStateLogger.hpp"
 #include "shore_comms_cpp/data_loggers/GPSVTGLogger.hpp"
+#include "shore_comms_cpp/data_loggers/ROSOutLogger.hpp"
 #include "shore_comms_cpp_test/LoggerTestHelper.hpp"
 builtin_interfaces::msg::Time create_test_time_msg() {
     auto msg = builtin_interfaces::msg::Time();
@@ -87,5 +88,27 @@ TEST(shore_comms_cpp, alarms_publisher_test) {
     alarm1.id = 5;
 
     boat_alarm_logger.transmitter->assert_has_alarm(alarm1, 1);
+}
+
+TEST(shore_comms_cpp, logger_publisher_test) {
+    const auto log_logger = LoggerTestHelper<rcl_interfaces::msg::Log, ROSOutLogger>(false);
+    auto msg = rcl_interfaces::msg::Log();
+    msg.file = "/src/mkail";
+    msg.msg = "This is an example log message";
+    msg.function = "test_method";
+    msg.line = 67;
+    msg.name = "TestLogger";
+    msg.stamp = create_test_time_msg();
+    msg.level = 40;
+    log_logger.rec->on_data(msg);
+
+    auto log1 = LogData();
+    log1.filename = "/src/mkail";
+    log1.msg = "This is an example log message";
+    log1.function = "test_method";
+    log1.line = 67;
+    log1.timestamp = get_time_from_msg(create_test_time_msg());
+    log1.level = 40;
+    log_logger.transmitter->assert_has_log(log1, 1);
 }
 

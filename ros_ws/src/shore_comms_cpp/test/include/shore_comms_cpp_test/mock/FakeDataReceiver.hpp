@@ -7,9 +7,9 @@
 #include "shore_comms_cpp/IDataReceiver.hpp"
 
 template<typename T>
-class MockDataReceiver: public IDataReceiver<T> {
+class FakeDataReceiver: public IDataReceiver<T> {
 public:
-    explicit MockDataReceiver() : IDataReceiver<T>("/test") {
+    explicit FakeDataReceiver() : IDataReceiver<T>("/test") {
 
     }
     void on_data(T data) override {

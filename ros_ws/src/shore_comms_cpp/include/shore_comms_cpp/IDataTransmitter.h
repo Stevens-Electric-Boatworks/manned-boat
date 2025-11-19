@@ -13,6 +13,15 @@ struct LogData {
     std::string function;
     uint32_t line;
     uint8_t level;
+
+    friend bool operator==(const LogData &lhs, const LogData &rhs) {
+        return lhs.timestamp == rhs.timestamp
+               && lhs.msg == rhs.msg
+               && lhs.filename == rhs.filename
+               && lhs.function == rhs.function
+               && lhs.line == rhs.line
+               && lhs.level == rhs.level;
+    }
 };
 
 struct Alarm {

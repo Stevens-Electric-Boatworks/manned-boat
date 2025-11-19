@@ -7,7 +7,7 @@
 #include "shore_comms_cpp/data_loggers/CANBusStateLogger.hpp"
 
 
-class MockDataTransmitter : public IDataTransmitter {
+class FakeDataTransmitter : public IDataTransmitter {
 public:
     void send_alarm(const Alarm &alarm) override;
     void send_can_bus_state(const uint8_t &can_state) override;
@@ -20,10 +20,13 @@ public:
 
     void assert_has_alarm(const Alarm &alarm, int amount);
 
+    void assert_has_log(const LogData& log_data, int amount);
+
 private:
     nlohmann::json data;
     uint8_t can_bus_state_ = 0;
     std::vector<Alarm> alarms_;
+    std::vector<LogData> logs_;
 };
 
 

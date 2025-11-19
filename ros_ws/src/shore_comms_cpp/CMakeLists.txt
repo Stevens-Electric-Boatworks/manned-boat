@@ -48,7 +48,7 @@ if(BUILD_TESTING)
     find_package(ament_cmake_gtest REQUIRED)
     find_package(ament_cmake_gmock REQUIRED)
     set(tests_libs
-            test/mock/MockDataTransmitter.cpp
+            test/mock/FakeDataTransmitter.cpp
     )
     set(tests
             test/data_loggers_test.cpp
