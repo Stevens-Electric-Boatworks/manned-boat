@@ -18,6 +18,11 @@ struct LogData {
 struct Alarm {
     int16_t id;
     double_t timestamp;
+
+    friend bool operator==(const Alarm &lhs, const Alarm &rhs) {
+        return lhs.id == rhs.id
+               && lhs.timestamp == rhs.timestamp;
+    }
 };
 class IDataTransmitter {
 public:

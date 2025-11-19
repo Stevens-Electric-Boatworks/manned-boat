@@ -46,6 +46,7 @@ install(TARGETS shore DESTINATION lib/${PROJECT_NAME})
 
 if(BUILD_TESTING)
     find_package(ament_cmake_gtest REQUIRED)
+    find_package(ament_cmake_gmock REQUIRED)
     set(tests_libs
             test/mock/MockDataTransmitter.cpp
     )

@@ -9,10 +9,17 @@
 #include "shore_comms_cpp/data_loggers/MotorDataLogger.hpp"
 #include "boat_data_interfaces/msg/can_motor_data.hpp"
 #include "shore_comms_cpp/Helpers.hpp"
+#include "shore_comms_cpp/data_loggers/AlarmsLogger.hpp"
 #include "shore_comms_cpp/data_loggers/BoatTimeLogger.hpp"
 #include "shore_comms_cpp/data_loggers/CANBusStateLogger.hpp"
 #include "shore_comms_cpp/data_loggers/GPSVTGLogger.hpp"
 #include "shore_comms_cpp_test/LoggerTestHelper.hpp"
+builtin_interfaces::msg::Time create_test_time_msg() {
+    auto msg = builtin_interfaces::msg::Time();
+    msg.nanosec = 508282839;
+    msg.sec = 2717281;
+    return msg;
+}
 
 TEST(shore_comms_cpp, can_bus_state_logger_test) {
     const auto can_logger = LoggerTestHelper<boat_data_interfaces::msg::CANMotorData, MotorDataLogger>(false);
@@ -41,9 +48,7 @@ TEST(shore_comms_cpp, can_bus_state_logger_test) {
 }
 TEST(shore_comms_cpp, boat_time_logger_test) {
     const auto time_logger = LoggerTestHelper<builtin_interfaces::msg::Time, BoatTimeLogger>(false);
-    auto msg = builtin_interfaces::msg::Time();
-    msg.nanosec = 508282839;
-    msg.sec = 2717281;
+    auto msg = create_test_time_msg();
     time_logger.rec->on_data(msg);
     time_logger.transmitter->assert_has_data({
         {"boat_time", get_time_from_msg(msg)}
@@ -53,9 +58,9 @@ TEST(shore_comms_cpp, boat_time_logger_test) {
 TEST(shore_comms_cpp, can_bus_status_logger_test) {
     const auto can_state_logger = LoggerTestHelper<boat_data_interfaces::msg::CANBusStatus, CANBusStateLogger>(false);
     auto msg = boat_data_interfaces::msg::CANBusStatus();
-    msg.bus_state = msg.ONLINE;
+    msg.bus_state = boat_data_interfaces::msg::CANBusStatus::ONLINE;
     can_state_logger.rec->on_data(msg);
-    can_state_logger.transmitter->assert_has_can_status(msg.ONLINE);
+    can_state_logger.transmitter->assert_has_can_status(boat_data_interfaces::msg::CANBusStatus::ONLINE);
 }
 
 TEST(shore_comms_cpp, gps_vtg_logger_test) {
@@ -69,3 +74,18 @@ TEST(shore_comms_cpp, gps_vtg_logger_test) {
     {"heading", 97}
     });
 }
+
+TEST(shore_comms_cpp, alarms_publisher_test) {
+    const auto boat_alarm_logger = LoggerTestHelper<boat_data_interfaces::msg::BoatAlarm, AlarmsLogger>(false);
+    auto msg = boat_data_interfaces::msg::BoatAlarm();
+    msg.error_code = 5;
+    msg.timestamp = create_test_time_msg();
+    boat_alarm_logger.rec->on_data(msg);
+
+    auto alarm1 = Alarm();
+    alarm1.timestamp = get_time_from_msg(create_test_time_msg());
+    alarm1.id = 5;
+
+    boat_alarm_logger.transmitter->assert_has_alarm(alarm1, 1);
+}
+

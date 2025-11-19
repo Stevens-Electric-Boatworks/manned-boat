@@ -3,10 +3,7 @@
 //
 
 #include <gtest/gtest.h>
-
-#include "shore_comms_cpp_test/LoggerTestHelper.hpp"
 #include "shore_comms_cpp/Helpers.hpp"
-#include "shore_comms_cpp_test/mock/MockDataTransmitter.hpp"
 
 TEST(shore_comms_cpp, helpers_get_time_to_msg_test) {
     auto time = builtin_interfaces::msg::Time();

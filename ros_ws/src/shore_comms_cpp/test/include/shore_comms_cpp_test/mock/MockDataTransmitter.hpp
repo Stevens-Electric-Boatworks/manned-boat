@@ -16,11 +16,14 @@ public:
 
     void assert_has_data(const nlohmann::json &json) const;
 
-    void assert_has_can_status(const uint8_t can_state) const;
+    void assert_has_can_status(uint8_t can_state) const;
+
+    void assert_has_alarm(const Alarm &alarm, int amount);
 
 private:
     nlohmann::json data;
     uint8_t can_bus_state_ = 0;
+    std::vector<Alarm> alarms_;
 };
 
 
