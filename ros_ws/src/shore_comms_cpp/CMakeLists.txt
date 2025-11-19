@@ -21,17 +21,13 @@ set(shore_comms_cpp_srcs
 add_executable(shore src/shore_comms.cpp ${shore_comms_cpp_srcs})
 target_include_directories(shore PUBLIC include/)
 
-set(USE_TLS ON CACHE BOOL "Enable TLS support for IXWebSocket")
-
 # find dependencies
 find_package(ament_cmake REQUIRED)
 find_package(rclcpp REQUIRED)
 find_package(std_msgs REQUIRED)
 find_package(boat_data_interfaces REQUIRED)
 find_package(boat_common_libs_cpp REQUIRED)
-
-add_subdirectory(${CMAKE_SOURCE_DIR}/../IXWebSocket IXWebSocket_build)
-
+find_package(ixwebsocket REQUIRED)
 # Create library from sources
 target_link_libraries(shore
         PUBLIC
