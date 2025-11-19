@@ -15,6 +15,11 @@ jobs:
       - name: Checkout
         uses: actions/checkout@v4
 
+      - name: Install APT dependicies 
+        run: |
+          apt update
+          apt install -y nlohmann-json3-dev
+
       - name: Build and run tests
         uses: ros-tooling/action-ros-ci@0.4.5
         with:
