@@ -3,7 +3,7 @@
 #include "shore_comms_cpp/IDataLogger.hpp"
 #include "shore_comms_cpp/IDataReceiver.hpp"
 #include <memory>
-#include <boat_data_interfaces/msg/detail/can_motor_data__struct.hpp>
+#include <boat_data_interfaces/msg/can_motor_data.hpp>
 #include <rclcpp/rclcpp.hpp>
 
 

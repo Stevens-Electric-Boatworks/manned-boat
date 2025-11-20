@@ -4,7 +4,7 @@
 #include "shore_comms_cpp/IDataLogger.hpp"
 #include "shore_comms_cpp/IDataReceiver.hpp"
 #include <memory>
-#include <boat_data_interfaces/msg/detail/boat_alarm__struct.hpp>
+#include <boat_data_interfaces/msg/boat_alarm.hpp>
 #include <boat_data_interfaces/msg/detail/can_motor_data__builder.hpp>
 #include <rclcpp/rclcpp.hpp>
 
