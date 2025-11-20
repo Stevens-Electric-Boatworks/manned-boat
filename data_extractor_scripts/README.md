@@ -1,3 +1,7 @@
+# DEPRECATION NOTICE
+
+Please use the `rosbag-to-csv` project in this org to process data.
+
 # Data Extraction Scripts
 These scripts contain some tools to take a ROS bag recording, and return a `.csv` of specific topics/data points.
 
