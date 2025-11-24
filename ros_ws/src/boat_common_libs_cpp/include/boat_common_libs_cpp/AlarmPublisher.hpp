@@ -43,13 +43,13 @@ enum class Faults {
 
 class AlarmPublisher {
 public:
-  explicit AlarmPublisher(rclcpp::Node *node);
+  explicit AlarmPublisher(const rclcpp::Node::SharedPtr node);
 
   void publishAlarm(Faults fault) const;
   void delatchAlarm(Faults fault) const;
 
 private:
-  const rclcpp::Node *node;
+  rclcpp::Node::SharedPtr node;
   rclcpp::Client<boat_data_interfaces::srv::AlarmRaise>::SharedPtr
       alarmRaiseClient;
   rclcpp::Client<boat_data_interfaces::srv::AlarmDelatch>::SharedPtr

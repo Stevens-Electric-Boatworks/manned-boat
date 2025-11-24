@@ -2,8 +2,6 @@ name: ROS 2 CI
 
 on:
   push:
-  pull_request:
-
 jobs:
   Build_and_Test_ROS2_Packages:
     runs-on: ubuntu-latest

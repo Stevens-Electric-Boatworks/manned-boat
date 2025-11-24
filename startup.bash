@@ -3,9 +3,7 @@ source /home/rpi/.bashrc
 
 echo "Starting up the Webserver for the Boat Display"
 eval "$(fnm env --use-on-cd --shell bash)"
-cd /home/rpi/display_src
-fnm use 22
-npm run dev &
+    
 
 
 echo "Starting up ROS2"
@@ -15,7 +13,7 @@ echo "Starting up ROS2"
 #ROS_WS="eboat_src/ros_ws"
 
 # Relative to ros_ws/launch
-LAUNCH_FILE="eboat_real.yaml"
+LAUNCH_FILE="eboat_real_cpp.yaml"
 
 # Relative to home
 ROS_BAG_LOG_DIR="ros_bag_logs"

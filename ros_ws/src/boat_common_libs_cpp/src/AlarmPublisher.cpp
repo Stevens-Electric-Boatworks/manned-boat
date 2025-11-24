@@ -9,7 +9,7 @@
 
 
 
-AlarmPublisher::AlarmPublisher(rclcpp::Node* node) {
+AlarmPublisher::AlarmPublisher(const rclcpp::Node::SharedPtr node) {
     this->node = node;
     this->alarmDeLatchClient = node->create_client<boat_data_interfaces::srv::AlarmDelatch>("/alarm/delatch");
     this->alarmRaiseClient = node->create_client<boat_data_interfaces::srv::AlarmRaise>("/alarm/raise");
