@@ -8,6 +8,7 @@ from rcl_interfaces.msg import ParameterDescriptor, ParameterType
 from rclpy.node import Node
 from rclpy.executors import ExternalShutdownException
 from boat_data_interfaces.msg import BoatAlarm
+from boat_data_interfaces.msg import ShoreBoatAlarm
 
 import csv
 
@@ -34,7 +35,7 @@ class AlarmsWatchdog(Node):
         b.configure_introspection(self._clock, service_event_qos_profile=QoSProfile(depth=10), introspection_state=ServiceIntrospectionState.CONTENTS)
 
 
-        self.shore_pub = self.create_publisher(BoatAlarm, "/alarm/shore/publish", 10)
+        self.shore_pub = self.create_publisher(ShoreBoatAlarm, "/alarm/shore/publish", 10)
 
         if bool(self.get_parameter("replay_mode").get_parameter_value().bool_value):
             self._logger.info("Watchdog node is in replay mode!")
@@ -76,7 +77,11 @@ class AlarmsWatchdog(Node):
         else:
             response.result = AlarmRaise.Response.RAISED
         if not bool(self.get_parameter("replay_mode").get_parameter_value().bool_value):
-            self.shore_pub.publish(alarm)
+            shoreAlarm = ShoreBoatAlarm()
+            shoreAlarm.error_code = alarm.error_code
+            shoreAlarm.message = error_message
+            shoreAlarm.timestamp = alarm.timestamp
+            self.shore_pub.publish(shoreAlarm)
         return response
 
     def on_alarm_delatch(self, request:AlarmDelatch.Request, response: AlarmDelatch.Response) -> AlarmDelatch.Response:

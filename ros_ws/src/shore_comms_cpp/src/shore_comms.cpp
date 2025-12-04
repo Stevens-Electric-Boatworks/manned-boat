@@ -4,6 +4,7 @@
 
 #include <memory>
 
+#include "boat_data_interfaces/msg/shore_boat_alarm.hpp"
 #include "builtin_interfaces/msg/time.hpp"
 #include "rcl_interfaces/msg/log.hpp"
 #include "shore_comms_cpp/DataLoggers.hpp"
@@ -47,7 +48,7 @@ public:
     this->log_data<boat_data_interfaces::msg::CANBusStatus, CANBusStateLogger>("/motors/can_bus_state");
     this->log_data<boat_data_interfaces::msg::CANMotorData, MotorDataLogger>("/motors/can_motor_data");
     this->log_data<builtin_interfaces::msg::Time, BoatTimeLogger>("/boat_time");
-    this->log_data<boat_data_interfaces::msg::BoatAlarm, AlarmsLogger>("/alarm/shore/publish");
+    this->log_data<boat_data_interfaces::msg::ShoreBoatAlarm, AlarmsLogger>("/alarm/shore/publish");
     this->log_data<boat_data_interfaces::msg::InletCoolantData, InletCoolantLogger>("/electrical/temp_sensors/in");
     this->log_data<boat_data_interfaces::msg::OutletCoolantData, OutletCoolantLogger>("/electrical/temp_sensors/out");
     this->log_data<boat_data_interfaces::msg::GPSData, GPSLogger>("/motion/gps");

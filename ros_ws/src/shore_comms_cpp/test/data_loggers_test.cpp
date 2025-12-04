@@ -114,15 +114,18 @@ TEST(shore_comms_cpp, outlet_coolant_logger_test) {
 }
 
 TEST(shore_comms_cpp, alarms_publisher_test) {
-    const auto boat_alarm_logger = LoggerTestHelper<boat_data_interfaces::msg::BoatAlarm, AlarmsLogger>(false);
-    auto msg = boat_data_interfaces::msg::BoatAlarm();
+    const auto boat_alarm_logger = LoggerTestHelper<boat_data_interfaces::msg::ShoreBoatAlarm, AlarmsLogger>(false);
+    auto msg = boat_data_interfaces::msg::ShoreBoatAlarm();
     msg.error_code = 5;
+    msg.message = "USB Port 5 has failed!";
     msg.timestamp = create_test_time_msg();
     boat_alarm_logger.rec->on_data(msg);
 
     auto alarm1 = Alarm();
     alarm1.timestamp = get_time_from_msg(create_test_time_msg());
     alarm1.id = 5;
+    alarm1.message = "USB Port 5 has failed!";
+    
 
     boat_alarm_logger.transmitter->assert_has_alarm(alarm1, 1);
 }

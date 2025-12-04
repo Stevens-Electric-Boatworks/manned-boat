@@ -34,11 +34,11 @@ rosidl_generate_interfaces(${PROJECT_NAME}
   "msg/GPSVTGData.msg"
   "msg/MotorData.msg"
   "msg/BoatAlarm.msg"
+  "msg/ShoreBoatAlarm.msg"
   "msg/CANMotorData.msg"
   "msg/CANBusStatus.msg"
   "msg/OutletCoolantData.msg"
   "msg/InletCoolantData.msg"
-
   "srv/AlarmRaise.srv"
   "srv/AlarmDelatch.srv"
   DEPENDENCIES builtin_interfaces

@@ -121,12 +121,12 @@ void WebsocketDataTransmitter::publish_alarms() {
         return;
     std::vector<nlohmann::json> alarms;
 
-    for (const auto [id, timestamp]: alarms_) {
+    for (const auto [id, timestamp, message]: alarms_) {
         nlohmann::json j = {{"type", "alarm"}, {"action", "set"}};
         const nlohmann::json payload = {
             {"id", id},
             {"timestamp", timestamp},
-            {"message", "Not supported yet..."},
+            {"message", message},
             {"type", "error"}
         };
         j["payload"] = payload;

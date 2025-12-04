@@ -5,6 +5,7 @@
 #pragma once
 #include <nlohmann/json.hpp>
 #include <rclcpp/node.hpp>
+#include <string>
 
 struct LogData {
     double_t timestamp;
@@ -27,10 +28,12 @@ struct LogData {
 struct Alarm {
     int16_t id;
     double_t timestamp;
+    std::string message;
 
     friend bool operator==(const Alarm &lhs, const Alarm &rhs) {
         return lhs.id == rhs.id
-               && lhs.timestamp == rhs.timestamp;
+               && lhs.timestamp == rhs.timestamp
+               && lhs.message == rhs.message;
     }
 };
 class IDataTransmitter {

@@ -1,0 +1,3 @@
+int16 error_code
+string message
+builtin_interfaces/Time timestamp
