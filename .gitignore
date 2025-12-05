@@ -65,3 +65,4 @@ ros_ws/CATKIN_IGNORE
 
 # Clangd cache files
 .cache
+/ros_ws/src/minimal_pub_sub_rust/target/
