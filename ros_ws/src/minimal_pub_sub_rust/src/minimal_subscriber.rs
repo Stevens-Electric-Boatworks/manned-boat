@@ -11,7 +11,8 @@ fn main() -> Result<(), Error> {
     let _subscription = worker.create_subscription::<boat_data_interfaces::msg::CANMotorData, _>(
         "motors/can_motor_data",
         move |num_messages: &mut usize, msg: boat_data_interfaces::msg::CANMotorData| {
-            println!("#{} | Got the RPM of the motor as: '{}'", *num_messages, msg.rpm);
+            log!(node.info(), "Got the motor: {} rpm, {} W, {} degrees, {} throttle (mv), {} kW, {} N*m", msg.rpm, msg.current, msg.motor_temp, msg.throttle_mv, msg.power, msg.torque);
+            *num_messages += 1;
         },
     )?;
 
