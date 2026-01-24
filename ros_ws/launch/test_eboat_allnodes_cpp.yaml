@@ -36,3 +36,11 @@ launch:
       pkg: "time_node"
       exec: "time_node"
       name: "time"
+  - node:
+      pkg: "minimal_pub_sub_rust"
+      exec: "minimal_subscriber"
+      name: "min_sub"
+  - node:
+      pkg: "minimal_pub_sub_rust"
+      exec: "minimal_publisher"
+      name: "min_pub"
