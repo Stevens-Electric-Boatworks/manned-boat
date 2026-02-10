@@ -52,7 +52,7 @@ class GPSDevice(SerialDevice):
 
         elif data.to_utf_8().startswith("$GPVTG"):
             gps_str = pynmea2.parse(data.to_utf_8())
-            if not type(gps_str.spd_over_grnd_kts) == NoneType and not type(gps_str.track):
+            if not type(gps_str.spd_over_grnd_kts) == NoneType and hasattr(gps_str, "track") and not type(gps_str.track):
                 self._vtg_callback(GPVTGResult(float(gps_str.spd_over_grnd_kts), float(gps_str.true_track)))
 
         elif data.to_utf_8().startswith("$GPGSV"):
