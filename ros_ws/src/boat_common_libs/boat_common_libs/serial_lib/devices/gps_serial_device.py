@@ -57,7 +57,6 @@ class GPSDevice(SerialDevice):
 
         elif data.to_utf_8().startswith("$GPGSV"):
             gps_str = data.to_utf_8().split(",")
-            self.node.get_logger().info("The GPS SV Data STRING: " + str(gps_str))
             if gps_str[3] == '':
                 return
             satsStr = gps_str[3]

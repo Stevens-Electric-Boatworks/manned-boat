@@ -33,7 +33,7 @@ class MotionNode(Node):
 
     def _vtg_callback(self, data:GPVTGResult):
         self._speed_pub.publish(GPSVTGData(speed=data.speed_knots, true_track=data.true_track))
-        
+
     def _sv_callback(self, data:GPGSVResult):
         self._sats_pub.publish(GPSSVData(sats=data.sats))
 
