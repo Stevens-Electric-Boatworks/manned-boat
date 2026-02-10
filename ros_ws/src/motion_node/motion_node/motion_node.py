@@ -4,8 +4,8 @@ from rclpy.executors import ExternalShutdownException
 from rclpy.node import Node
 
 from boat_common_libs.alarm_lib.alarm_helper import AlarmPublisher
-from boat_common_libs.serial_lib.devices.gps_serial_device import GPGGAResult, GPSDevice, GPVTGResult
-from boat_data_interfaces.msg import GPSData, GPSVTGData
+from boat_common_libs.serial_lib.devices.gps_serial_device import GPGGAResult, GPSDevice, GPVTGResult, GPGSVResult
+from boat_data_interfaces.msg import GPSData, GPSVTGData, GPSSVData
 
 
 #pip install --break-system-packages pynmea2
@@ -15,9 +15,10 @@ class MotionNode(Node):
         super().__init__('motion_node')
         self._gps_pub = self.create_publisher(GPSData, '/motion/gps', 10)
         self._speed_pub = self.create_publisher(GPSVTGData, '/motion/vtg', 10)
+        self._sats_pub = self.create_publisher(GPSSVData, '/motion/sv', 10)
         self._logger.info("Attempting to read REAL GPS Data")
         self.alarm_pub = AlarmPublisher(self)
-        self.dev = GPSDevice(self, self.alarm_pub, self._gpa_callback, self._vtg_callback)
+        self.dev = GPSDevice(self, self.alarm_pub, self._gpa_callback, self._vtg_callback, self._sv_callback)
         # self.dev = serial.Serial(
         #     port='/dev/ttyUSB1',
         #     baudrate=115200,
@@ -32,6 +33,9 @@ class MotionNode(Node):
 
     def _vtg_callback(self, data:GPVTGResult):
         self._speed_pub.publish(GPSVTGData(speed=data.speed_knots, true_track=data.true_track))
+        
+    def _sv_callback(self, data:GPGSVResult):
+        self._sats_pub.publish(GPSSVData(sats=data.sats))
 
 
 def main(args=None):

@@ -23,6 +23,9 @@ class GPGGAResult:
     def __init__(self, lat, lon):
         self.lat = lat
         self.lon = lon
+class GPGSVResult:
+    def __init__(self, sats):
+        self.sats = sats
 
 class GPVTGResult:
     def __init__(self, speed_knots, true_track):
@@ -31,10 +34,12 @@ class GPVTGResult:
 
 
 class GPSDevice(SerialDevice):
-    def __init__(self, node:Node, alarm_pub:AlarmPublisher, on_gpgga_result:Callable[[GPGGAResult], None], on_gpvtg_result:Callable[[GPVTGResult], None]):
+    def __init__(self, node:Node, alarm_pub:AlarmPublisher, on_gpgga_result:Callable[[GPGGAResult], None], on_gpvtg_result:Callable[[GPVTGResult], None], on_gpsv_result:Callable[[GPGSVResult], None]):
         super().__init__(node, "/dev/ttyUSB1", self._on_gps_msg_rec, alarm_pub)
         self._gga_callback = on_gpgga_result
         self._vtg_callback = on_gpvtg_result
+        self._sv_callback = on_gpsv_result
+
         self.node = node
 
     def _on_gps_msg_rec(self, data:SerialData):
@@ -49,3 +54,15 @@ class GPSDevice(SerialDevice):
             gps_str = pynmea2.parse(data.to_utf_8())
             if not type(gps_str.spd_over_grnd_kts) == NoneType and not type(gps_str.track):
                 self._vtg_callback(GPVTGResult(float(gps_str.spd_over_grnd_kts), float(gps_str.true_track)))
+
+        elif data.to_utf_8().startswith("$GPGSV"):
+            gps_str = data.to_utf_8().split(",")
+            self.node.get_logger().info("The GPS SV Data STRING: " + str(gps_str))
+            if gps_str[3] == '':
+                return
+            satsStr = gps_str[3]
+            try:
+                sats = int(satsStr)
+                self._sv_callback(GPGSVResult(sats))
+            except ValueError:
+                print("Invalid input: cannot convert to integer")
