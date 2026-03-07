@@ -1,3 +1,5 @@
+from boat_data_interfaces.msg._gpgsa_data import GPGSAData
+from boat_data_interfaces.msg._gpssv_data import GPSSVData
 from builtin_interfaces.msg import Time
 from websockets.exceptions import ConnectionClosed, InvalidStatus
 import rclpy
@@ -17,6 +19,7 @@ from websockets.client import connect
 from websockets.client import WebSocketClientProtocol
 import json
 import threading
+from rosidl_runtime_py import message_to_ordereddict
 
 
 SHORE_URI = "wss://shore.stevenseboat.org/api"
@@ -66,6 +69,8 @@ class ShoreDataCollector(Node):
         self.create_sub(OutletCoolantData, "/electrical/temp_sensors/out", self.electrical_coolant_temp_collector_outlet)
         self.create_sub(GPSData, "/motion/gps", self.gps_location_collector)
         self.create_sub(GPSVTGData, "/motion/vtg", self.gps_speed_collector)
+        self.create_sub(GPSSVData, "/motion/sv", self.gps_sats_collector)
+        self.create_sub(GPGSAData, "/motion/gsa", self.gps_sat_mode_collector)
         self.create_sub(CANMotorData, "/motors/can_motor_data", self.motor_collector)
         self.create_sub(CANBusStatus, "/motors/can_bus_state", self.bus_state_collector)
         self.create_sub(Time, "/boat_time", self.time_collector)
@@ -227,6 +232,12 @@ class ShoreDataCollector(Node):
     def gps_speed_collector(self, msg:GPSVTGData):
         self.add_data("speed", msg.speed)
         self.add_data("heading", msg.true_track)
+
+    def gps_sats_collector(self, msg:GPSSVData):
+        self.add_data("sats", [message_to_ordereddict(sat) for sat in msg.sats])
+
+    def gps_sat_mode_collector(self, msg:GPGSAData):
+        self.add_alarm("sat_mode", message_to_ordereddict(msg))
 
     def motor_collector(self, msg:CANMotorData):
         self.add_data("voltage", msg.voltage)

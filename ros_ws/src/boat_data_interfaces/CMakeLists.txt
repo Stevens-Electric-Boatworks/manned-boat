@@ -27,12 +27,14 @@ find_package(builtin_interfaces REQUIRED)
 find_package(rosidl_default_generators REQUIRED)
 
 rosidl_generate_interfaces(${PROJECT_NAME}
+  "msg/Satellite.msg"
   "msg/ElectricalData.msg"
   "msg/GPIOData.msg"
   "msg/MotionData.msg"
   "msg/GPSData.msg"
   "msg/GPSVTGData.msg"
   "msg/GPSSVData.msg"
+  "msg/GPGSAData.msg"
   "msg/MotorData.msg"
   "msg/BoatAlarm.msg"
   "msg/ShoreBoatAlarm.msg"
