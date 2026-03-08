@@ -31,12 +31,25 @@ class GPGSVResult:
 
 class GPGSAResult:
     def __init__(self, op_mode, mode, prn, pdop, hdop, vdop, system_id):
+        # string - Operation Mode. Possible values: "A" or "M"
+        # "A" - Automatic Mode
+        # "M" - Manual Mode, forced to operate in 2D or 3D
         self.op_mode = op_mode
+        # int - Mode. Possible values: 1, 2, 3
+        # 1 - Fix not available
+        # 2 - 2D
+        # 3 - 3D
         self.mode = mode
+        # int - PRN (Psuedorandom Noise)
+        # Unique identifer for each satellite
         self.prn = prn
+        # float - Position dilution of precision
         self.pdop = pdop
+        # float - Horizontal dilution of precision
         self.hdop = hdop
+        # float - Vertical dilution of precision
         self.vdop = vdop
+        # int - System ID
         self.system_id = system_id
 
 class GPVTGResult:
@@ -47,8 +60,8 @@ class GPVTGResult:
 
 class GPSDevice(SerialDevice):    
     def __init__(self, node:Node, alarm_pub:AlarmPublisher, on_gpgga_result:Callable[[GPGGAResult], None], on_gpvtg_result:Callable[[GPVTGResult], None], on_gpsv_result:Callable[[GPGSVResult], None], on_gpgsa_result:Callable[[GPGSAResult], None]):
-        super().__init__(node, "/tmp/ttyUSB1_fake", self._on_gps_msg_rec, alarm_pub)
-        # super().__init__(node, "/dev/ttyUSB1", self._on_gps_msg_rec, alarm_pub)
+        super().__init__(node, node.get_parameter("gnss_serial_fd").get_parameter_value().string_value, 
+                         self._on_gps_msg_rec, alarm_pub)
         self._gga_callback = on_gpgga_result
         self._vtg_callback = on_gpvtg_result
         self._sv_callback = on_gpsv_result
@@ -79,51 +92,57 @@ class GPSDevice(SerialDevice):
             gps_str = data.to_utf_8().split(",")
 
             op_mode = gps_str[1]
-            mode = int(gps_str[2])
             prns = []
             for i in range(12):
                 try:
                     prns.append(int(gps_str[3 + i]))
                 except ValueError:
                     break
-            pdop = float(gps_str[15])
-            hdop = float(gps_str[16])
-            vdop = float(gps_str[17].split("*")[0])
+            try:
+                mode = int(gps_str[2])
+                pdop = float(gps_str[15])
+                hdop = float(gps_str[16])
+                vdop = float(gps_str[17].split("*")[0])
 
-            self._gsa_callback(GPGSAResult(
-                op_mode=op_mode,
-                mode=mode,
-                prn=prns,
-                pdop=pdop,
-                hdop=hdop,
-                vdop=vdop,
-                system_id=1
-            ))
+                self._gsa_callback(GPGSAResult(
+                    op_mode=op_mode,
+                    mode=mode,
+                    prn=prns,
+                    pdop=pdop,
+                    hdop=hdop,
+                    vdop=vdop,
+                    system_id=1
+                ))
+            except ValueError:
+                return
 
         elif data.to_utf_8().startswith("$GPGSV"):
             gps_str = data.to_utf_8().split(",")
             if gps_str[3] == '': # No sats
                 return 
             
-            self.sv_state["current_msg"] = int(gps_str[2])
+            try:
+                self.sv_state["current_msg"] = int(gps_str[2])
+            except ValueError:
+                return
             if self.sv_state["current_msg"] <= self.sv_state["total_msgs"]:
                 for i in range(4):
                     try:
                         prn = int(gps_str[4 + (i * 4) + 0])
                     except (ValueError, IndexError):
-                        prn = 0xff
+                        prn = 0xffffffff
                     try:
                         elev = int(gps_str[4 + (i * 4) + 1])
                     except (ValueError, IndexError):
-                        elev = 0xff
+                        elev = 0xffffffff
                     try:
                         azim = int(gps_str[4 + (i * 4) + 2])
                     except (ValueError, IndexError):
-                        azim = 0xff
+                        azim = 0xffffffff
                     try:
                         snr = int(gps_str[4 + (i * 4) + 3])
                     except (ValueError, IndexError):
-                        snr = 0xff
+                        snr = 0xffffffff
 
                     self.sats.append(Satellite(
                         prn=prn,
@@ -132,7 +151,10 @@ class GPSDevice(SerialDevice):
                         snr=snr
                     ))
             if gps_str[2] == "1":
-                self.sv_state["total_msgs"] = int(gps_str[1])
+                try :
+                    self.sv_state["total_msgs"] = int(gps_str[1])
+                except ValueError: 
+                    return
             elif int(gps_str[2]) == self.sv_state["total_msgs"]:
                 self._sv_callback(GPGSVResult(self.sats))
                 self.sats = []

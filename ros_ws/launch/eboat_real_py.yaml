@@ -28,6 +28,9 @@ launch:
       pkg: "motion_node"
       exec: "motion"
       name: "gps"
+      param:
+          - name: "gnss_serial_fd"
+            value: "/dev/ttyUSB1"
   - node:
       pkg: "electrical_node"
       exec: "electrical"

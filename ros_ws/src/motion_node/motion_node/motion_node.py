@@ -12,6 +12,7 @@ from boat_data_interfaces.msg import GPSData, GPSVTGData, GPSSVData, GPGSAData
 class MotionNode(Node):
     def __init__(self):
         super().__init__('motion_node')
+        self.declare_parameter("gnss_serial_fd", "/dev/ttyUSB1")
         self._gps_pub = self.create_publisher(GPSData, '/motion/gps', 10)
         self._speed_pub = self.create_publisher(GPSVTGData, '/motion/vtg', 10)
         self._sats_pub = self.create_publisher(GPSSVData, '/motion/sv', 10)

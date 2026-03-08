@@ -237,7 +237,7 @@ class ShoreDataCollector(Node):
         self.add_data("sats", [message_to_ordereddict(sat) for sat in msg.sats])
 
     def gps_sat_mode_collector(self, msg:GPGSAData):
-        self.add_alarm("sat_mode", message_to_ordereddict(msg))
+        self.add_data("sat_mode", message_to_ordereddict(msg))
 
     def motor_collector(self, msg:CANMotorData):
         self.add_data("voltage", msg.voltage)
