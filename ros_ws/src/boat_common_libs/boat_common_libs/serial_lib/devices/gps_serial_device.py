@@ -25,9 +25,12 @@ class GPGGAResult:
     def __init__(self, lat, lon):
         self.lat = lat
         self.lon = lon
+
+
 class GPGSVResult:
     def __init__(self, sats):
         self.sats = sats
+
 
 class GPGSAResult:
     def __init__(self, op_mode, mode, prn, pdop, hdop, vdop, system_id):
@@ -52,15 +55,18 @@ class GPGSAResult:
         # int - System ID
         self.system_id = system_id
 
+
 class GPVTGResult:
     def __init__(self, speed_knots, true_track):
         self.speed_knots = speed_knots
         self.true_track = true_track
 
 
-class GPSDevice(SerialDevice):    
-    def __init__(self, node:Node, alarm_pub:AlarmPublisher, on_gpgga_result:Callable[[GPGGAResult], None], on_gpvtg_result:Callable[[GPVTGResult], None], on_gpsv_result:Callable[[GPGSVResult], None], on_gpgsa_result:Callable[[GPGSAResult], None]):
-        super().__init__(node, node.get_parameter("gnss_serial_fd").get_parameter_value().string_value, 
+class GPSDevice(SerialDevice):
+    def __init__(self, node: Node, alarm_pub: AlarmPublisher, on_gpgga_result: Callable[[GPGGAResult], None],
+                 on_gpvtg_result: Callable[[GPVTGResult], None], on_gpsv_result: Callable[[GPGSVResult], None],
+                 on_gpgsa_result: Callable[[GPGSAResult], None]):
+        super().__init__(node, node.get_parameter("gnss_serial_fd").get_parameter_value().string_value,
                          self._on_gps_msg_rec, alarm_pub)
         self._gga_callback = on_gpgga_result
         self._vtg_callback = on_gpvtg_result
@@ -72,10 +78,9 @@ class GPSDevice(SerialDevice):
             "current_msg": 0,
             "total_msgs": 0
         }
-
         self.node = node
 
-    def _on_gps_msg_rec(self, data:SerialData):
+    def _on_gps_msg_rec(self, data: SerialData):
         if data.to_utf_8().startswith("$GPGGA"):
             gps_str = pynmea2.parse(data.to_utf_8())
             if gps_str.lat != '':
@@ -85,7 +90,8 @@ class GPSDevice(SerialDevice):
 
         elif data.to_utf_8().startswith("$GPVTG"):
             gps_str = pynmea2.parse(data.to_utf_8())
-            if not type(gps_str.spd_over_grnd_kts) == NoneType and hasattr(gps_str, "track") and not type(gps_str.track):
+            if not type(gps_str.spd_over_grnd_kts) == NoneType and hasattr(gps_str, "track") and not type(
+                    gps_str.track):
                 self._vtg_callback(GPVTGResult(float(gps_str.spd_over_grnd_kts), float(gps_str.true_track)))
 
         elif data.to_utf_8().startswith("$GPGSA"):
@@ -114,16 +120,18 @@ class GPSDevice(SerialDevice):
                     system_id=1
                 ))
             except ValueError:
+                self.node.get_logger().error(f"Unable to parse GPGSA string during a GSA callback: \"${gps_str}\"")
                 return
 
         elif data.to_utf_8().startswith("$GPGSV"):
             gps_str = data.to_utf_8().split(",")
-            if gps_str[3] == '': # No sats
-                return 
-            
+            if gps_str[3] == '':  # No sats
+                return
+
             try:
                 self.sv_state["current_msg"] = int(gps_str[2])
             except ValueError:
+                self.node.get_logger().error(f"Unable to parse GPGSV string: \"${gps_str}\"")
                 return
             if self.sv_state["current_msg"] <= self.sv_state["total_msgs"]:
                 for i in range(4):
@@ -151,9 +159,10 @@ class GPSDevice(SerialDevice):
                         snr=snr
                     ))
             if gps_str[2] == "1":
-                try :
+                try:
                     self.sv_state["total_msgs"] = int(gps_str[1])
-                except ValueError: 
+                except ValueError:
+                    self.node.get_logger().error(f"Unable to parse GPGSV string: \"${gps_str}\"")
                     return
             elif int(gps_str[2]) == self.sv_state["total_msgs"]:
                 self._sv_callback(GPGSVResult(self.sats))
