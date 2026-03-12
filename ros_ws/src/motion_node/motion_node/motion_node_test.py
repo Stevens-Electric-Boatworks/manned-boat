@@ -1,9 +1,12 @@
+from datetime import date
+
+from boat_data_interfaces.msg._satellite import Satellite
 import rclpy
 from rclpy.executors import ExternalShutdownException
 from rclpy.node import Node
 
 from boat_common_libs.smooth_random import SmoothRandom
-from boat_data_interfaces.msg import (MotionData, BoatAlarm, GPSData, GPSVTGData, GPSSVData, )
+from boat_data_interfaces.msg import (MotionData, BoatAlarm, GPSData, GPSVTGData, GPSSVData, GPGSAData,)
                                       #GPSSpeed)  # type: ignore
 
 import random
@@ -15,6 +18,7 @@ class MotionNode(Node):
         self._gps_pub = self.create_publisher(GPSData, '/motion/gps', 10)
         self._speed_pub = self.create_publisher(GPSVTGData, '/motion/vtg', 10)
         self._sats_pub = self.create_publisher(GPSSVData, '/motion/sv', 10)
+        self._sats_mode_pub = self.create_publisher(GPGSAData, '/motion/gsa', 10)
         timer_period = random.random() * 0.1
         self._logger.info("Sending test data at a period of " + str(timer_period))
 
@@ -30,13 +34,27 @@ class MotionNode(Node):
     def timer_callback(self):
         msg = GPSData()
         sats = GPSSVData()
+        mode = GPGSAData()
 
         msg.lon = self.gps_long.next()
         msg.lat = self.gps_lat.next()
         self._gps_pub.publish(msg)
         self._speed_pub.publish(GPSVTGData(speed=float(self.speed.next()), true_track=float(self.heading.next())))
-        sats.sats = int(self.sats.next())
+        sats.sats.append(Satellite(prn=24, elev=64, azimuth=80, snr=93))
+        sats.sats.append(Satellite(prn=14, elev=41, azimuth=99, snr=62))
+        sats.sats.append(Satellite(prn=5, elev=63, azimuth=12, snr=44))
+        sats.sats.append(Satellite(prn=8, elev=85, azimuth=156, snr=87))
+        sats.sats.append(Satellite(prn=16, elev=14, azimuth=277, snr=55))
+        sats.sats.append(Satellite(prn=19, elev=89, azimuth=190, snr=53))
         self._sats_pub.publish(sats)
+        mode.mode = 3
+        mode.op_mode = "A"
+        mode.hdop = 0.01
+        mode.vdop = 0.02
+        mode.pdop = 0.01
+        mode.system_id=1
+        mode.prn = [ 5, 14, 24 ]
+        self._sats_mode_pub.publish(mode)
 
 
 def main(args=None):

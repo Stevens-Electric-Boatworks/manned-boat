@@ -1,1 +1,1 @@
-uint8 sats
+boat_data_interfaces/Satellite[] sats
