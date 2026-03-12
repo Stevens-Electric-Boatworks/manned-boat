@@ -104,9 +104,9 @@ class GPSDevice(SerialDevice):
                 return
             
             op_mode = gps_str[1]
+            prns = []
             
             if mode == 1:
-                prns = []
                 pdop = 0xffffffff
                 hdop = 0xffffffff
                 vdop = 0xffffffff
@@ -123,6 +123,7 @@ class GPSDevice(SerialDevice):
                     vdop = float(gps_str[17].split("*")[0])
                 except ValueError:
                     self.node.get_logger().error("Failed to parse field in GPGSA sentence.")
+                    return
 
             self._gsa_callback(GPGSAResult(
                     op_mode=op_mode,
