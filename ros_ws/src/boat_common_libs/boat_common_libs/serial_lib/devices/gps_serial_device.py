@@ -97,20 +97,34 @@ class GPSDevice(SerialDevice):
         elif data.to_utf_8().startswith("$GPGSA"):
             gps_str = data.to_utf_8().split(",")
 
-            op_mode = gps_str[1]
-            prns = []
-            for i in range(12):
-                try:
-                    prns.append(int(gps_str[3 + i]))
-                except ValueError:
-                    break
             try:
                 mode = int(gps_str[2])
-                pdop = float(gps_str[15])
-                hdop = float(gps_str[16])
-                vdop = float(gps_str[17].split("*")[0])
+            except ValueError:
+                self.node.get_logger().error("Failed to parse GPGSA message. Invalid mode.")
+                return
+            
+            op_mode = gps_str[1]
+            
+            if mode == 1:
+                prns = []
+                pdop = 0xffffffff
+                hdop = 0xffffffff
+                vdop = 0xffffffff
+            else:
+                try:
+                    for i in range(12):
+                        try:
+                            prns.append(int(gps_str[3 + i]))
+                        except ValueError:
+                            break
 
-                self._gsa_callback(GPGSAResult(
+                    pdop = float(gps_str[15])
+                    hdop = float(gps_str[16])
+                    vdop = float(gps_str[17].split("*")[0])
+                except ValueError:
+                    self.node.get_logger().error("Failed to parse field in GPGSA sentence.")
+
+            self._gsa_callback(GPGSAResult(
                     op_mode=op_mode,
                     mode=mode,
                     prn=prns,
@@ -118,12 +132,9 @@ class GPSDevice(SerialDevice):
                     hdop=hdop,
                     vdop=vdop,
                     system_id=1 
-                    # Not all NMEA versions include this message, so for now I hard code
-                    # it to `1` (for USA GPS). 
-                ))
-            except ValueError:
-                self.node.get_logger().error(f"Unable to parse GPGSA string during a GSA callback: \"${gps_str}\"")
-                return
+                # Not all NMEA versions include this message, so for now I hard code
+                # it to `1` (for USA GPS). 
+            ))
 
         elif data.to_utf_8().startswith("$GPGSV"):
             gps_str = data.to_utf_8().split(",")
@@ -140,7 +151,7 @@ class GPSDevice(SerialDevice):
                     try:
                         prn = int(gps_str[4 + (i * 4) + 0])
                     except (ValueError, IndexError):
-                        prn = 0xffffffff
+                        continue
                     try:
                         elev = int(gps_str[4 + (i * 4) + 1])
                     except (ValueError, IndexError):
