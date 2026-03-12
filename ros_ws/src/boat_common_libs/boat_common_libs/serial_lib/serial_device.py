@@ -91,3 +91,10 @@ class SerialDevice:
                 self.device = None
                 threading.Thread(target=self._device_connect_thread, daemon=True).start()
 
+    def send_string(self, data: str):
+        if not self.valid:
+            return
+
+        self.device.write(data.encode())
+
+
