@@ -100,7 +100,7 @@ class GPSDevice(SerialDevice):
             try:
                 mode = int(gps_str[2])
             except ValueError:
-                self.node.get_logger().error("Failed to parse GPGSA message. Invalid mode.")
+                self.node.get_logger().error(f"Failed to parse GPGSA message. Invalid mode: {mode}")
                 return
             
             op_mode = gps_str[1]
@@ -122,7 +122,7 @@ class GPSDevice(SerialDevice):
                     hdop = float(gps_str[16])
                     vdop = float(gps_str[17].split("*")[0])
                 except ValueError:
-                    self.node.get_logger().error("Failed to parse field in GPGSA sentence.")
+                    self.node.get_logger().error(f"Failed to parse field in GPGSA sentence. {gps_str}")
                     return
 
             self._gsa_callback(GPGSAResult(
