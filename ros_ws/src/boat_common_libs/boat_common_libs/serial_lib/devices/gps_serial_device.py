@@ -117,7 +117,9 @@ class GPSDevice(SerialDevice):
                     pdop=pdop,
                     hdop=hdop,
                     vdop=vdop,
-                    system_id=1
+                    system_id=1 
+                    # Not all NMEA versions include this message, so for now I hard code
+                    # it to `1` (for USA GPS). 
                 ))
             except ValueError:
                 self.node.get_logger().error(f"Unable to parse GPGSA string during a GSA callback: \"${gps_str}\"")
