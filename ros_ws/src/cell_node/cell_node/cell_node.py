@@ -6,23 +6,25 @@ from std_msgs.msg import String
 
 from boat_common_libs.alarm_lib.alarm_helper import AlarmPublisher
 from boat_common_libs.serial_lib.devices.cell_serial_device import CellSerialDevice, CellData
+from boat_data_interfaces.msg import CellData as CellDataMsg
 
 
 class CellNode(Node):
 
     def __init__(self):
         super().__init__('cell_node')
-                                                #TODO: change message type!
-        self.publisher_ = self.create_publisher(String, '/cell', 10)
+        self.publisher_ = self.create_publisher(CellDataMsg, '/cell', 10)
         self.alarm_pub = AlarmPublisher(self)
         self.cell = CellSerialDevice(self, self.alarm_pub, self._on_cell_data_rec)
         self.timer = self.create_timer(5, self.timer_callback)
 
 
     def _on_cell_data_rec(self, data: CellData):
-
         # publish
-        self.publisher_.publish("f")
+        self.publisher_.publish(CellDataMsg(network=data.network, technology=data.tech, 
+                                            bars=data.bars, rsrp=data.rsrp, rsrq=data.rsrq,
+                                            reg_status=data.reg_status, ip_addr=data.ip_addr,
+                                            apn=data.apn, pin_status=data.pin_status))
 
     def timer_callback(self):
         self.cell.update_cell_data()

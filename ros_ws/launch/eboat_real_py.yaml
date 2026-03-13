@@ -31,6 +31,12 @@ launch:
       param:
           - name: "gnss_serial_fd"
             value: "/dev/ttyUSB1"
+
+  - node:
+      pkg: "cell_node"
+      exec: "cell"
+      name: "cell_node"
+
   - node:
       pkg: "electrical_node"
       exec: "electrical"

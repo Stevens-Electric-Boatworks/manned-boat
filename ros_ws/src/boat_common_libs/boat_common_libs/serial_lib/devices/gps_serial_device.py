@@ -107,9 +107,9 @@ class GPSDevice(SerialDevice):
             prns = []
             
             if mode == 1:
-                pdop = 0xffffffff
-                hdop = 0xffffffff
-                vdop = 0xffffffff
+                pdop = -99.0
+                hdop = -99.0
+                vdop = -99.0
             else:
                 try:
                     for i in range(12):
@@ -156,15 +156,15 @@ class GPSDevice(SerialDevice):
                     try:
                         elev = int(gps_str[4 + (i * 4) + 1])
                     except (ValueError, IndexError):
-                        elev = 0xffffffff
+                        elev = -99
                     try:
                         azim = int(gps_str[4 + (i * 4) + 2])
                     except (ValueError, IndexError):
-                        azim = 0xffffffff
+                        azim = -99
                     try:
                         snr = int(gps_str[4 + (i * 4) + 3])
                     except (ValueError, IndexError):
-                        snr = 0xffffffff
+                        snr = -99
 
                     self.sats.append(Satellite(
                         prn=prn,
