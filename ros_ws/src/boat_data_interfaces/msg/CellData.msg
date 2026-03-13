@@ -17,12 +17,12 @@ string technology
 uint8 bars
 
 # Raw RSRP value from modem (ONLY APPLIES TO 4G NETWORKS)
-# RSRP - Reference Signal Received Power
-uint8 rsrp
+# RSRP - Reference Signal Received Power (in dBm)
+int16 rsrp
 
 # Raw RSRQ value from modem (ONLY APPLIES TO 4G NETWORKS)
-# Reference Signal Received Quality
-uint8 rsrq
+# Reference Signal Received Quality (in dB)
+int16 rsrq
 
 # Network Registration Status
 uint8 reg_status

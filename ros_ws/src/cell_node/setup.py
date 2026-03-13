@@ -26,6 +26,7 @@ setup(
     entry_points={
         'console_scripts': [
             "cell = cell_node.cell_node:main",
+            "test = cell_node.cell_node_test:main"
         ],
     },
 )
