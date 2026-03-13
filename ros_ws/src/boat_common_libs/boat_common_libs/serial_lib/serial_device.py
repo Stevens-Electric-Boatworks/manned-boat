@@ -94,7 +94,7 @@ class SerialDevice:
     def send_string(self, data: str):
         if not self.valid:
             return
-        self.logger.info(f"Sending {data}...")
+        self.logger.debug(f"Sending {data}...")
         self.device.write(data.encode())
 
 
