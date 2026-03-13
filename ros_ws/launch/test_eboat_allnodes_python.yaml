@@ -36,6 +36,10 @@ launch:
           - name: "gnss_serial_fd"
             value: "/tmp/ttyUSB1_fake"
   - node:
+      pkg: "cell_node"
+      exec: "test"
+      name: "cell_node"
+  - node:
       pkg: "time_node"
       exec: "time_node"
       name: "time"
