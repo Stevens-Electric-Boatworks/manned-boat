@@ -1,8 +1,11 @@
 
+from datetime import date
 import threading
 from time import sleep
+import time
 from typing import Callable
 
+from boat_common_libs.alarm_lib.alarms import Alarm
 from rclpy.node import Node
 
 from boat_common_libs.alarm_lib.alarm_helper import AlarmPublisher
@@ -33,16 +36,16 @@ class CellSerialDevice(SerialDevice):
         self.node = node
         self.on_cell_data = on_cell_data
         self.data = CellData()
-        self.ready_for_next_msg = True
-        self._configured = threading.Event()
+        self._ready_for_next_msg = threading.Event()
         threading.Thread(target=self._configure_then_signal).start()
 
     def _configure_then_signal(self):
         self.configure()
-        self._configured.set()
+        self._ready_for_next_msg.set()
 
 
     def configure(self):
+        self.node.get_logger().set_level(10)
         self.node.get_logger().info("Configuring modem...")
         # Commands to reset GPS receiver
         self.send_and_wait("AT$GPSRST\r")
@@ -52,17 +55,23 @@ class CellSerialDevice(SerialDevice):
         # Turn on GPS receiver
         self.send_and_wait("AT$GPSP=1\r")
 
+    def _sanitize_msg(msg:str):
+        return msg.replace("\r", "")
+
     def send_and_wait(self, msg:str):
-        self.ready_for_next_msg = False
+        self._ready_for_next_msg.clear()
         self.send_string(msg)
-        self.node.get_logger().info(f"Sent {msg}. Waiting now")
-        while not self.ready_for_next_msg:
-            pass
-        self.node.get_logger().info("Wait complete")
+        self.node.get_logger().debug(f"Sent {msg.replace("\r", "")}. Waiting now...")
+        # Three second timeout for each message
+        if not self._ready_for_next_msg.wait(3):
+            self.node.get_logger().error(f"Failed to get a response to the following message: {msg.replace("\r", "")}")
+            return
+
+        self.node.get_logger().debug("Wait complete.")
 
     def update_cell_data(self):
-        self._configured.wait()
-        self.node.get_logger().info("Updating cell data...")
+        self._ready_for_next_msg.wait()
+        self.node.get_logger().debug("Updating cell data...")
         # Retrieve cell tech and network
         self.send_and_wait("AT+COPS?\r")
         # Retrieve info about cell signal quality
@@ -81,10 +90,10 @@ class CellSerialDevice(SerialDevice):
     def _on_cell_data_rec(self, data: SerialData):
         # whenever we receive cell data
         data_str = data.to_utf_8()
-        self.node.get_logger().info(f"{data_str}")
+        self.node.get_logger().debug(f"{data_str}")
 
         if data_str.startswith("OK"):
-            self.ready_for_next_msg = True
+            self._ready_for_next_msg.set()
             return
 
         # Process network & technology
@@ -105,29 +114,35 @@ class CellSerialDevice(SerialDevice):
         elif data_str.startswith("+CESQ"):
             split = data_str.split(",")
             try:
-                rsrp = int(split[5])
-                self.data.rsrp = rsrp
-
-                if rsrp < 15:
-                    self.data.bars = 0
-                elif rsrp < 22:
-                    self.data.bars = 1
-                elif rsrp < 29:
-                    self.data.bars = 2
-                elif rsrp < 37:
-                    self.data.bars = 3
-                elif rsrp == 255:
-                    self.data.bars = 255
-                else:
-                    self.data.bars = 4
-            except ValueError:
-                self.node.get_logger().error(f"Failed to parse RSRP signal power: {split[5]}")
-
-            try:
-                rsrq = int(split[4])
+                rsrq = int(int(split[4]) / 2 - 20)
                 self.data.rsrq = rsrq
             except ValueError:
                 self.node.get_logger().error(f"Failed to parse RSRQ signal quality: {split[4]}")
+
+            try:
+                rsrp = int(split[5]) - 140
+                self.data.rsrp = rsrp
+
+                if rsrp < -130:
+                    bars = 0
+                elif rsrp < -120:
+                    bars = 1
+                elif rsrp < -105:
+                    bars = 2
+                elif rsrp < -90:
+                    bars = 3
+                elif rsrp + 140 == 255:
+                    bars = 255
+                else:
+                    bars = 4
+
+                # RSRQ quality penalty (drop 1 bar if poor)
+                if rsrq is not None and rsrq < -15:
+                    bars = max(0, bars - 1)
+
+                self.data.bars = bars
+            except ValueError:
+                self.node.get_logger().error(f"Failed to parse RSRP signal power: {split[5]}")
                 
 
         elif data_str.startswith("+CEREG:"):
@@ -154,11 +169,14 @@ class CellSerialDevice(SerialDevice):
         elif data_str.startswith("+CPIN:"):
             split = data_str.split(":")
             pin_status = split[1].replace(" ", "")
+            if pin_status != "READY":
+                self.alarm_manager.publish_alarm(31)
             self.data.pin_status = pin_status
         elif data_str.startswith("$GPSP:"):
             # Eventually we will query the GNSS power but for now 
             # we use this to indicate when we can send new data
             if any(getattr(self.data, field) is None for field in vars(self.data)):
+                self.node.get_logger().warn(f"Could not publish cellular data due to missing fields.")
                 return
             
             self.on_cell_data(self.data)
