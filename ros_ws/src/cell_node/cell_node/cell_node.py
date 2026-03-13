@@ -1,3 +1,6 @@
+import threading
+from time import sleep
+
 import rclpy
 from rclpy.executors import ExternalShutdownException
 from rclpy.node import Node
@@ -16,7 +19,7 @@ class CellNode(Node):
         self.publisher_ = self.create_publisher(CellDataMsg, '/cell', 10)
         self.alarm_pub = AlarmPublisher(self)
         self.cell = CellSerialDevice(self, self.alarm_pub, self._on_cell_data_rec)
-        self.timer = self.create_timer(5, self.timer_callback)
+        self.timer = threading.Thread(target=self.timer_callback).start()
 
 
     def _on_cell_data_rec(self, data: CellData):
@@ -27,7 +30,9 @@ class CellNode(Node):
                                             apn=data.apn, pin_status=data.pin_status))
 
     def timer_callback(self):
-        self.cell.update_cell_data()
+        while True:
+            self.cell.update_cell_data()
+            sleep(5)
 
 
 

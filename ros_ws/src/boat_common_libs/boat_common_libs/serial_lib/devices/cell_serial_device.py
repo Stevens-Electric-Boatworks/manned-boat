@@ -1,3 +1,6 @@
+
+import threading
+from time import sleep
 from typing import Callable
 
 from rclpy.node import Node
@@ -26,44 +29,63 @@ class CellData:
 
 class CellSerialDevice(SerialDevice):
     def __init__(self, node: Node, alarm_pub: AlarmPublisher, on_cell_data: Callable[[CellData], None]):
-        super().__init__(node, "/dev/ttyUSB2", self._on_cell_data_rec, alarm_pub)
+        super().__init__(node, "/dev/ttyUSB2", self._on_cell_data_rec, alarm_pub, timeout=1)
         self.node = node
         self.on_cell_data = on_cell_data
         self.data = CellData()
+        self.ready_for_next_msg = True
+        self._configured = threading.Event()
+        threading.Thread(target=self._configure_then_signal).start()
+
+    def _configure_then_signal(self):
         self.configure()
+        self._configured.set()
 
 
     def configure(self):
+        self.node.get_logger().info("Configuring modem...")
         # Commands to reset GPS receiver
-        self.send_string("AT$GPSRST\n")
-        self.send_string("AT$GPSNVRAM=15,0\r")
-        self.send_string("AT$GPSACP\r")
+        self.send_and_wait("AT$GPSRST\r")
         # Sets the data that will be output by GPS receiver - currently set to
         # unsolicited output on /dev/ttyUSB1 for all types of messages
-        self.send_string("AT$GPSNMUN=2,1,1,1,1,1,1\r")
+        self.send_and_wait("AT$GPSNMUN=2,1,1,1,1,1,1\r")
         # Turn on GPS receiver
-        self.send_string("AT$GPSP=1\r")
+        self.send_and_wait("AT$GPSP=1\r")
+
+    def send_and_wait(self, msg:str):
+        self.ready_for_next_msg = False
+        self.send_string(msg)
+        self.node.get_logger().info(f"Sent {msg}. Waiting now")
+        while not self.ready_for_next_msg:
+            pass
+        self.node.get_logger().info("Wait complete")
 
     def update_cell_data(self):
+        self._configured.wait()
+        self.node.get_logger().info("Updating cell data...")
         # Retrieve cell tech and network
-        self.send_string("AT+COPS?\r")
+        self.send_and_wait("AT+COPS?\r")
         # Retrieve info about cell signal quality
-        self.send_string("AT+CESQ\r")
+        self.send_and_wait("AT+CESQ\r")
         # Get registration status
-        self.send_string("AT+CEREG?\r")
+        self.send_and_wait("AT+CEREG?\r")
         # Get IP cell's address
-        self.send_string("AT+CGPADDR=1\r")
+        self.send_and_wait("AT+CGPADDR=1\r")
         # Get information about context, most useful is APN
-        self.send_string("AT+CGDCONT?\r")
+        self.send_and_wait("AT+CGDCONT?\r")
         # Get PIN status
-        self.send_string("AT+CPIN?\r")
+        self.send_and_wait("AT+CPIN?\r")
         # Get GNSS power status
-        self.send_string("AT$GPSP?\r")
+        self.send_and_wait("AT$GPSP?\r")
 
     def _on_cell_data_rec(self, data: SerialData):
         # whenever we receive cell data
         data_str = data.to_utf_8()
         self.node.get_logger().info(f"{data_str}")
+
+        if data_str.startswith("OK"):
+            self.ready_for_next_msg = True
+            return
 
         # Process network & technology
         if data_str.startswith("+COPS:"):
@@ -126,17 +148,17 @@ class CellSerialDevice(SerialDevice):
             # Don't consider the other contexts
             if split[0] != "+CGDCONT: 1":
                 return
-            apn = split[1].replace("\"", "")
+            apn = split[2].replace("\"", "")
             self.data.apn = apn
 
         elif data_str.startswith("+CPIN:"):
-            split = data_str.split(",")
+            split = data_str.split(":")
             pin_status = split[1].replace(" ", "")
             self.data.pin_status = pin_status
         elif data_str.startswith("$GPSP:"):
             # Eventually we will query the GNSS power but for now 
             # we use this to indicate when we can send new data
-            if self.data is None:
+            if any(getattr(self.data, field) is None for field in vars(self.data)):
                 return
             
             self.on_cell_data(self.data)
