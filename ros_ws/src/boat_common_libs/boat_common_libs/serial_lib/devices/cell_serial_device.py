@@ -45,7 +45,8 @@ class CellSerialDevice(SerialDevice):
 
 
     def configure(self):
-        self.node.get_logger().set_level(10)
+        # Wait for serial device to connect
+        sleep(2)
         self.node.get_logger().info("Configuring modem...")
         # Commands to reset GPS receiver
         self.send_and_wait("AT$GPSRST\r")
@@ -92,7 +93,7 @@ class CellSerialDevice(SerialDevice):
         data_str = data.to_utf_8()
         self.node.get_logger().debug(f"{data_str}")
 
-        if data_str.startswith("OK"):
+        if data_str.startswith("OK") or data_str.find("ERROR") != -1:
             self._ready_for_next_msg.set()
             return
 
@@ -125,12 +126,14 @@ class CellSerialDevice(SerialDevice):
 
                 if rsrp < -130:
                     bars = 0
+                    self.alarm_manager.publish_alarm(Alarm.CELL_SIGNAL_QUALITY_POOR)
                 elif rsrp < -120:
                     bars = 1
                 elif rsrp < -105:
                     bars = 2
                 elif rsrp < -90:
                     bars = 3
+                    self.alarm_manager.publish_alarm(Alarm.CELL_SIGNAL_QUALITY_POOR)
                 elif rsrp + 140 == 255:
                     bars = 255
                 else:
@@ -170,7 +173,7 @@ class CellSerialDevice(SerialDevice):
             split = data_str.split(":")
             pin_status = split[1].replace(" ", "")
             if pin_status != "READY":
-                self.alarm_manager.publish_alarm(31)
+                self.alarm_manager.publish_alarm(Alarm.CELL_AUTH_MODE_NOT_READY)
             self.data.pin_status = pin_status
         elif data_str.startswith("$GPSP:"):
             # Eventually we will query the GNSS power but for now 
