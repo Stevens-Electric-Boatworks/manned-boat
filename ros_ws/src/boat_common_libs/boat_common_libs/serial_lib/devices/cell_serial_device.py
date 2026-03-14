@@ -133,7 +133,6 @@ class CellSerialDevice(SerialDevice):
                     bars = 2
                 elif rsrp < -90:
                     bars = 3
-                    self.alarm_manager.publish_alarm(Alarm.CELL_SIGNAL_QUALITY_POOR)
                 elif rsrp + 140 == 255:
                     bars = 255
                 else:
