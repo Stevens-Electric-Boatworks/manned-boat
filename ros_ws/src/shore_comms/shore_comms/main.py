@@ -9,7 +9,7 @@ from rclpy.node import Node
 
 from boat_common_libs.alarm_lib.alarms import Alarm
 from boat_data_interfaces.msg import ElectricalData, MotionData, BoatAlarm, \
-    CANMotorData, CANBusStatus, GPSData, OutletCoolantData, InletCoolantData, GPSVTGData
+    CANMotorData, CANBusStatus, GPSData, OutletCoolantData, InletCoolantData, GPSVTGData, ShoreBoatAlarm
 from rcl_interfaces.msg import Log, ParameterDescriptor, SetParametersResult
 from boat_common_libs.alarm_lib import alarm_helper
 
@@ -34,7 +34,7 @@ class ShoreDataCollector(Node):
     def __init__(self):
         super().__init__('shore_comms')
         self.alarms = []
-        self.create_sub(BoatAlarm, "/alarm/shore/publish", self.alarms_collector)
+        self.create_sub(ShoreBoatAlarm, "/alarm/shore/publish", self.alarms_collector)
 
         self.declare_parameter("data_send", 0.1, ParameterDescriptor(
             description='How often shore_comms should send data to the shore server.'))
@@ -50,7 +50,8 @@ class ShoreDataCollector(Node):
         self.alarm_publisher = alarm_helper.create_alarm_publisher(self)
 
         ros_out_topic = "/rosout"
-        if self.get_parameter("replay_mode").get_parameter_value().bool_value:
+        self.isReplay = self.get_parameter("replay_mode").get_parameter_value().bool_value
+        if self.isReplay:
             self._logger.info("The SHORE node is in replay mode. Now replaying log files from /logout")
             ros_out_topic = "/logout"
             logged_data = {
@@ -98,13 +99,13 @@ class ShoreDataCollector(Node):
         """
         self.data[data_name] = data
 
-    def add_alarm(self, error_code: int, timestamp):
+    def add_alarm(self, error_code: int, timestamp, msg: str):
         """
         Queues an alarm to be sent to the shore server.
          param error_code - The error code based on the spreadsheet
          param timestamp - The timestamp of when the alarm was issued
         """
-        self.alarms.append((error_code, timestamp))
+        self.alarms.append((error_code, timestamp, msg))
 
     def clear_all_websocket_alarms(self):
         self.alarm_publisher.delatch_alarm(Alarm.WEBSOCKET_CONNECTION_CLOSED)
@@ -126,6 +127,7 @@ class ShoreDataCollector(Node):
                     # Shore Comms Node Shutdown
                     self.destroy_node()
                     return
+                await self.send_initial_ident()
                 await self.send_data_to_shore(False)
                 self._logger.info(f"Connected to the websocket at {SHORE_URI} ✅")
                 self._logger.info(f"Data will be sent every {self.get_parameter("data_send").value}s")
@@ -154,6 +156,13 @@ class ShoreDataCollector(Node):
             self._logger.error("[Websocket Watchdog] The node is not connected to the shore server via the websocket.")
             self.alarm_publisher.publish_alarm(Alarm.WEBSOCKET_NOT_OPENED) # ALARM: Shore Comms Websocket failure
 
+    async def send_initial_ident(self):
+        output_data = {
+            "type": "ident",
+            "message": "boat"
+        }
+        await self.websocket.send(json.dumps(output_data))
+
     async def send_data_to_shore(self, ignore_empty):
         if len(self.data) == 0 and ignore_empty:
             return
@@ -161,6 +170,8 @@ class ShoreDataCollector(Node):
             "type": "data",
             "payload" : self.data
         }
+        if self.isReplay:
+            output_data["replay"] = True
         await self.websocket.send(json.dumps(output_data))
         self.data.clear()
 
@@ -176,7 +187,7 @@ class ShoreDataCollector(Node):
             "payload" : {
                 "id": alarm[0],
                 "timestamp": alarm[1],
-                "message": "<Check faults.csv for more information>",
+                "message": alarm[2],
                 "type": "error"
                 }   
             }
@@ -256,8 +267,8 @@ class ShoreDataCollector(Node):
         self.add_data("boat_time", get_time_in_ms(msg))
 
 
-    def alarms_collector(self, msg:BoatAlarm):
-        self.add_alarm(msg.error_code, get_time_in_ms(msg.timestamp))
+    def alarms_collector(self, msg:ShoreBoatAlarm):
+        self.add_alarm(msg.error_code, get_time_in_ms(msg.timestamp), msg.message)
 
     def logs_collector(self, msg:Log):
         logged_data = {
