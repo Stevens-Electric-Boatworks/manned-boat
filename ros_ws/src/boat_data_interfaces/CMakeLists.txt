@@ -35,6 +35,7 @@ rosidl_generate_interfaces(${PROJECT_NAME}
   "msg/GPSVTGData.msg"
   "msg/GPSSVData.msg"
   "msg/GPGSAData.msg"
+  "msg/CellData.msg"
   "msg/MotorData.msg"
   "msg/BoatAlarm.msg"
   "msg/ShoreBoatAlarm.msg"

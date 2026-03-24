@@ -27,7 +27,7 @@ class SerialDevice:
     Represents a serial device that is intended to work within the ROS ecosystem.
     """
 
-    def __init__(self, node:Node, serial_port:str, on_msg_rec:Callable[[SerialData], None], alarm_manager: AlarmPublisher, baudrate:int = 115200, timeout:int = 1, polling_duration=0.1):
+    def __init__(self, node:Node, serial_port:str, on_msg_rec:Callable[[SerialData], None], alarm_manager: AlarmPublisher, baudrate:int = 115200, timeout:float = 1, polling_duration=0.1):
         """
 
         param: node - The ROS2 node that is using the serial device
@@ -90,4 +90,11 @@ class SerialDevice:
                 self.device.close()
                 self.device = None
                 threading.Thread(target=self._device_connect_thread, daemon=True).start()
+
+    def send_string(self, data: str):
+        if not self.valid:
+            return
+        self.logger.debug(f"Sending {data}...")
+        self.device.write(data.encode())
+
 

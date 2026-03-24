@@ -9,7 +9,7 @@ from rclpy.node import Node
 
 from boat_common_libs.alarm_lib.alarms import Alarm
 from boat_data_interfaces.msg import ElectricalData, MotionData, BoatAlarm, \
-    CANMotorData, CANBusStatus, GPSData, OutletCoolantData, InletCoolantData, GPSVTGData, ShoreBoatAlarm
+    CANMotorData, CANBusStatus, GPSData, OutletCoolantData, InletCoolantData, GPSVTGData, CellData, ShoreBoatAlarm
 from rcl_interfaces.msg import Log, ParameterDescriptor, SetParametersResult
 from boat_common_libs.alarm_lib import alarm_helper
 
@@ -72,6 +72,7 @@ class ShoreDataCollector(Node):
         self.create_sub(GPSVTGData, "/motion/vtg", self.gps_speed_collector)
         self.create_sub(GPSSVData, "/motion/sv", self.gps_sats_collector)
         self.create_sub(GPGSAData, "/motion/gsa", self.gps_sat_mode_collector)
+        self.create_sub(CellData, "/cell", self.cell_data_collector)
         self.create_sub(CANMotorData, "/motors/can_motor_data", self.motor_collector)
         self.create_sub(CANBusStatus, "/motors/can_bus_state", self.bus_state_collector)
         self.create_sub(Time, "/boat_time", self.time_collector)
@@ -249,6 +250,9 @@ class ShoreDataCollector(Node):
 
     def gps_sat_mode_collector(self, msg:GPGSAData):
         self.add_data("sat_mode", message_to_ordereddict(msg))
+
+    def cell_data_collector(self, msg: CellData):
+        self.add_data("cell", message_to_ordereddict(msg))
 
     def motor_collector(self, msg:CANMotorData):
         self.add_data("voltage", msg.voltage)

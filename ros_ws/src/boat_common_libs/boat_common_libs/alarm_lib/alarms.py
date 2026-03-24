@@ -47,3 +47,9 @@ class Alarm(Enum):
 
     SERIAL_IO_ERROR = 18
     """FAULT: There was an serial IO error"""
+
+    CELL_SIGNAL_QUALITY_POOR = 30
+    """WARN: Cell Signal Quality POOR"""
+
+    CELL_AUTH_MODE_NOT_READY = 31
+    """FAULT: Cell auth mode is not READY"""
