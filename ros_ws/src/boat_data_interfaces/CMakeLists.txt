@@ -44,6 +44,7 @@ rosidl_generate_interfaces(${PROJECT_NAME}
   "msg/InletCoolantData.msg"
   "srv/AlarmRaise.srv"
   "srv/AlarmDelatch.srv"
+  "srv/AlarmsQuery.srv"
   DEPENDENCIES builtin_interfaces
 )
 

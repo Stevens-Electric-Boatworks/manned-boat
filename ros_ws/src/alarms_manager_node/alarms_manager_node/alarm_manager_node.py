@@ -12,8 +12,14 @@ from boat_data_interfaces.msg import ShoreBoatAlarm
 
 import csv
 
-from boat_data_interfaces.srv import AlarmRaise, AlarmDelatch
+from boat_data_interfaces.srv import AlarmRaise, AlarmDelatch, AlarmsQuery
 
+
+class Alarm:
+    def __init__(self, alarm_id: int, msg: str, timestamp):
+        self.alarm_id = alarm_id
+        self.msg = msg
+        self.timestamp = timestamp
 
 class AlarmsWatchdog(Node):
     def __init__(self):
@@ -25,14 +31,18 @@ class AlarmsWatchdog(Node):
         # Error Code, Type, Message
         self.codes = {}
         self.load_csv_file()
-        self.raised_sticky_alarms = set({})
+        self.raised_sticky_alarms: set[Alarm] = set({})
 
 
         a = self.create_service(AlarmRaise, "/alarm/raise", self.on_alarm_raise)
         b = self.create_service(AlarmDelatch, "/alarm/delatch", self.on_alarm_delatch)
+        query = self.create_service(AlarmsQuery, "/alarm/query", self.on_alarm_query)
+
         # Service introspection is needed for us to be
         a.configure_introspection(self._clock, service_event_qos_profile=QoSProfile(depth=10), introspection_state=ServiceIntrospectionState.CONTENTS)
         b.configure_introspection(self._clock, service_event_qos_profile=QoSProfile(depth=10), introspection_state=ServiceIntrospectionState.CONTENTS)
+        query.configure_introspection(self._clock, service_event_qos_profile=QoSProfile(depth=10),
+                                  introspection_state=ServiceIntrospectionState.CONTENTS)
 
 
         self.shore_pub = self.create_publisher(ShoreBoatAlarm, "/alarm/shore/publish", 10)
@@ -60,7 +70,7 @@ class AlarmsWatchdog(Node):
                 self._logger.warn("Alarm was raised:\n\tError Code: " + str(
                     error_code) + "\tDescription: " + error_message + "\tSeverity: " + error_type)
 
-        already_raised = self.raised_sticky_alarms.__contains__(error_code)
+        already_raised = any(x.alarm_id == error_code for x in self.raised_sticky_alarms)
         if sticky and already_raised:
             self._logger.info(f"Alarm ID {error_code} is sticky, and has already been raised")
             response.result = AlarmRaise.Response.STICKY_ALREADY_RAISED
@@ -73,7 +83,7 @@ class AlarmsWatchdog(Node):
                 self._logger.warn("Alarm was raised:\n\tError Code: " + str(
                     error_code) + "\tDescription: " + error_message + "\tSeverity: " + error_type)
             response.result = AlarmRaise.Response.STICKY_NOT_RAISED_BEFORE
-            self.raised_sticky_alarms.add(error_code)
+            self.raised_sticky_alarms.add(Alarm(error_code, error_message, alarm.timestamp))
         else:
             response.result = AlarmRaise.Response.RAISED
         if not bool(self.get_parameter("replay_mode").get_parameter_value().bool_value):
@@ -98,7 +108,13 @@ class AlarmsWatchdog(Node):
 
         return response
 
-
+    def on_alarm_query(self, request: AlarmsQuery.Request, response: AlarmsQuery.Response) -> AlarmsQuery.Response:
+        alarms: list[ShoreBoatAlarm] = []
+        for x in self.raised_sticky_alarms:
+            self._logger.info(f"adding {x} to the list")
+            alarms.append(ShoreBoatAlarm(error_code=x.alarm_id, message=x.msg, timestamp=x.timestamp))
+        response.alarms = alarms
+        return response
 
     def load_csv_file(self):
         file_path = self.get_parameter('faults_file').get_parameter_value().string_value
@@ -127,5 +143,4 @@ def main(args=None):
 
 
 if __name__ == '__main__':
-    print("Starting!!")
     main()
