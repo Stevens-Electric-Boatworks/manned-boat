@@ -10,6 +10,8 @@ from boat_common_libs.alarm_lib.alarm_helper import AlarmPublisher
 from boat_common_libs.alarm_lib.alarms import Alarm
 
 
+# requires the pyserial package
+
 class SerialData:
     def __init__(self, data:bytes):
         self.data = data
