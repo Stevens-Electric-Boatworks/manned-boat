@@ -17,7 +17,7 @@ launch:
       name: "alarms_watchdog"
       param:
           - name: "faults_file"
-            value: "~/eboat_src/data/FAULTS.csv"
+            value: "~/stevens_eboat/eboat_src/data/FAULTS.csv"
 
   - node:
       pkg: "motor_node"

@@ -1,5 +1,6 @@
 from threading import Thread
 
+import can
 import canopen
 
 import math
@@ -122,12 +123,12 @@ class OldCanProgram:
         self.logger.info("Setting up the old can...")
         self.logger.warning("The throttle values and motor temperature are not real.")
 
-        # test for can0 open
-        if not is_can_interface_up():
-            self.logger.error("can0 is not up. Aborting startup!!")
-            self.declare_alarm(Alarm.CAN0_INTERFACE_NOT_UP)
-            self.can_bus_state = CANBusStatus.OFFLINE
-            return
+        # # test for can0 open
+        # if not is_can_interface_up():
+        #     self.logger.error("can0 is not up. Aborting startup!!")
+        #     self.declare_alarm(Alarm.CAN0_INTERFACE_NOT_UP)
+        #     self.can_bus_state = CANBusStatus.OFFLINE
+        #     return
 
         # Start with creating a new network representing one CAN bus
         self.network = canopen.Network()
@@ -155,6 +156,70 @@ class OldCanProgram:
             target=self.read_can_messages, args=[self.publisher], daemon=True)
         self.can_thread.start()
 
+    def request_bms_status_data(self):
+        """
+        Send PDO2 MOSI (SID 0x313) to ask the MCU to start
+        sending PDO2 MISO status updates (SID 0x293).
+        B0 selects which data: 0x01=MCU Summary, 0x02=Pack, 0x03=Cell V, etc.
+        """
+
+        def send(e):
+            request = can.Message(
+                arbitration_id=0x313,
+                data=e,
+                is_extended_id=False
+            )
+            self.network.bus.send(request)
+            time.sleep(0.01)
+
+        send([0x01, 0x01, 0x01, 0x01, 0x01, 0x01, 0x01, 0x01])
+
+    def query_bms(self):
+        msg = self.network.bus.recv(timeout=1)
+        print(f"{msg}")
+        if(msg is None):
+            return
+        sid = msg.arbitration_id
+        data = msg.data
+
+        if sid == 0x293:  # PDO2 MISO — Status Data Reply
+            b0 = data[0]  # Message type identifier
+
+            if b0 == 0x01:  # MCU Summary
+                charge_state = data[4]
+                plug_state = data[5]
+                alerts = data[6]
+                print(f"MCU Summary — ChargeState={charge_state}, PlugState={plug_state}, Alerts={alerts}")
+
+            elif b0 == 0x02:  # Pack Summary
+                pack_voltage_raw = int.from_bytes(data[1:3], 'little')
+                pack_current_raw = int.from_bytes(data[4:6], 'little', signed=True)
+                # Scale factors depend on your firmware config; check the doc for your version
+                print(f"Pack Summary — Voltage bytes={data[1:3].hex()}, Current bytes={data[4:6].hex()}")
+
+            elif b0 == 0x03:  # Cell Voltage Summary
+                cv_low = int.from_bytes(data[2:4], 'little')
+                cv_mean = int.from_bytes(data[4:6], 'little')
+                cv_hi = int.from_bytes(data[6:8], 'little')
+                print(f"Cell Voltage — Low={cv_low}, Mean={cv_mean}, High={cv_hi}")
+
+            elif b0 == 0x04:  # Thermistor Summary
+                th_min = data[1]
+                th_max = data[2]
+                print(f"Thermistor — Min={th_min}, Max={th_max}")
+
+            elif b0 == 0x05:  # SOC Summary
+                soc = data[1]
+                pack_kwhr = int.from_bytes(data[2:4], 'little')
+                pack_max_kwhr = int.from_bytes(data[6:8], 'little')
+                print(f"SOC Summary — SOC={soc}%, PackKWHr={pack_kwhr}, MaxKWHr={pack_max_kwhr}")
+
+        elif sid == 0x193:  # PDO1 MISO — Configuration Data Reply
+            print(f"Config reply: {data.hex()}")
+        # if msg and msg.arbitration_id == 0x293:
+        #     print(f"Status [{msg.data[0]:#04x}]: {msg.data.hex()}")
+        print("\n")
+
     def read_can_messages(self, publisher):
         while True:
             try:
@@ -163,6 +228,7 @@ class OldCanProgram:
                     return
 
                 self.publish_sdo_data(publisher)
+                self.query_bms()
                 time.sleep(0.3)
             except Exception as e:
                 time.sleep(0.8)
@@ -218,8 +284,8 @@ class OldCanProgram:
         msg.motor_temp = int(temperature)
         msg.current = int(current)
         msg.power = int(power)
-        
-        
+
+
         if self.can_bus_state == CANBusStatus.ONLINE:
             publisher.publish(msg)
 
