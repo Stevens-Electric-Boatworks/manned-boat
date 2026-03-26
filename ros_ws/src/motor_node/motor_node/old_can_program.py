@@ -135,7 +135,7 @@ class OldCanProgram:
 
         # Connect to the CAN bus
         try:
-            self.network.connect(channel='can0', bustype='socketcan')
+            self.network.connect(channel='can0', bustype='socketcan',  bitrate=250000)
         except CanError:
             self.logger.error(
                 f"""Unable to connect to the CAN bus because of the following error: {traceback.format_exc()}""")
@@ -146,6 +146,7 @@ class OldCanProgram:
         self.logger.info("Connected to SocketCAN")
         # Subscribe to messages
         self.network.subscribe(0, self.on_msg_receive)
+        
         # You can create a node with a known node-ID
         node_id = 6  # Replace with your node ID
         self.logger.info("Using a dummy EDS file at \"" + self.dummy_efp + "\".")
@@ -155,6 +156,10 @@ class OldCanProgram:
         self.can_thread = Thread(
             target=self.read_can_messages, args=[self.publisher], daemon=True)
         self.can_thread.start()
+        
+        self.bms_thread = Thread(
+            target=self.bms_thread_callback, args=[], daemon=True)
+        self.bms_thread.start()
 
     def request_bms_status_data(self):
         """
@@ -164,18 +169,19 @@ class OldCanProgram:
         """
 
         def send(e):
-            request = can.Message(
-                arbitration_id=0x313,
-                data=e,
-                is_extended_id=False
-            )
-            self.network.bus.send(request)
-            time.sleep(0.01)
-
+                request = can.Message(
+                    arbitration_id=0x313,
+                    data=e,
+                    is_extended_id=False
+                )
+                self.network.bus.send(request)
+                time.sleep(0.01)
+        
         send([0x01, 0x01, 0x01, 0x01, 0x01, 0x01, 0x01, 0x01])
 
     def query_bms(self):
-        msg = self.network.bus.recv(timeout=1)
+        self.request_bms_status_data()
+        msg = self.network.bus.recv(timeout=0.2)
         print(f"{msg}")
         if(msg is None):
             return
@@ -219,6 +225,11 @@ class OldCanProgram:
         # if msg and msg.arbitration_id == 0x293:
         #     print(f"Status [{msg.data[0]:#04x}]: {msg.data.hex()}")
         print("\n")
+        
+    
+    def bms_thread_callback(self):
+        while True:
+            self.query_bms()
 
     def read_can_messages(self, publisher):
         while True:
@@ -226,9 +237,7 @@ class OldCanProgram:
                 if not self.is_node_ok:
                     self.logger.info("Safely shutting down the CAN Motor reader thread")
                     return
-
                 self.publish_sdo_data(publisher)
-                self.query_bms()
                 time.sleep(0.3)
             except Exception as e:
                 time.sleep(0.8)
@@ -262,7 +271,7 @@ class OldCanProgram:
     # There is a wide list of sensor data that can be read, but these are the useful ones.
     # Feel free to browse the parameter list which is in testing/parameters.csv
     def publish_sdo_data(self, publisher):
-        voltage = self.read_and_log_sdo(0x2030, 2) * 0.01  # Volts
+        voltage = float(self.read_and_log_sdo(0x2030, 2)) * 0.01  # Volts
         throttle_mv = -1  # self.read_and_log_sdo( 0x2013, 1)  # mV
         rpm = self.read_and_log_sdo(0x2001, 2)  # rpm
         current = self.read_and_log_sdo(0x2073, 1)  # Arms
@@ -271,9 +280,9 @@ class OldCanProgram:
         throttle_percent = throttle_mv / 2800  # %
 
         # this torque must be converted to lb*ft, because it is preferred
-        torque = current * 0.15  # Nm
+        torque = float(current) * 0.15  # Nm
 
-        power = (torque * rpm) * math.pi / 30000  # kW
+        power = (float(torque) * float(rpm)) * math.pi / 30000  # kW
 
         msg = CANMotorData()
         msg.voltage = int(voltage)
