@@ -192,7 +192,7 @@ class CANInterlink:
 
     def query_bms(self):
         self.request_bms_status_data()
-        msg = self.network.bus.recv(timeout=0.2)
+        msg = self.network.bus.recv(timeout=0.5)
         if msg is None:
             return
         sid = msg.arbitration_id
