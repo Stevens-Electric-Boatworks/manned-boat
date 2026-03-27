@@ -8,9 +8,11 @@ import time
 
 from can import CanError
 from rclpy.impl.rcutils_logger import RcutilsLogger
+from rclpy.publisher import Publisher
 
 from boat_common_libs.alarm_lib.alarms import Alarm
-from boat_data_interfaces.msg import CANMotorData, CANBusStatus
+from boat_data_interfaces.msg import CANMotorData, CANBusStatus, BMSCellVoltage, BMSMcuSummary, BMSPackSummary, \
+    BMSThermistor, BMSSOCSummary
 
 import traceback
 import subprocess
@@ -96,13 +98,16 @@ def is_can_interface_up(interface: str = "can0") -> bool:
             check=True
         )
         # Example output line: "3: can0: <NOARP,UP,LOWER_UP> mtu 16 ..."
-        return "state UP" in result.stdout
+        return "UP" in result.stdout
     except subprocess.CalledProcessError:
         return False
 
 
-class OldCanProgram:
-    def __init__(self, logger: RcutilsLogger, dummy_efp, publisher, is_node_ok, declare_alarm, shutdown_node, unlatch_all_alarms):
+class CANInterlink:
+    def __init__(self, logger: RcutilsLogger, dummy_efp, publisher, is_node_ok, declare_alarm, shutdown_node,
+                 unlatch_all_alarms, bms_pack_sum_pub, bms_mcu_sum_pub, bms_cell_volt_pub, bms_thermistor_pub,
+                 bms_soc_sum_pub):
+        self.network = None
         self.sdo = None
         self.start_time = None
         self.can_thread = None
@@ -117,25 +122,31 @@ class OldCanProgram:
         self.can_bus_state = CANBusStatus.OFFLINE
         self.unlatch_all_alarms = unlatch_all_alarms
 
+        self.bms_pack_sum_pub: Publisher = bms_pack_sum_pub
+        self.bms_mcu_sum_pub: Publisher = bms_mcu_sum_pub
+        self.bms_cell_volt_pub: Publisher = bms_cell_volt_pub
+        self.bms_soc_sum_pub: Publisher = bms_soc_sum_pub
+        self.bms_thermistor_pub: Publisher = bms_thermistor_pub
+
     def setup_can(self):
         # This is to ensure that we can publish alarms
         time.sleep(1.5)
         self.logger.info("Setting up the old can...")
         self.logger.warning("The throttle values and motor temperature are not real.")
 
-        # # test for can0 open
-        # if not is_can_interface_up():
-        #     self.logger.error("can0 is not up. Aborting startup!!")
-        #     self.declare_alarm(Alarm.CAN0_INTERFACE_NOT_UP)
-        #     self.can_bus_state = CANBusStatus.OFFLINE
-        #     return
+        # test for can0 open
+        if not is_can_interface_up():
+            self.logger.error("can0 is not up. Aborting startup!!")
+            self.declare_alarm(Alarm.CAN0_INTERFACE_NOT_UP)
+            self.can_bus_state = CANBusStatus.OFFLINE
+            return
 
         # Start with creating a new network representing one CAN bus
         self.network = canopen.Network()
 
         # Connect to the CAN bus
         try:
-            self.network.connect(channel='can0', bustype='socketcan',  bitrate=250000)
+            self.network.connect(channel='can0', bustype='socketcan', bitrate=250000)
         except CanError:
             self.logger.error(
                 f"""Unable to connect to the CAN bus because of the following error: {traceback.format_exc()}""")
@@ -146,7 +157,7 @@ class OldCanProgram:
         self.logger.info("Connected to SocketCAN")
         # Subscribe to messages
         self.network.subscribe(0, self.on_msg_receive)
-        
+
         # You can create a node with a known node-ID
         node_id = 6  # Replace with your node ID
         self.logger.info("Using a dummy EDS file at \"" + self.dummy_efp + "\".")
@@ -156,7 +167,7 @@ class OldCanProgram:
         self.can_thread = Thread(
             target=self.read_can_messages, args=[self.publisher], daemon=True)
         self.can_thread.start()
-        
+
         self.bms_thread = Thread(
             target=self.bms_thread_callback, args=[], daemon=True)
         self.bms_thread.start()
@@ -169,21 +180,20 @@ class OldCanProgram:
         """
 
         def send(e):
-                request = can.Message(
-                    arbitration_id=0x313,
-                    data=e,
-                    is_extended_id=False
-                )
-                self.network.bus.send(request)
-                time.sleep(0.01)
-        
+            request = can.Message(
+                arbitration_id=0x313,
+                data=e,
+                is_extended_id=False
+            )
+            self.network.bus.send(request)
+            time.sleep(0.01)
+
         send([0x01, 0x01, 0x01, 0x01, 0x01, 0x01, 0x01, 0x01])
 
     def query_bms(self):
         self.request_bms_status_data()
         msg = self.network.bus.recv(timeout=0.2)
-        print(f"{msg}")
-        if(msg is None):
+        if msg is None:
             return
         sid = msg.arbitration_id
         data = msg.data
@@ -195,29 +205,37 @@ class OldCanProgram:
                 charge_state = data[4]
                 plug_state = data[5]
                 alerts = data[6]
+
+                self.bms_mcu_sum_pub.publish(
+                    BMSMcuSummary(charge_state=charge_state, plug_state=plug_state, alerts=alerts))
                 print(f"MCU Summary — ChargeState={charge_state}, PlugState={plug_state}, Alerts={alerts}")
 
             elif b0 == 0x02:  # Pack Summary
                 pack_voltage_raw = int.from_bytes(data[1:3], 'little')
                 pack_current_raw = int.from_bytes(data[4:6], 'little', signed=True)
                 # Scale factors depend on your firmware config; check the doc for your version
+                self.bms_pack_sum_pub.publish(
+                    BMSPackSummary(pack_voltage_raw=pack_voltage_raw, pack_current_raw=pack_current_raw))
                 print(f"Pack Summary — Voltage bytes={data[1:3].hex()}, Current bytes={data[4:6].hex()}")
 
             elif b0 == 0x03:  # Cell Voltage Summary
                 cv_low = int.from_bytes(data[2:4], 'little')
                 cv_mean = int.from_bytes(data[4:6], 'little')
                 cv_hi = int.from_bytes(data[6:8], 'little')
+                self.bms_cell_volt_pub.publish(BMSCellVoltage(low=cv_low, mean=cv_mean, high=cv_hi))
                 print(f"Cell Voltage — Low={cv_low}, Mean={cv_mean}, High={cv_hi}")
 
             elif b0 == 0x04:  # Thermistor Summary
                 th_min = data[1]
                 th_max = data[2]
+                self.bms_thermistor_pub.publish(BMSThermistor(min=th_min, max=th_max))
                 print(f"Thermistor — Min={th_min}, Max={th_max}")
 
             elif b0 == 0x05:  # SOC Summary
                 soc = data[1]
                 pack_kwhr = int.from_bytes(data[2:4], 'little')
                 pack_max_kwhr = int.from_bytes(data[6:8], 'little')
+                self.bms_soc_sum_pub.publish(BMSSOCSummary(pack_kwhr=pack_kwhr, pack_max_kwhr=pack_max_kwhr))
                 print(f"SOC Summary — SOC={soc}%, PackKWHr={pack_kwhr}, MaxKWHr={pack_max_kwhr}")
 
         elif sid == 0x193:  # PDO1 MISO — Configuration Data Reply
@@ -225,8 +243,7 @@ class OldCanProgram:
         # if msg and msg.arbitration_id == 0x293:
         #     print(f"Status [{msg.data[0]:#04x}]: {msg.data.hex()}")
         print("\n")
-        
-    
+
     def bms_thread_callback(self):
         while True:
             self.query_bms()
@@ -275,7 +292,7 @@ class OldCanProgram:
         throttle_mv = -1  # self.read_and_log_sdo( 0x2013, 1)  # mV
         rpm = self.read_and_log_sdo(0x2001, 2)  # rpm
         current = self.read_and_log_sdo(0x2073, 1)  # Arms
-        temperature = self.read_and_log_sdo( 0x2040, 2)  # deg C
+        temperature = self.read_and_log_sdo(0x2040, 2)  # deg C
 
         throttle_percent = throttle_mv / 2800  # %
 
@@ -294,10 +311,8 @@ class OldCanProgram:
         msg.current = int(current)
         msg.power = int(power)
 
-
         if self.can_bus_state == CANBusStatus.ONLINE:
             publisher.publish(msg)
-
 
     def get_bus_state(self):
         return self.can_bus_state
