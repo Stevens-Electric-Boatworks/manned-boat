@@ -244,6 +244,7 @@ class CANInterlink:
         #     print(f"Status [{msg.data[0]:#04x}]: {msg.data.hex()}")
         print("\n")
 
+    # This read runs in the background to query data from the BMS
     def bms_thread_callback(self):
         while True:
             self.query_bms()
