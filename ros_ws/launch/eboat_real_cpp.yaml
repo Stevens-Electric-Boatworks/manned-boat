@@ -18,7 +18,7 @@ launch:
             value: "~/eboat_src/data/FAULTS.csv"
 
   - node:
-      pkg: "motor_node"
+      pkg: "can_node"
       exec: "motor"
       name: "can_motor"
       param:
@@ -28,10 +28,11 @@ launch:
       pkg: "motion_node"
       exec: "motion"
       name: "gps"
-  - node:
-      pkg: "electrical_node"
-      exec: "electrical"
-      name: "electrical_node"
+      
+#  - node:
+#      pkg: "electrical_node"
+#      exec: "electrical"
+#      name: "electrical_node"
   - node:
       pkg: "time_node"
       exec: "time_node"

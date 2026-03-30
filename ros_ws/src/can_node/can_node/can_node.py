@@ -9,13 +9,14 @@ from boat_data_interfaces.msg import MotorData, BoatAlarm, CANMotorData, CANBusS
 
 import os
 
-from motor_node.old_can_program import OldCanProgram #type: ignore
+from can_node.old_can_program import CANBus  #type: ignore
 
 
 class MotorNode(Node):
     def __init__(self):
-        super().__init__('motor_node')
-        self._logger.warn("This node is using the code that was developed for the 2023 Boat. We should migrate to using ros2_canopen...")
+        super().__init__('can_node')
+        self._logger.warn(
+            "This node is using the code that was developed for the 2023 Boat. We should migrate to using ros2_canopen...")
         self.motorA_pub = self.create_publisher(CANMotorData, '/motors/motorA', 10)
         self.motorB_pub = self.create_publisher(CANMotorData, '/motors/motorB', 10)
         self._alarm_publisher = alarm_helper.create_alarm_publisher(self)
@@ -24,17 +25,17 @@ class MotorNode(Node):
         self.declare_parameter('dummy_epf', '~/eboat_src/data/dummy.epf', description)
 
         file_path = self.get_parameter('dummy_epf').get_parameter_value().string_value
-        self.old_can = OldCanProgram(self._logger, os.path.expanduser(file_path), self.motorA_pub, self.motorB_pub, self.context.ok, self.declare_alarm, rclpy.shutdown, self.unlatch_all_alarms)
+        self.can = CANBus(self._logger, os.path.expanduser(file_path), self.motorA_pub, self.motorB_pub,
+                          self.context.ok, self.declare_alarm, rclpy.shutdown, self.unlatch_all_alarms)
         self.create_timer(0.5, self.publish_bus_state)
-        self.old_can.setup_can()
+        self.can.setup_can()
 
     def publish_bus_state(self):
         msg = CANBusStatus()
-        msg.bus_state = self.old_can.get_bus_state()
+        msg.bus_state = self.can.get_bus_state()
         self.can_bus_status_publisher.publish(msg)
 
-
-    def declare_alarm(self, alarm:Alarm):
+    def declare_alarm(self, alarm: Alarm):
         self._alarm_publisher.publish_alarm(alarm)
 
     def unlatch_all_alarms(self):

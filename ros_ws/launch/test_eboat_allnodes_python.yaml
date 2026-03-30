@@ -20,14 +20,14 @@ launch:
             value: "~/eboat_src/data/FAULTS.csv"
 
   - node:
-      pkg: "motor_node"
+      pkg: "can_node"
       exec: "test"
-      name: "motor_node"
+      name: "can_node"
 
-  - node:
-      pkg: "electrical_node"
-      exec: "test"
-      name: "test_electrical_node"
+#  - node:
+#      pkg: "electrical_node"
+#      exec: "test"
+#      name: "test_electrical_node"
   - node:
       pkg: "motion_node"
       exec: "test"

@@ -27,7 +27,7 @@ def is_can_interface_up(interface: str = "can0") -> bool:
         return False
 
 
-class OldCanProgram:
+class CANBus:
     def __init__(self, logger: RcutilsLogger, dummy_efp, motorA_pub, motorB_pub, is_node_ok, declare_alarm, shutdown_node,
                  unlatch_all_alarms):
         self.network = None
