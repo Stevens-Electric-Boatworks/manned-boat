@@ -7,6 +7,8 @@ import math
 import time
 
 from can import CanError
+from canopen import SdoCommunicationError
+from canopen.sdo import SdoClient
 from rclpy.impl.rcutils_logger import RcutilsLogger
 from rclpy.publisher import Publisher
 
@@ -153,7 +155,6 @@ class CANInterlink:
             self.declare_alarm(Alarm.INVALID_CAN_PACKET_READ)
             self.can_bus_state = CANBusStatus.OFFLINE
             return
-
         self.logger.info("Connected to SocketCAN")
         # Subscribe to messages
         self.network.subscribe(0, self.on_msg_receive)
@@ -279,7 +280,7 @@ class CANInterlink:
             self.unlatch_all_alarms()
             self.can_bus_state = CANBusStatus.ONLINE
             return value
-        except RuntimeError as e:
+        except SdoCommunicationError as e:
             self.logger.error(f"Error reading SDO [{hex(index)}:{subindex}]: {e}")
             self.declare_alarm(Alarm.ERROR_READING_CAN_SDO)
             self.can_bus_state = CANBusStatus.OFFLINE
@@ -289,6 +290,7 @@ class CANInterlink:
     # There is a wide list of sensor data that can be read, but these are the useful ones.
     # Feel free to browse the parameter list which is in testing/parameters.csv
     def publish_sdo_data(self, publisher):
+
         voltage = float(self.read_and_log_sdo(0x2030, 2)) * 0.01  # Volts
         throttle_mv = -1  # self.read_and_log_sdo( 0x2013, 1)  # mV
         rpm = self.read_and_log_sdo(0x2001, 2)  # rpm

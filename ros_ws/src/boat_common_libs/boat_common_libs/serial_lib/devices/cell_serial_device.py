@@ -5,6 +5,9 @@ from time import sleep
 import time
 from typing import Callable
 
+from rclpy.impl.logging_severity import LoggingSeverity
+from rclpy.logging_service import LoggingService
+
 from boat_common_libs.alarm_lib.alarms import Alarm
 from rclpy.node import Node
 
@@ -47,6 +50,7 @@ class CellSerialDevice(SerialDevice):
     def configure(self):
         # Wait for serial device to connect
         sleep(2)
+        self.node.get_logger().set_level(LoggingSeverity.WARN)
         self.node.get_logger().info("Configuring modem...")
         # Commands to reset GPS receiver
         self.send_and_wait("AT$GPSRST\r")

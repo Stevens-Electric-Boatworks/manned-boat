@@ -102,10 +102,10 @@ class GPSDevice(SerialDevice):
             except ValueError:
                 self.node.get_logger().error(f"Failed to parse GPGSA message. Invalid mode: {mode}")
                 return
-            
+
             op_mode = gps_str[1]
             prns = []
-            
+
             if mode == 1:
                 pdop = -99.0
                 hdop = -99.0
@@ -126,13 +126,13 @@ class GPSDevice(SerialDevice):
                     return
 
             self._gsa_callback(GPGSAResult(
-                    op_mode=op_mode,
-                    mode=mode,
-                    prn=prns,
-                    pdop=pdop,
-                    hdop=hdop,
-                    vdop=vdop,
-                    system_id=1 
+                op_mode=op_mode,
+                mode=mode,
+                prn=prns,
+                pdop=pdop,
+                hdop=hdop,
+                vdop=vdop,
+                system_id=1
                 # Not all NMEA versions include this message, so for now I hard code
                 # it to `1` (for USA GPS). 
             ))
