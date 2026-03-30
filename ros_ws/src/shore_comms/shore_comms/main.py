@@ -9,7 +9,8 @@ from rclpy.node import Node
 
 from boat_common_libs.alarm_lib.alarms import Alarm
 from boat_data_interfaces.msg import ElectricalData, MotionData, BoatAlarm, \
-    CANMotorData, CANBusStatus, GPSData, OutletCoolantData, InletCoolantData, GPSVTGData, CellData, ShoreBoatAlarm
+    CANMotorData, CANBusStatus, GPSData, OutletCoolantData, InletCoolantData, GPSVTGData, CellData, ShoreBoatAlarm, \
+    SysUtilData
 from rcl_interfaces.msg import Log, ParameterDescriptor, SetParametersResult
 from boat_common_libs.alarm_lib import alarm_helper
 
@@ -76,6 +77,7 @@ class ShoreDataCollector(Node):
         self.create_sub(CANMotorData, "/motors/can_motor_data", self.motor_collector)
         self.create_sub(CANBusStatus, "/motors/can_bus_state", self.bus_state_collector)
         self.create_sub(Time, "/boat_time", self.time_collector)
+        self.create_sub(SysUtilData, "/sys_utilization", self.sys_util_collector)
         self.wss_watchdog = self.create_timer(5, self.watchdog_callback)
         self.add_on_set_parameters_callback(self.on_param_change_callback)
         threading.Thread(target=self._run_asyncio_loop, daemon=True).start()
@@ -270,6 +272,14 @@ class ShoreDataCollector(Node):
     def time_collector(self, msg:Time):
         self.add_data("boat_time", get_time_in_ms(msg))
 
+    def sys_util_collector(self, msg: SysUtilData):
+        self.add_data("rpi.cpu.currentLoad", msg.cpu_percent)
+        self.add_data("rpi.cpu.speed", msg.cpu_freq / 1000)
+        self.add_data("rpi.memory.total", msg.total_mem)
+        self.add_data("rpi.memory.used", msg.current_mem)
+        self.add_data("rpi.memory.percent", msg.percent_mem)
+        self.add_data("rpi.disk.total", msg.disk_total)
+        self.add_data("rpi.disk.used", msg.disk_used)
 
     def alarms_collector(self, msg:ShoreBoatAlarm):
         self.add_alarm(msg.error_code, get_time_in_ms(msg.timestamp), msg.message)

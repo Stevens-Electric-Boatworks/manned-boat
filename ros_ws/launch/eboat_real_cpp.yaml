@@ -37,3 +37,6 @@ launch:
       exec: "time_node"
       name: "time"
 
+  - node:
+      pkg: "sys_util_node"
+      exec: "sys_util"
