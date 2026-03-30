@@ -21,16 +21,17 @@ import json
 import threading
 from rosidl_runtime_py import message_to_ordereddict
 
-
 SHORE_URI = "wss://shore.stevenseboat.org/api"
+
+
 # SHORE_URI = "ws://localhost:5001/api"
 
-def get_time_in_ms(time:Time):
+def get_time_in_ms(time: Time):
     return time.sec * 1000 + (time.nanosec / 1e+6)
 
 
 class ShoreDataCollector(Node):
-    
+
     def __init__(self):
         super().__init__('shore_comms')
         self.alarms = []
@@ -42,7 +43,7 @@ class ShoreDataCollector(Node):
         self.declare_parameter("replay_mode", False,
                                ParameterDescriptor(description='Is the shore node trying to replay data?'))
 
-        self.websocket:WebSocketClientProtocol = None
+        self.websocket: WebSocketClientProtocol = None
         self.data = {}
         self.logs = []
         self.can_bus_state = CANBusStatus.OFFLINE
@@ -67,13 +68,15 @@ class ShoreDataCollector(Node):
 
         self.create_sub(Log, ros_out_topic, self.logs_collector)
         self.create_sub(InletCoolantData, "/electrical/temp_sensors/in", self.electrical_coolant_temp_collector_inlet)
-        self.create_sub(OutletCoolantData, "/electrical/temp_sensors/out", self.electrical_coolant_temp_collector_outlet)
+        self.create_sub(OutletCoolantData, "/electrical/temp_sensors/out",
+                        self.electrical_coolant_temp_collector_outlet)
         self.create_sub(GPSData, "/motion/gps", self.gps_location_collector)
         self.create_sub(GPSVTGData, "/motion/vtg", self.gps_speed_collector)
         self.create_sub(GPSSVData, "/motion/sv", self.gps_sats_collector)
         self.create_sub(GPGSAData, "/motion/gsa", self.gps_sat_mode_collector)
         self.create_sub(CellData, "/cell", self.cell_data_collector)
-        self.create_sub(CANMotorData, "/motors/can_motor_data", self.motor_collector)
+        self.create_sub(CANMotorData, "/motors/motor_a", self.motorA_collector)
+        self.create_sub(CANMotorData, "/motors/motor_b", self.motorB_collector)
         self.create_sub(CANBusStatus, "/motors/can_bus_state", self.bus_state_collector)
         self.create_sub(Time, "/boat_time", self.time_collector)
         self.wss_watchdog = self.create_timer(5, self.watchdog_callback)
@@ -84,14 +87,13 @@ class ShoreDataCollector(Node):
         self._logger.info("Data send rate was changed to " + str(param_list[0].value) + "s via a parameter callback")
         return SetParametersResult(successful=True)
 
-    
     def create_sub(self, data_type, topic, callback):
         self._logger.info("Logging <" + topic + "> with custom msg of <" + data_type.__name__ + ">")
         self.create_subscription(data_type, topic, callback, 10)
 
     def _run_asyncio_loop(self):
         asyncio.run(self.start_background_shore_sender())
-    
+
     def add_data(self, data_name, data):
         """
         Adds data to be sent to the shore server.
@@ -124,7 +126,7 @@ class ShoreDataCollector(Node):
                 if not self.websocket.open:
                     self._logger.error("Unable to open a connect to the shore server.")
                     self._logger.error(f"Attempted URI: {SHORE_URI}. SHUTTING DOWN...")
-                    self.alarm_publisher.publish_alarm(Alarm.WEBSOCKET_INITIAL_CONNECTION_FAILURE) # ALARM:
+                    self.alarm_publisher.publish_alarm(Alarm.WEBSOCKET_INITIAL_CONNECTION_FAILURE)  # ALARM:
                     # Shore Comms Node Shutdown
                     self.destroy_node()
                     return
@@ -145,17 +147,17 @@ class ShoreDataCollector(Node):
                 self._logger.error(f"Websocket error: {e.reason}")
                 self.alarm_publisher.publish_alarm(Alarm.WEBSOCKET_CONNECTION_CLOSED)
                 continue
-    
+
     def watchdog_callback(self):
         self._logger.debug("[Websocket Watchdog] running callback")
         if not hasattr(self, "websocket") or self.websocket is None:
             self._logger.warn("[Websocket Watchdog] Websocket is not opened yet...")
-            self.alarm_publisher.publish_alarm(Alarm.WEBSOCKET_IS_NOT_INITIALLY_OPENED_YET) # ALARM:
+            self.alarm_publisher.publish_alarm(Alarm.WEBSOCKET_IS_NOT_INITIALLY_OPENED_YET)  # ALARM:
             # Shore Comms Websocket failure
 
         elif not self.websocket.open:
             self._logger.error("[Websocket Watchdog] The node is not connected to the shore server via the websocket.")
-            self.alarm_publisher.publish_alarm(Alarm.WEBSOCKET_NOT_OPENED) # ALARM: Shore Comms Websocket failure
+            self.alarm_publisher.publish_alarm(Alarm.WEBSOCKET_NOT_OPENED)  # ALARM: Shore Comms Websocket failure
 
     async def send_initial_ident(self):
         output_data = {
@@ -169,7 +171,7 @@ class ShoreDataCollector(Node):
             return
         output_data = {
             "type": "data",
-            "payload" : self.data
+            "payload": self.data
         }
         if self.isReplay:
             output_data["replay"] = True
@@ -183,14 +185,14 @@ class ShoreDataCollector(Node):
 
         for alarm in self.alarms:
             output_data = {
-            "type": "alarm",
-            "action": "set",
-            "payload" : {
-                "id": alarm[0],
-                "timestamp": alarm[1],
-                "message": alarm[2],
-                "type": "error"
-                }   
+                "type": "alarm",
+                "action": "set",
+                "payload": {
+                    "id": alarm[0],
+                    "timestamp": alarm[1],
+                    "message": alarm[2],
+                    "type": "error"
+                }
             }
             try:
                 await self.websocket.send(json.dumps(output_data))
@@ -203,7 +205,7 @@ class ShoreDataCollector(Node):
 
         self.alarms.clear()
 
-    async def  send_logs_to_shore(self):
+    async def send_logs_to_shore(self):
         if len(self.logs) == 0:
             return
 
@@ -229,52 +231,61 @@ class ShoreDataCollector(Node):
         }
         await self.websocket.send(json.dumps(output_data))
 
+        # IMPORTANT: Parameter name MUST be "msg"
 
-                    # IMPORTANT: Parameter name MUST be "msg"
-    def electrical_coolant_temp_collector_inlet(self, msg:InletCoolantData):
+    def electrical_coolant_temp_collector_inlet(self, msg: InletCoolantData):
         self.add_data("inlet_temp", msg.inlet_temp)
 
-    def electrical_coolant_temp_collector_outlet(self, msg:OutletCoolantData):
+    def electrical_coolant_temp_collector_outlet(self, msg: OutletCoolantData):
         self.add_data("outlet_temp", msg.outlet_temp)
 
-    def gps_location_collector(self, msg:GPSData):
+    def gps_location_collector(self, msg: GPSData):
         self.add_data("lat", msg.lat)
         self.add_data("long", msg.lon)
 
-    def gps_speed_collector(self, msg:GPSVTGData):
+    def gps_speed_collector(self, msg: GPSVTGData):
         self.add_data("speed", msg.speed)
         self.add_data("heading", msg.true_track)
 
-    def gps_sats_collector(self, msg:GPSSVData):
+    def gps_sats_collector(self, msg: GPSSVData):
         self.add_data("sats", [message_to_ordereddict(sat) for sat in msg.sats])
 
-    def gps_sat_mode_collector(self, msg:GPGSAData):
+    def gps_sat_mode_collector(self, msg: GPGSAData):
         self.add_data("sat_mode", message_to_ordereddict(msg))
 
     def cell_data_collector(self, msg: CellData):
         self.add_data("cell", message_to_ordereddict(msg))
 
-    def motor_collector(self, msg:CANMotorData):
-        self.add_data("voltage", msg.voltage)
-        self.add_data("throttle_mv", msg.throttle_mv)
-        self.add_data("throttle_percentage", msg.throttle_mv)
-        self.add_data("rpm", msg.rpm)
-        self.add_data("torque", msg.torque)
-        self.add_data("motor_temp", msg.motor_temp)
-        self.add_data("current", msg.current)
-        self.add_data("power", msg.power)
+    def motorA_collector(self, msg: CANMotorData):
+        self.add_data("motor_a.voltage", msg.voltage)
+        self.add_data("motor_a.throttle_mv", msg.throttle_mv)
+        self.add_data("motor_a.throttle_percentage", msg.throttle_mv)
+        self.add_data("motor_a.rpm", msg.rpm)
+        self.add_data("motor_a.torque", msg.torque)
+        self.add_data("motor_a.motor_temp", msg.motor_temp)
+        self.add_data("motor_a.current", msg.current)
+        self.add_data("motor_a.power", msg.power)
 
-    def bus_state_collector(self, msg:CANBusStatus):
+    def motorB_collector(self, msg: CANMotorData):
+        self.add_data("motor_b.voltage", msg.voltage)
+        self.add_data("motor_b.throttle_mv", msg.throttle_mv)
+        self.add_data("motor_b.throttle_percentage", msg.throttle_mv)
+        self.add_data("motor_b.rpm", msg.rpm)
+        self.add_data("motor_b.torque", msg.torque)
+        self.add_data("motor_b.motor_temp", msg.motor_temp)
+        self.add_data("motor_b.current", msg.current)
+        self.add_data("motor_b.power", msg.power)
+
+    def bus_state_collector(self, msg: CANBusStatus):
         self.can_bus_state = msg.bus_state
 
-    def time_collector(self, msg:Time):
+    def time_collector(self, msg: Time):
         self.add_data("boat_time", get_time_in_ms(msg))
 
-
-    def alarms_collector(self, msg:ShoreBoatAlarm):
+    def alarms_collector(self, msg: ShoreBoatAlarm):
         self.add_alarm(msg.error_code, get_time_in_ms(msg.timestamp), msg.message)
 
-    def logs_collector(self, msg:Log):
+    def logs_collector(self, msg: Log):
         logged_data = {
             "timestamp": get_time_in_ms(msg.stamp),
             "msg": msg.msg,
@@ -294,8 +305,6 @@ def main(args=None):
             rclpy.spin(minimal_subscriber)
     except (KeyboardInterrupt, ExternalShutdownException):
         pass
-
-
 
 
 if __name__ == '__main__':

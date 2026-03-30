@@ -1,3 +1,5 @@
+import os
+
 import rclpy
 from rcl_interfaces.msg import ParameterDescriptor
 from rclpy.executors import ExternalShutdownException
@@ -5,11 +7,8 @@ from rclpy.node import Node
 
 from boat_common_libs.alarm_lib import alarm_helper
 from boat_common_libs.alarm_lib.alarms import Alarm
-from boat_data_interfaces.msg import MotorData, BoatAlarm, CANMotorData, CANBusStatus
-
-import os
-
-from can_node.old_can_program import CANBus  #type: ignore
+from boat_data_interfaces.msg import CANMotorData, CANBusStatus
+from can_node.canbus import CANBus  # type: ignore
 
 
 class MotorNode(Node):
