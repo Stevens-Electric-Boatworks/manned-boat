@@ -275,11 +275,11 @@ class ShoreDataCollector(Node):
     def sys_util_collector(self, msg: SysUtilData):
         self.add_data("rpi.cpu.currentLoad", msg.cpu_percent)
         self.add_data("rpi.cpu.speed", msg.cpu_freq / 1000)
-        self.add_data("rpi.memory.total", msg.total_mem)
-        self.add_data("rpi.memory.used", msg.current_mem)
+        self.add_data("rpi.memory.total", msg.total_mem * 1000000)
+        self.add_data("rpi.memory.used", msg.current_mem * 1000000)
         self.add_data("rpi.memory.percent", msg.percent_mem)
-        self.add_data("rpi.disk.total", msg.disk_total)
-        self.add_data("rpi.disk.used", msg.disk_used)
+        self.add_data("rpi.disk.total", msg.disk_total * 1000000)
+        self.add_data("rpi.disk.used", msg.disk_used * 1000000)
 
     def alarms_collector(self, msg:ShoreBoatAlarm):
         self.add_alarm(msg.error_code, get_time_in_ms(msg.timestamp), msg.message)
