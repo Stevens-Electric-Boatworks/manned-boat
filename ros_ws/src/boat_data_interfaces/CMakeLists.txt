@@ -43,6 +43,11 @@ rosidl_generate_interfaces(${PROJECT_NAME}
   "msg/CANBusStatus.msg"
   "msg/OutletCoolantData.msg"
   "msg/InletCoolantData.msg"
+  "msg/bms/BMSCellVoltage.msg"
+  "msg/bms/BMSPackSummary.msg"
+  "msg/bms/BMSSOCSummary.msg"
+  "msg/bms/BMSMcuSummary.msg"
+  "msg/bms/BMSThermistor.msg"
   "srv/AlarmRaise.srv"
   "srv/AlarmDelatch.srv"
   DEPENDENCIES builtin_interfaces

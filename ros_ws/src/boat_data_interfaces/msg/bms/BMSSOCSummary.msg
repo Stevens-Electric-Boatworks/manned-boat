@@ -1,0 +1,3 @@
+float32 soc_percent
+int32 pack_kwhr
+int32 max_kwhr
