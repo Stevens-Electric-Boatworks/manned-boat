@@ -1,90 +1,17 @@
+import math
+import subprocess
+import time
+import traceback
 from threading import Thread
 
 import canopen
-
-import math
-import time
-
 from can import CanError
+from canopen import BaseNode402
 from rclpy.impl.rcutils_logger import RcutilsLogger
 
 from boat_common_libs.alarm_lib.alarms import Alarm
 from boat_data_interfaces.msg import CANMotorData, CANBusStatus
 
-import traceback
-import subprocess
-
-
-# GatherData.py
-
-
-# NEED to install pip package "canlib"
-# sudo pip install canlib --break-system-packages
-# https://pycanlib.readthedocs.io/en/v1.31.107/canlib.html#installation
-# https://kvaser.com/canlib-webhelp/section_install_linux.htm
-
-# Instructions coming soon AFTER we run them on the Pi to verify what we have done
-
-# This program is for reading serial data from the arduino
-# Any new sensor or data being read, must be added to the dictionaries below.
-# All you must do is make sure the order in which it is getting printed corresponsd to the loop below
-
-
-# They are using serial?
-# == Ishaan
-
-# ser = serial.Serial('/dev/ttyACM0', 115200, timeout=1)
-
-
-# def read_serial():
-#     try:
-#         line = ser.readline().decode('utf-8').strip()  # Read a line from the serial port
-#         values = line.split(",")  # Split the line by commas
-#
-#         # Ensure we have the expected number of values before proceeding
-#         if len(values) != 7:
-#             return {
-#                 'yaw': 0,
-#                 'pitch': 0,
-#                 'roll': 0,
-#                 'ax': 0,
-#                 'ay': 0,
-#                 'az': 0,
-#                 'heading': 0
-#             }
-#
-#         # loop mentioned in desctiption
-#         yaw, pitch, roll, ax, ay, az, heading = [float(v) for v in values]
-#         #         print("good data:", values)
-#         return {
-#             'yaw': yaw,
-#             'pitch': pitch,
-#             'roll': roll,
-#             'ax': ax,
-#             'ay': ay,
-#             'az': az,
-#             'heading': heading
-#         }
-#     except UnicodeDecodeError:
-#         print("Received invalid byte sequence. Skipping...")
-#         return {'yaw': 0,
-#                 'pitch': 0,
-#                 'roll': 0,
-#                 'ax': 0,
-#                 'ay': 0,
-#                 'az': 0,
-#                 'heading': 0
-#                 }
-#     except ValueError:
-#         print("Error in converting values. Skipping...")
-#         return {'yaw': 0,
-#                 'pitch': 0,
-#                 'roll': 0,
-#                 'ax': 0,
-#                 'ay': 0,
-#                 'az': 0,
-#                 'heading': 0
-#                 }
 
 def is_can_interface_up(interface: str = "can0") -> bool:
     try:
@@ -101,15 +28,18 @@ def is_can_interface_up(interface: str = "can0") -> bool:
 
 
 class OldCanProgram:
-    def __init__(self, logger: RcutilsLogger, dummy_efp, publisher, is_node_ok, declare_alarm, shutdown_node, unlatch_all_alarms):
+    def __init__(self, logger: RcutilsLogger, dummy_efp, motorA_pub, motorB_pub, is_node_ok, declare_alarm, shutdown_node,
+                 unlatch_all_alarms):
+        self.network = None
         self.sdo = None
         self.start_time = None
         self.can_thread = None
-        self.node = None
-        self.publisher = None
+        self.motorA = None
+        self.motorB = None
         self.logger = logger
         self.dummy_efp = dummy_efp
-        self.publisher = publisher
+        self.motorA_pub = motorA_pub
+        self.motorB_pub = motorB_pub
         self.is_node_ok = is_node_ok
         self.declare_alarm = declare_alarm
         self.shutdown_node = shutdown_node
@@ -145,24 +75,25 @@ class OldCanProgram:
         self.logger.info("Connected to SocketCAN")
         # Subscribe to messages
         self.network.subscribe(0, self.on_msg_receive)
-        # You can create a node with a known node-ID
-        node_id = 6  # Replace with your node ID
         self.logger.info("Using a dummy EDS file at \"" + self.dummy_efp + "\".")
-        self.node = canopen.BaseNode402(node_id, canopen.import_od(self.dummy_efp))  # Use a dummy EDS here
-        self.network.add_node(self.node)
+        self.motorA = canopen.BaseNode402(6, canopen.import_od(self.dummy_efp))  # Use a dummy EDS here
+        self.motorB = canopen.BaseNode402(7, canopen.import_od(self.dummy_efp))  # Use a dummy EDS here
+        self.network.add_node(self.motorA)
+        self.network.add_node(self.motorB)
 
         self.can_thread = Thread(
-            target=self.read_can_messages, args=[self.publisher], daemon=True)
+            target=self.read_can_messages, args=[self.motorA_pub, self.motorB_pub], daemon=True)
         self.can_thread.start()
 
-    def read_can_messages(self, publisher):
+    def read_can_messages(self, motorA_pub, motorB_pub):
         while True:
             try:
                 if not self.is_node_ok:
                     self.logger.info("Safely shutting down the CAN Motor reader thread")
                     return
 
-                self.publish_sdo_data(publisher)
+                self.publish_sdo_data(self.motorA, motorA_pub)
+                self.publish_sdo_data(self.motorB, motorB_pub)
                 time.sleep(0.3)
             except Exception as e:
                 time.sleep(0.8)
@@ -180,9 +111,9 @@ class OldCanProgram:
                     """.format(str(node_id), str(data), str(subindex)))
 
     # The SDO index (or address) is found in the parameters.csv file.
-    def read_and_log_sdo(self, index, subindex):
+    def read_and_log_sdo(self, motor: BaseNode402, index, subindex):
         try:
-            value = self.node.sdo[index][subindex].raw
+            value = motor.sdo[index][subindex].raw
             self.unlatch_all_alarms()
             self.can_bus_state = CANBusStatus.ONLINE
             return value
@@ -195,12 +126,12 @@ class OldCanProgram:
     # These are SDOs retrieved from the controller via CANbus using above function
     # There is a wide list of sensor data that can be read, but these are the useful ones.
     # Feel free to browse the parameter list which is in testing/parameters.csv
-    def publish_sdo_data(self, publisher):
-        voltage = self.read_and_log_sdo(0x2030, 2) * 0.01  # Volts
+    def publish_sdo_data(self, motor, publisher):
+        voltage = self.read_and_log_sdo(motor, 0x2030, 2) * 0.01  # Volts
         throttle_mv = -1  # self.read_and_log_sdo( 0x2013, 1)  # mV
-        rpm = self.read_and_log_sdo(0x2001, 2)  # rpm
-        current = self.read_and_log_sdo(0x2073, 1)  # Arms
-        temperature = self.read_and_log_sdo( 0x2040, 2)  # deg C
+        rpm = self.read_and_log_sdo(motor, 0x2001, 2)  # rpm
+        current = self.read_and_log_sdo(motor, 0x2073, 1)  # Arms
+        temperature = self.read_and_log_sdo(motor, 0x2040, 2)  # deg C
 
         throttle_percent = throttle_mv / 2800  # %
 
@@ -218,11 +149,9 @@ class OldCanProgram:
         msg.motor_temp = int(temperature)
         msg.current = int(current)
         msg.power = int(power)
-        
-        
+
         if self.can_bus_state == CANBusStatus.ONLINE:
             publisher.publish(msg)
-
 
     def get_bus_state(self):
         return self.can_bus_state
