@@ -32,8 +32,10 @@ class MotorNode(Node):
 
         file_path = self.get_parameter('dummy_epf').get_parameter_value().string_value
         self.can = CANBus(self._logger, os.path.expanduser(file_path), self.motorA_pub, self.motorB_pub,
-                          self.context.ok, self.declare_alarm, rclpy.shutdown, self.unlatch_all_alarms, bms_pack_sum_pub=self.bms_pack_sum_pub, bms_thermistor_pub=self.bms_thermistor_pub,
-                                    bms_mcu_sum_pub=self.bms_mcu_sum_pub, bms_soc_sum_pub=self.bms_soc_sum_pub, bms_cell_volt_pub=self.bms_cell_volt_pub)
+                          self.context.ok, self.declare_alarm, rclpy.shutdown, self.unlatch_all_alarms,
+                          bms_pack_sum_pub=self.bms_pack_sum_pub, bms_thermistor_pub=self.bms_thermistor_pub,
+                          bms_mcu_sum_pub=self.bms_mcu_sum_pub, bms_soc_sum_pub=self.bms_soc_sum_pub,
+                          bms_cell_volt_pub=self.bms_cell_volt_pub)
         self.create_timer(0.5, self.publish_bus_state)
         self.can.setup_can()
 
