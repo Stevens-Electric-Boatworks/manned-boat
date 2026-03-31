@@ -22,7 +22,7 @@ class MotorNode(Node):
         self._alarm_publisher = alarm_helper.create_alarm_publisher(self)
         self.can_bus_status_publisher = self.create_publisher(CANBusStatus, '/motors/can_bus_state', 10)
         description = ParameterDescriptor(description='Defines where to find the exact file the dummy epf data is')
-        self.declare_parameter('dummy_epf', '~/eboat_src/data/dummy.epf', description)
+        self.declare_parameter('dummy_epf', '~/eboat_src/data/motors.epf', description)
         # bms stuff
         self.bms_mcu_sum_pub = self.create_publisher(BMSMcuSummary, '/bms/mcu_summary', 10)
         self.bms_pack_sum_pub = self.create_publisher(BMSPackSummary, '/bms/pack_summary', 10)

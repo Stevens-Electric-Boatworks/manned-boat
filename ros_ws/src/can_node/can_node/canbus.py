@@ -2,12 +2,13 @@ import math
 import subprocess
 import time
 import traceback
+from sys import exec_prefix
 from threading import Thread
 
 import can
 import canopen
 from can import CanError
-from canopen import BaseNode402
+from canopen import BaseNode402, SdoCommunicationError, SdoAbortedError
 from rclpy.impl.rcutils_logger import RcutilsLogger
 from rclpy.publisher import Publisher
 
@@ -31,7 +32,8 @@ def is_can_interface_up(interface: str = "can0") -> bool:
 
 
 class CANBus:
-    def __init__(self, logger: RcutilsLogger, dummy_efp, motorA_pub, motorB_pub, is_node_ok, declare_alarm, shutdown_node,
+    def __init__(self, logger: RcutilsLogger, dummy_efp, motorA_pub, motorB_pub, is_node_ok, declare_alarm,
+                 shutdown_node,
                  unlatch_all_alarms, bms_pack_sum_pub, bms_mcu_sum_pub, bms_cell_volt_pub, bms_thermistor_pub,
                  bms_soc_sum_pub):
         self.network = None
@@ -56,7 +58,6 @@ class CANBus:
         self.bms_soc_sum_pub: Publisher = bms_soc_sum_pub
         self.bms_thermistor_pub: Publisher = bms_thermistor_pub
 
-
     def setup_can(self):
         # This is to ensure that we can publish alarms
         time.sleep(1.5)
@@ -75,7 +76,7 @@ class CANBus:
 
         # Connect to the CAN bus
         try:
-            self.network.connect(channel='can0', bustype='socketcan')
+            self.network.connect(channel='can0', bustype='socketcan', bitrate=500_000)
         except CanError:
             self.logger.error(
                 f"""Unable to connect to the CAN bus because of the following error: {traceback.format_exc()}""")
@@ -85,10 +86,10 @@ class CANBus:
 
         self.logger.info("Connected to SocketCAN")
         # Subscribe to messages
-        self.network.subscribe(0, self.on_msg_receive)
+        self.network.subscribe(1 , self.on_msg_receive)
         self.logger.info("Using a dummy EDS file at \"" + self.dummy_efp + "\".")
-        self.motorA = canopen.BaseNode402(6, canopen.import_od(self.dummy_efp))  # Use a dummy EDS here
-        self.motorB = canopen.BaseNode402(7, canopen.import_od(self.dummy_efp))  # Use a dummy EDS here
+        self.motorA = canopen.BaseNode402(7, canopen.import_od(self.dummy_efp))  # Use a dummy EDS here
+        self.motorB = canopen.BaseNode402(6, canopen.import_od(self.dummy_efp))  # Use a dummy EDS here
         self.network.add_node(self.motorA)
         self.network.add_node(self.motorB)
 
@@ -170,13 +171,13 @@ class CANBus:
             print(f"Config reply: {data.hex()}")
         # if msg and msg.arbitration_id == 0x293:
         #     print(f"Status [{msg.data[0]:#04x}]: {msg.data.hex()}")
-        print("\n")
 
         # This read runs in the background to query data from the BMS
 
     def bms_thread_callback(self):
         while True:
             self.query_bms()
+
     def read_can_messages(self, motorA_pub, motorB_pub):
         while True:
             try:
@@ -185,8 +186,8 @@ class CANBus:
                     return
 
                 self.publish_sdo_data(self.motorA, motorA_pub)
-                self.publish_sdo_data(self.motorB, motorB_pub)
-                time.sleep(0.3)
+                # self.publish_sdo_data(self.motorB, motorB_pub)
+                time.sleep(0.5)
             except Exception as e:
                 time.sleep(0.8)
                 self.logger.error(f"Error reading CAN message: {e}")
@@ -209,11 +210,23 @@ class CANBus:
             self.unlatch_all_alarms()
             self.can_bus_state = CANBusStatus.ONLINE
             return value
+        except canopen.sdo.exceptions.SdoCommunicationError as e:
+            value = motor.sdo[index][subindex].raw
+            return value
+        except SdoAbortedError as e:
+            self.logger.error(f"SDO communication error [{hex(index)}:{subindex}]: {e}")
+            self.declare_alarm(Alarm.ERROR_READING_CAN_SDO)
+            self.can_bus_state = CANBusStatus.OFFLINE
+            self.network.add_node(self.motorB)
+            self.network.add_node(self.motorA)
+            return -1
         except RuntimeError as e:
             self.logger.error(f"Error reading SDO [{hex(index)}:{subindex}]: {e}")
             self.declare_alarm(Alarm.ERROR_READING_CAN_SDO)
             self.can_bus_state = CANBusStatus.OFFLINE
-            return 0
+            self.network.add_node(self.motorA)
+            self.network.add_node(self.motorB)
+            return -1
 
     # These are SDOs retrieved from the controller via CANbus using above function
     # There is a wide list of sensor data that can be read, but these are the useful ones.
@@ -221,12 +234,17 @@ class CANBus:
     def publish_sdo_data(self, motor, publisher):
         voltage = self.read_and_log_sdo(motor, 0x2030, 2) * 0.01  # Volts
         throttle_mv = -1  # self.read_and_log_sdo( 0x2013, 1)  # mV
-        rpm = self.read_and_log_sdo(motor, 0x2001, 2)  # rpm
-        current = self.read_and_log_sdo(motor, 0x2073, 1)  # Arms
-        temperature = self.read_and_log_sdo(motor, 0x2040, 2)  # deg C
+        if motor == self.motorA:
+            rpm = self.read_and_log_sdo(motor, 0x2052, 1)  # rpm
+        else:
+            rpm = -1
 
-        throttle_percent = throttle_mv / 2800  # %
-
+        current = 0 # self.read_and_log_sdo(motor, 0x2073, 1)  # Arms
+        if motor == self.motorB:
+            temperature = self.read_and_log_sdo(motor, 0x2040, 2)  # deg C
+        else:
+            temperature = -1
+        throttle_percent = throttle_mv / 2800  #
         # this torque must be converted to lb*ft, because it is preferred
         torque = current * 0.15  # Nm
 
