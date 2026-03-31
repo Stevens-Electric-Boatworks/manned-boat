@@ -186,7 +186,7 @@ class CANBus:
                     return
 
                 self.publish_sdo_data(self.motorA, motorA_pub)
-                # self.publish_sdo_data(self.motorB, motorB_pub)
+                self.publish_sdo_data(self.motorB, motorB_pub)
                 time.sleep(0.5)
             except Exception as e:
                 time.sleep(0.8)
@@ -204,22 +204,23 @@ class CANBus:
                     """.format(str(node_id), str(data), str(subindex)))
 
     # The SDO index (or address) is found in the parameters.csv file.
-    def read_and_log_sdo(self, motor: BaseNode402, index, subindex):
+    def read_and_log_sdo(self, motor: BaseNode402, index, subindex, tries = 0):
+        if tries >= 10:
+            return -1
         try:
             value = motor.sdo[index][subindex].raw
             self.unlatch_all_alarms()
             self.can_bus_state = CANBusStatus.ONLINE
             return value
         except canopen.sdo.exceptions.SdoCommunicationError as e:
-            value = motor.sdo[index][subindex].raw
-            return value
+            return self.read_and_log_sdo(motor, index, subindex, tries + 1)
         except SdoAbortedError as e:
             self.logger.error(f"SDO communication error [{hex(index)}:{subindex}]: {e}")
             self.declare_alarm(Alarm.ERROR_READING_CAN_SDO)
             self.can_bus_state = CANBusStatus.OFFLINE
             self.network.add_node(self.motorB)
             self.network.add_node(self.motorA)
-            return -1
+            return self.read_and_log_sdo(motor, index, subindex, tries + 1)
         except RuntimeError as e:
             self.logger.error(f"Error reading SDO [{hex(index)}:{subindex}]: {e}")
             self.declare_alarm(Alarm.ERROR_READING_CAN_SDO)
@@ -233,31 +234,27 @@ class CANBus:
     # Feel free to browse the parameter list which is in testing/parameters.csv
     def publish_sdo_data(self, motor, publisher):
         voltage = self.read_and_log_sdo(motor, 0x2030, 2) * 0.01  # Volts
-        throttle_mv = -1  # self.read_and_log_sdo( 0x2013, 1)  # mV
-        if motor == self.motorA:
-            rpm = self.read_and_log_sdo(motor, 0x2052, 1)  # rpm
-        else:
-            rpm = -1
-
-        current = 0 # self.read_and_log_sdo(motor, 0x2073, 1)  # Arms
+        throttle_percent = self.read_and_log_sdo(motor, 0x2029, 6)  # mV
+        rpm = self.read_and_log_sdo(motor, 0x2052, 1)  # rpm
+        current = self.read_and_log_sdo(motor, 0x2073, 1)  # Arms
         if motor == self.motorB:
             temperature = self.read_and_log_sdo(motor, 0x2040, 2)  # deg C
         else:
             temperature = -1
-        throttle_percent = throttle_mv / 2800  #
+        throttle_percent = throttle_percent / 10
         # this torque must be converted to lb*ft, because it is preferred
         torque = current * 0.15  # Nm
 
-        power = (torque * rpm) * math.pi / 30000  # kW
+        power = voltage * current
 
         msg = CANMotorData()
         msg.voltage = int(voltage)
-        msg.throttle_mv = int(throttle_mv)
+        msg.throttle_mv = int(throttle_percent)
         msg.throttle_percentage = int(throttle_percent)
         msg.rpm = int(rpm)
         msg.torque = int(torque)
         msg.motor_temp = int(temperature)
-        msg.current = int(current)
+        msg.current = abs(int(current))
         msg.power = int(power)
 
         if self.can_bus_state == CANBusStatus.ONLINE:
