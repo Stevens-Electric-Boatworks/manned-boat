@@ -23,7 +23,7 @@ launch:
       name: "can_motor"
       param:
           - name: "dummy_epf"
-            value: "~/eboat_src/data/dummy.epf"
+            value: "~/eboat_src/data/motors.epf"
   - node:
       pkg: "motion_node"
       exec: "motion"
