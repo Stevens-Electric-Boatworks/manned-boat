@@ -9,7 +9,8 @@ from rclpy.node import Node
 
 from boat_common_libs.alarm_lib.alarms import Alarm
 from boat_data_interfaces.msg import ElectricalData, MotionData, BoatAlarm, \
-    CANMotorData, CANBusStatus, GPSData, OutletCoolantData, InletCoolantData, GPSVTGData, CellData, ShoreBoatAlarm
+    CANMotorData, CANBusStatus, GPSData, OutletCoolantData, InletCoolantData, GPSVTGData, CellData, ShoreBoatAlarm, \
+    BMSCellVoltage, BMSPackSummary, BMSSOCSummary, BMSMcuSummary
 from rcl_interfaces.msg import Log, ParameterDescriptor, SetParametersResult
 from boat_common_libs.alarm_lib import alarm_helper
 
@@ -78,7 +79,14 @@ class ShoreDataCollector(Node):
         self.create_sub(CANMotorData, "/motors/motor_a", self.motorA_collector)
         self.create_sub(CANMotorData, "/motors/motor_b", self.motorB_collector)
         self.create_sub(CANBusStatus, "/motors/can_bus_state", self.bus_state_collector)
+
+        self.create_sub(BMSCellVoltage, "/bms/cell_voltage", self.bms_cell_voltage)
+        self.create_sub(BMSPackSummary, "/bms/bms_pack_summary", self.bms_pack_summary)
+        self.create_sub(BMSSOCSummary, "/bms/soc_summary", self.bms_soc_summary)
+        self.create_sub(BMSMcuSummary, "/bms/mcu_summary", self.bms_mcu_summary)
+
         self.create_sub(Time, "/boat_time", self.time_collector)
+
         self.wss_watchdog = self.create_timer(5, self.watchdog_callback)
         self.add_on_set_parameters_callback(self.on_param_change_callback)
         threading.Thread(target=self._run_asyncio_loop, daemon=True).start()
@@ -275,6 +283,25 @@ class ShoreDataCollector(Node):
         self.add_data("motor_b.motor_temp", msg.motor_temp)
         self.add_data("motor_b.current", msg.current)
         self.add_data("motor_b.power", msg.power)
+
+    def bms_cell_voltage(self, msg: BMSCellVoltage):
+        self.add_data("bms.cell_voltage_high", msg.high)
+        self.add_data("bms.cell_voltage_low", msg.low)
+        self.add_data("bms.cell_voltage_mean", msg.mean)
+
+    def bms_pack_summary(self, msg: BMSPackSummary):
+        self.add_data("bms.pack_voltage_raw", msg.pack_voltage_raw)
+        self.add_data("bms.pack_current_raw", msg.pack_current_raw)
+
+    def bms_soc_summary(self, msg: BMSSOCSummary):
+        self.add_data("bms.soc_percent", msg.soc_percent)
+        self.add_data("bms.pack_kwhr", msg.pack_kwhr)
+        self.add_data("bms.max_kwhr", msg.max_kwhr)
+
+    def bms_mcu_summary(self, msg: BMSMcuSummary):
+        self.add_data("bms.charge_state", msg.charge_state)
+        self.add_data("bms.alerts", msg.alerts)
+        self.add_data("bms.plug_state", msg.plug_state)
 
     def bus_state_collector(self, msg: CANBusStatus):
         self.can_bus_state = msg.bus_state
