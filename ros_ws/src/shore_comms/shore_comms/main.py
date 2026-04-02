@@ -81,7 +81,7 @@ class ShoreDataCollector(Node):
         self.create_sub(CANBusStatus, "/motors/can_bus_state", self.bus_state_collector)
 
         self.create_sub(BMSCellVoltage, "/bms/cell_voltage", self.bms_cell_voltage)
-        self.create_sub(BMSPackSummary, "/bms/bms_pack_summary", self.bms_pack_summary)
+        self.create_sub(BMSPackSummary, "/bms/pack_summary", self.bms_pack_summary)
         self.create_sub(BMSSOCSummary, "/bms/soc_summary", self.bms_soc_summary)
         self.create_sub(BMSMcuSummary, "/bms/mcu_summary", self.bms_mcu_summary)
 
