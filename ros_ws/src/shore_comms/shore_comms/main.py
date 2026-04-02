@@ -76,8 +76,8 @@ class ShoreDataCollector(Node):
         self.create_sub(GPSSVData, "/motion/sv", self.gps_sats_collector)
         self.create_sub(GPGSAData, "/motion/gsa", self.gps_sat_mode_collector)
         self.create_sub(CellData, "/cell", self.cell_data_collector)
-        self.create_sub(CANMotorData, "/motors/motor_a", self.motorA_collector)
-        self.create_sub(CANMotorData, "/motors/motor_b", self.motorB_collector)
+        self.create_sub(CANMotorData, "/motors/motorA", self.motorA_collector)
+        self.create_sub(CANMotorData, "/motors/motorB", self.motorB_collector)
         self.create_sub(CANBusStatus, "/motors/can_bus_state", self.bus_state_collector)
 
         self.create_sub(BMSCellVoltage, "/bms/cell_voltage", self.bms_cell_voltage)
@@ -269,8 +269,9 @@ class ShoreDataCollector(Node):
         self.add_data("motor_a.throttle_mv", msg.throttle_mv)
         self.add_data("motor_a.throttle_percentage", msg.throttle_mv)
         self.add_data("motor_a.rpm", msg.rpm)
+        self.add_data("motors.rpm", msg.rpm)
         self.add_data("motor_a.torque", msg.torque)
-        self.add_data("motor_a.motor_temp", msg.motor_temp)
+        self.add_data("motor_a.temp", msg.motor_temp)
         self.add_data("motor_a.current", msg.current)
         self.add_data("motor_a.power", msg.power)
 
@@ -280,7 +281,7 @@ class ShoreDataCollector(Node):
         self.add_data("motor_b.throttle_percentage", msg.throttle_mv)
         self.add_data("motor_b.rpm", msg.rpm)
         self.add_data("motor_b.torque", msg.torque)
-        self.add_data("motor_b.motor_temp", msg.motor_temp)
+        self.add_data("motor_b.temp", msg.motor_temp)
         self.add_data("motor_b.current", msg.current)
         self.add_data("motor_b.power", msg.power)
 
