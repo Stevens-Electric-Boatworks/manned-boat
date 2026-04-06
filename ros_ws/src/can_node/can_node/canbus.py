@@ -140,12 +140,13 @@ class CANBus:
                 print(f"MCU Summary — ChargeState={charge_state}, PlugState={plug_state}, Alerts={alerts}")
 
             elif b0 == 0x02:  # Pack Summary
-                pack_voltage_raw = int.from_bytes(data[1:3], 'little')
-                pack_current_raw = int.from_bytes(data[4:6], 'little', signed=True)
+                print(str(data))
+                pack_voltage_raw = int.from_bytes(data[2:4], 'little', signed=False)
+                pack_current_raw = int.from_bytes(data[4:6], 'little', signed=False)
                 # Scale factors depend on your firmware config; check the doc for your version
                 self.bms_pack_sum_pub.publish(
                     BMSPackSummary(pack_voltage_raw=pack_voltage_raw, pack_current_raw=pack_current_raw))
-                print(f"Pack Summary — Voltage bytes={data[1:3].hex()}, Current bytes={data[4:6].hex()}")
+                print(f"Pack Summary — Voltage bytes={data[2:4].hex()}, Current bytes={data[4:6].hex()}")
 
             elif b0 == 0x03:  # Cell Voltage Summary
                 cv_low = int.from_bytes(data[2:4], 'little')
@@ -169,6 +170,11 @@ class CANBus:
 
         elif sid == 0x193:  # PDO1 MISO — Configuration Data Reply
             print(f"Config reply: {data.hex()}")
+
+        elif sid == 0xbe:
+            number = int.from_bytes(data[1:2], 'little')
+            print(f"Number: {number}")
+
         # if msg and msg.arbitration_id == 0x293:
         #     print(f"Status [{msg.data[0]:#04x}]: {msg.data.hex()}")
 

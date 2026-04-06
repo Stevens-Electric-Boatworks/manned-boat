@@ -1,2 +1,2 @@
-int8 pack_voltage_raw
-int8 pack_current_raw
+int16 pack_voltage_raw
+int16 pack_current_raw
