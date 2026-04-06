@@ -281,6 +281,8 @@ class ShoreDataCollector(Node):
         self.add_data("rpi.memory.percent", msg.percent_mem)
         self.add_data("rpi.disk.total", msg.disk_total * 1000000)
         self.add_data("rpi.disk.used", msg.disk_used * 1000000)
+        self.add_data("rpi.net.tx_mb", msg.tx_mb)
+        self.add_data("rpi.net.rx_mb", msg.rx_mb)
 
     def alarms_collector(self, msg: ShoreBoatAlarm):
         self.add_alarm(msg.error_code, get_time_in_ms(msg.timestamp), msg.message)
