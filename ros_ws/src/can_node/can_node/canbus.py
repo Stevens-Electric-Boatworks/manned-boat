@@ -167,7 +167,7 @@ class CANBus:
     def _bms_request_loop(self):
         while True:
             self.request_bms_status_data()
-            time.sleep(0.1)
+            time.sleep(0.5)
 
     def read_can_messages(self, motorA_pub, motorB_pub):
         while True:
