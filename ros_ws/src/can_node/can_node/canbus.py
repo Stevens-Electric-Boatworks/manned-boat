@@ -222,28 +222,27 @@ class CANBus:
     # Feel free to browse the parameter list which is in testing/parameters.csv
     def publish_sdo_data(self, motor, publisher):
         voltage = self.read_and_log_sdo(motor, 0x2030, 2) * 0.01  # Volts
-        throttle_percent = self.read_and_log_sdo(motor, 0x2029, 6)  # mV
+        throttle_percent = self.read_and_log_sdo(motor, 0x2029, 6) / 10 # %
         rpm = self.read_and_log_sdo(motor, 0x2052, 1)  # rpm
         current = self.read_and_log_sdo(motor, 0x2073, 1)  # Arms
         if motor == self.motorB:
             temperature = self.read_and_log_sdo(motor, 0x2040, 2)  # deg C
         else:
             temperature = -1
-        throttle_percent = throttle_percent / 10
         # this torque must be converted to lb*ft, because it is preferred
-        torque = current * 0.15  # Nm
+        torque = self.read_and_log_sdo(motor, 0x2076, 2) * 0.1  # Nm
 
         power = voltage * current
 
         msg = CANMotorData()
-        msg.voltage = int(voltage)
-        msg.throttle_mv = int(throttle_percent)
+        msg.voltage = float(voltage)
+        msg.throttle_mv = -1
         msg.throttle_percentage = int(throttle_percent)
         msg.rpm = int(rpm)
-        msg.torque = int(torque)
-        msg.motor_temp = int(temperature)
-        msg.current = abs(int(current))
-        msg.power = int(power)
+        msg.torque = float(torque)
+        msg.motor_temp = float(temperature)
+        msg.current = float(current)
+        msg.power = float(power)
 
         if self.can_bus_state == CANBusStatus.ONLINE:
             publisher.publish(msg)

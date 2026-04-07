@@ -264,8 +264,7 @@ class ShoreDataCollector(Node):
 
     def motorA_collector(self, msg: CANMotorData):
         self.add_data("motor_a.voltage", msg.voltage)
-        self.add_data("motor_a.throttle_mv", msg.throttle_mv)
-        self.add_data("motor_a.throttle_percentage", msg.throttle_mv)
+        self.add_data("motors.throttle", msg.throttle_percentage)
         self.add_data("motor_a.rpm", msg.rpm)
         self.add_data("motors.rpm", msg.rpm)
         self.add_data("motor_a.torque", msg.torque)
@@ -276,7 +275,6 @@ class ShoreDataCollector(Node):
     def motorB_collector(self, msg: CANMotorData):
         self.add_data("motor_b.voltage", msg.voltage)
         self.add_data("motor_b.throttle_mv", msg.throttle_mv)
-        self.add_data("motor_b.throttle_percentage", msg.throttle_mv)
         self.add_data("motor_b.rpm", msg.rpm)
         self.add_data("motor_b.torque", msg.torque)
         self.add_data("motor_b.temp", msg.motor_temp)
