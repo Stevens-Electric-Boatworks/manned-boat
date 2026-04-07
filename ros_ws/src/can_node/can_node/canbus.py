@@ -151,7 +151,7 @@ class CANBus:
             cv_low_v = cv_low / 1000.0
             cv_mean_v = cv_mean / 1000.0
             cv_hi_v = cv_hi / 1000.0
-            self.bms_cell_volt_pub.publish(BMSCellVoltage(low=cv_low_v, mean=cv_mean_v, high=cv_hi_v))
+            self.bms_cell_volt_pub.publish(BMSCellVoltage(low=float(cv_low_v), mean=float(cv_mean_v), high=float(cv_hi_v)))
             # print(f"Cell Voltage — Low={cv_low}, Mean={cv_mean}, High={cv_hi}")
 
         elif b0 == 0x04:  # Thermistor Summary
