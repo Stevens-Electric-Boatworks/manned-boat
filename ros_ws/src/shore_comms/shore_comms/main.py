@@ -76,8 +76,15 @@ class ShoreDataCollector(Node):
         self.create_sub(GPSSVData, "/motion/sv", self.gps_sats_collector)
         self.create_sub(GPGSAData, "/motion/gsa", self.gps_sat_mode_collector)
         self.create_sub(CellData, "/cell", self.cell_data_collector)
-        self.create_sub(CANMotorData, "/motors/can_motor_data", self.motor_collector)
+        self.create_sub(CANMotorData, "/motors/motorA", self.motorA_collector)
+        self.create_sub(CANMotorData, "/motors/motorB", self.motorB_collector)
         self.create_sub(CANBusStatus, "/motors/can_bus_state", self.bus_state_collector)
+
+        self.create_sub(BMSCellVoltage, "/bms/cell_voltage", self.bms_cell_voltage)
+        self.create_sub(BMSPackSummary, "/bms/pack_summary", self.bms_pack_summary)
+        self.create_sub(BMSSOCSummary, "/bms/soc_summary", self.bms_soc_summary)
+        self.create_sub(BMSMcuSummary, "/bms/mcu_summary", self.bms_mcu_summary)
+
         self.create_sub(Time, "/boat_time", self.time_collector)
         self.create_sub(SysUtilData, "/sys_utilization", self.sys_util_collector)
         self.wss_watchdog = self.create_timer(5, self.watchdog_callback)
@@ -257,15 +264,45 @@ class ShoreDataCollector(Node):
     def cell_data_collector(self, msg: CellData):
         self.add_data("cell", message_to_ordereddict(msg))
 
-    def motor_collector(self, msg: CANMotorData):
-        self.add_data("voltage", msg.voltage)
-        self.add_data("throttle_mv", msg.throttle_mv)
-        self.add_data("throttle_percentage", msg.throttle_mv)
-        self.add_data("rpm", msg.rpm)
-        self.add_data("torque", msg.torque)
-        self.add_data("motor_temp", msg.motor_temp)
-        self.add_data("current", msg.current)
-        self.add_data("power", msg.power)
+    def motorA_collector(self, msg: CANMotorData):
+        self.add_data("motor_a.voltage", msg.voltage)
+        self.add_data("motor_a.throttle_mv", msg.throttle_mv)
+        self.add_data("motor_a.throttle_percentage", msg.throttle_mv)
+        self.add_data("motor_a.rpm", msg.rpm)
+        self.add_data("motors.rpm", msg.rpm)
+        self.add_data("motor_a.torque", msg.torque)
+        self.add_data("motor_a.temp", msg.motor_temp)
+        self.add_data("motor_a.current", msg.current)
+        self.add_data("motor_a.power", msg.power)
+
+    def motorB_collector(self, msg: CANMotorData):
+        self.add_data("motor_b.voltage", msg.voltage)
+        self.add_data("motor_b.throttle_mv", msg.throttle_mv)
+        self.add_data("motor_b.throttle_percentage", msg.throttle_mv)
+        self.add_data("motor_b.rpm", msg.rpm)
+        self.add_data("motor_b.torque", msg.torque)
+        self.add_data("motor_b.temp", msg.motor_temp)
+        self.add_data("motor_b.current", msg.current)
+        self.add_data("motor_b.power", msg.power)
+
+    def bms_cell_voltage(self, msg: BMSCellVoltage):
+        self.add_data("bms.cell_voltage_high", msg.high)
+        self.add_data("bms.cell_voltage_low", msg.low)
+        self.add_data("bms.cell_voltage_mean", msg.mean)
+
+    def bms_pack_summary(self, msg: BMSPackSummary):
+        self.add_data("bms.pack_voltage_raw", msg.pack_voltage_raw)
+        self.add_data("bms.pack_current_raw", msg.pack_current_raw)
+
+    def bms_soc_summary(self, msg: BMSSOCSummary):
+        self.add_data("bms.soc_percent", msg.soc_percent)
+        self.add_data("bms.pack_kwhr", msg.pack_kwhr)
+        self.add_data("bms.max_kwhr", msg.max_kwhr)
+
+    def bms_mcu_summary(self, msg: BMSMcuSummary):
+        self.add_data("bms.charge_state", msg.charge_state)
+        self.add_data("bms.alerts", msg.alerts)
+        self.add_data("bms.plug_state", msg.plug_state)
 
     def bus_state_collector(self, msg: CANBusStatus):
         self.can_bus_state = msg.bus_state

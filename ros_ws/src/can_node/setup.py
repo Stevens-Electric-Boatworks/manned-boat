@@ -1,6 +1,6 @@
 from setuptools import find_packages, setup
 
-package_name = 'motor_node'
+package_name = 'can_node'
 
 setup(
     name=package_name,
@@ -20,8 +20,8 @@ setup(
     tests_require=['pytest'],
     entry_points={
         'console_scripts': [
-            "test = motor_node.test_data.canmotor_testing_data:main",
-            "motor = motor_node.motor_node:main"
+            "test = can_node.test_data.canmotor_testing_data:main",
+            "motor = can_node.can_node:main"
         ],
     },
 )
