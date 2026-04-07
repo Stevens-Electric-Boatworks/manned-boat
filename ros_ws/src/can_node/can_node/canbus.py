@@ -133,36 +133,35 @@ class CANBus:
 
             self.bms_mcu_sum_pub.publish(
                 BMSMcuSummary(charge_state=charge_state, plug_state=plug_state, alerts=alerts))
-            print(f"MCU Summary — ChargeState={charge_state}, PlugState={plug_state}, Alerts={alerts}")
-
+            # print(f"MCU Summary — ChargeState={charge_state}, PlugState={plug_state}, Alerts={alerts}")
+        #
         elif b0 == 0x02:  # Pack Summary
-            print(str(data))
             pack_voltage_raw = int.from_bytes(data[2:4], 'little', signed=False)
             pack_current_raw = int.from_bytes(data[4:6], 'little', signed=False)
             # Scale factors depend on your firmware config; check the doc for your version
             self.bms_pack_sum_pub.publish(
                 BMSPackSummary(pack_voltage_raw=pack_voltage_raw, pack_current_raw=pack_current_raw))
-            print(f"Pack Summary — Voltage bytes={data[2:4].hex()}, Current bytes={data[4:6].hex()}")
+            # print(f"Pack Summary — Voltage bytes={data[2:4].hex()}, Current bytes={data[4:6].hex()}")
 
         elif b0 == 0x03:  # Cell Voltage Summary
             cv_low = int.from_bytes(data[2:4], 'little')
             cv_mean = int.from_bytes(data[4:6], 'little')
             cv_hi = int.from_bytes(data[6:8], 'little')
             self.bms_cell_volt_pub.publish(BMSCellVoltage(low=cv_low, mean=cv_mean, high=cv_hi))
-            print(f"Cell Voltage — Low={cv_low}, Mean={cv_mean}, High={cv_hi}")
+            # print(f"Cell Voltage — Low={cv_low}, Mean={cv_mean}, High={cv_hi}")
 
         elif b0 == 0x04:  # Thermistor Summary
             th_min = data[1]
             th_max = data[2]
             self.bms_thermistor_pub.publish(BMSThermistor(min=th_min, max=th_max))
-            print(f"Thermistor — Min={th_min}, Max={th_max}")
+            # print(f"Thermistor — Min={th_min}, Max={th_max}")
 
         elif b0 == 0x05:  # SOC Summary
             soc = data[1]
             pack_kwhr = int.from_bytes(data[2:4], 'little')
             pack_max_kwhr = int.from_bytes(data[6:8], 'little')
             self.bms_soc_sum_pub.publish(BMSSOCSummary(pack_kwhr=pack_kwhr, pack_max_kwhr=pack_max_kwhr))
-            print(f"SOC Summary — SOC={soc}%, PackKWHr={pack_kwhr}, MaxKWHr={pack_max_kwhr}")
+            # print(f"SOC Summary — SOC={soc}%, PackKWHr={pack_kwhr}, MaxKWHr={pack_max_kwhr}")
 
     def _bms_request_loop(self):
         while True:
@@ -231,7 +230,10 @@ class CANBus:
             temperature = -1
         # this torque must be converted to lb*ft, because it is preferred
         torque = self.read_and_log_sdo(motor, 0x2076, 2) * 0.1  # Nm
-
+        enabled_raw = self.read_and_log_sdo(motor, 0x2000, 1)
+        enabled = enabled_raw & (1 << 3)
+        if enabled == -1:
+            enabled = False
         power = voltage * current
 
         msg = CANMotorData()
@@ -243,6 +245,7 @@ class CANBus:
         msg.motor_temp = float(temperature)
         msg.current = float(current)
         msg.power = float(power)
+        msg.enabled = bool(enabled)
 
         if self.can_bus_state == CANBusStatus.ONLINE:
             publisher.publish(msg)

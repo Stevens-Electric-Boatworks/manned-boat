@@ -271,6 +271,7 @@ class ShoreDataCollector(Node):
         self.add_data("motor_a.temp", msg.motor_temp)
         self.add_data("motor_a.current", msg.current)
         self.add_data("motor_a.power", msg.power)
+        self.add_data("motor_a.enabled", msg.enabled)
 
     def motorB_collector(self, msg: CANMotorData):
         self.add_data("motor_b.voltage", msg.voltage)
@@ -280,6 +281,7 @@ class ShoreDataCollector(Node):
         self.add_data("motor_b.temp", msg.motor_temp)
         self.add_data("motor_b.current", msg.current)
         self.add_data("motor_b.power", msg.power)
+        self.add_data("motor_b.enabled", msg.enabled)
 
     def bms_cell_voltage(self, msg: BMSCellVoltage):
         self.add_data("bms.cell_voltage_high", msg.high)

@@ -6,3 +6,4 @@ float32 torque
 float32 motor_temp
 float32 current
 float32 power
+bool enabled
