@@ -1,5 +1,6 @@
 import math
 import subprocess
+import threading
 import time
 import traceback
 from sys import exec_prefix
@@ -36,6 +37,7 @@ class CANBus:
                  shutdown_node,
                  unlatch_all_alarms, bms_pack_sum_pub, bms_mcu_sum_pub, bms_cell_volt_pub, bms_thermistor_pub,
                  bms_soc_sum_pub):
+        self.bms_thread = None
         self.network = None
         self.sdo = None
         self.start_time = None
@@ -57,6 +59,8 @@ class CANBus:
         self.bms_cell_volt_pub: Publisher = bms_cell_volt_pub
         self.bms_soc_sum_pub: Publisher = bms_soc_sum_pub
         self.bms_thermistor_pub: Publisher = bms_thermistor_pub
+
+        self._sdo_lock = threading.Lock()
 
     def setup_can(self):
         # This is to ensure that we can publish alarms
@@ -86,7 +90,7 @@ class CANBus:
 
         self.logger.info("Connected to SocketCAN")
         # Subscribe to messages
-        self.network.subscribe(1 , self.on_msg_receive)
+        self.network.subscribe(0x293, self.on_bms_data)
         self.logger.info("Using a dummy EDS file at \"" + self.dummy_efp + "\".")
         self.motorA = canopen.BaseNode402(7, canopen.import_od(self.dummy_efp))  # Use a dummy EDS here
         self.motorB = canopen.BaseNode402(6, canopen.import_od(self.dummy_efp))  # Use a dummy EDS here
@@ -98,7 +102,7 @@ class CANBus:
         self.can_thread.start()
 
         self.bms_thread = Thread(
-            target=self.bms_thread_callback, args=[], daemon=True)
+            target=self._bms_request_loop, args=[], daemon=True)
         self.bms_thread.start()
 
     def request_bms_status_data(self):
@@ -119,70 +123,51 @@ class CANBus:
 
         send([0x01, 0x01, 0x01, 0x01, 0x01, 0x01, 0x01, 0x01])
 
-    def query_bms(self):
-        self.request_bms_status_data()
-        msg = self.network.bus.recv(timeout=0.5)
-        if msg is None:
-            return
-        sid = msg.arbitration_id
-        data = msg.data
+    def on_bms_data(self, can_id:int, data:bytearray, timestamp:float):
+        b0 = data[0]  # Message type identifier
 
-        if sid == 0x293:  # PDO2 MISO — Status Data Reply
-            b0 = data[0]  # Message type identifier
+        if b0 == 0x01:  # MCU Summary
+            charge_state = data[4]
+            plug_state = data[5]
+            alerts = data[6]
 
-            if b0 == 0x01:  # MCU Summary
-                charge_state = data[4]
-                plug_state = data[5]
-                alerts = data[6]
+            self.bms_mcu_sum_pub.publish(
+                BMSMcuSummary(charge_state=charge_state, plug_state=plug_state, alerts=alerts))
+            print(f"MCU Summary — ChargeState={charge_state}, PlugState={plug_state}, Alerts={alerts}")
 
-                self.bms_mcu_sum_pub.publish(
-                    BMSMcuSummary(charge_state=charge_state, plug_state=plug_state, alerts=alerts))
-                print(f"MCU Summary — ChargeState={charge_state}, PlugState={plug_state}, Alerts={alerts}")
+        elif b0 == 0x02:  # Pack Summary
+            print(str(data))
+            pack_voltage_raw = int.from_bytes(data[2:4], 'little', signed=False)
+            pack_current_raw = int.from_bytes(data[4:6], 'little', signed=False)
+            # Scale factors depend on your firmware config; check the doc for your version
+            self.bms_pack_sum_pub.publish(
+                BMSPackSummary(pack_voltage_raw=pack_voltage_raw, pack_current_raw=pack_current_raw))
+            print(f"Pack Summary — Voltage bytes={data[2:4].hex()}, Current bytes={data[4:6].hex()}")
 
-            elif b0 == 0x02:  # Pack Summary
-                print(str(data))
-                pack_voltage_raw = int.from_bytes(data[2:4], 'little', signed=False)
-                pack_current_raw = int.from_bytes(data[4:6], 'little', signed=False)
-                # Scale factors depend on your firmware config; check the doc for your version
-                self.bms_pack_sum_pub.publish(
-                    BMSPackSummary(pack_voltage_raw=pack_voltage_raw, pack_current_raw=pack_current_raw))
-                print(f"Pack Summary — Voltage bytes={data[2:4].hex()}, Current bytes={data[4:6].hex()}")
+        elif b0 == 0x03:  # Cell Voltage Summary
+            cv_low = int.from_bytes(data[2:4], 'little')
+            cv_mean = int.from_bytes(data[4:6], 'little')
+            cv_hi = int.from_bytes(data[6:8], 'little')
+            self.bms_cell_volt_pub.publish(BMSCellVoltage(low=cv_low, mean=cv_mean, high=cv_hi))
+            print(f"Cell Voltage — Low={cv_low}, Mean={cv_mean}, High={cv_hi}")
 
-            elif b0 == 0x03:  # Cell Voltage Summary
-                cv_low = int.from_bytes(data[2:4], 'little')
-                cv_mean = int.from_bytes(data[4:6], 'little')
-                cv_hi = int.from_bytes(data[6:8], 'little')
-                self.bms_cell_volt_pub.publish(BMSCellVoltage(low=cv_low, mean=cv_mean, high=cv_hi))
-                print(f"Cell Voltage — Low={cv_low}, Mean={cv_mean}, High={cv_hi}")
+        elif b0 == 0x04:  # Thermistor Summary
+            th_min = data[1]
+            th_max = data[2]
+            self.bms_thermistor_pub.publish(BMSThermistor(min=th_min, max=th_max))
+            print(f"Thermistor — Min={th_min}, Max={th_max}")
 
-            elif b0 == 0x04:  # Thermistor Summary
-                th_min = data[1]
-                th_max = data[2]
-                self.bms_thermistor_pub.publish(BMSThermistor(min=th_min, max=th_max))
-                print(f"Thermistor — Min={th_min}, Max={th_max}")
+        elif b0 == 0x05:  # SOC Summary
+            soc = data[1]
+            pack_kwhr = int.from_bytes(data[2:4], 'little')
+            pack_max_kwhr = int.from_bytes(data[6:8], 'little')
+            self.bms_soc_sum_pub.publish(BMSSOCSummary(pack_kwhr=pack_kwhr, pack_max_kwhr=pack_max_kwhr))
+            print(f"SOC Summary — SOC={soc}%, PackKWHr={pack_kwhr}, MaxKWHr={pack_max_kwhr}")
 
-            elif b0 == 0x05:  # SOC Summary
-                soc = data[1]
-                pack_kwhr = int.from_bytes(data[2:4], 'little')
-                pack_max_kwhr = int.from_bytes(data[6:8], 'little')
-                self.bms_soc_sum_pub.publish(BMSSOCSummary(pack_kwhr=pack_kwhr, pack_max_kwhr=pack_max_kwhr))
-                print(f"SOC Summary — SOC={soc}%, PackKWHr={pack_kwhr}, MaxKWHr={pack_max_kwhr}")
-
-        elif sid == 0x193:  # PDO1 MISO — Configuration Data Reply
-            print(f"Config reply: {data.hex()}")
-
-        elif sid == 0xbe:
-            number = int.from_bytes(data[1:2], 'little')
-            print(f"Number: {number}")
-
-        # if msg and msg.arbitration_id == 0x293:
-        #     print(f"Status [{msg.data[0]:#04x}]: {msg.data.hex()}")
-
-        # This read runs in the background to query data from the BMS
-
-    def bms_thread_callback(self):
+    def _bms_request_loop(self):
         while True:
-            self.query_bms()
+            self.request_bms_status_data()
+            time.sleep(0.1)
 
     def read_can_messages(self, motorA_pub, motorB_pub):
         while True:
@@ -211,29 +196,26 @@ class CANBus:
 
     # The SDO index (or address) is found in the parameters.csv file.
     def read_and_log_sdo(self, motor: BaseNode402, index, subindex, tries = 0):
-        if tries >= 10:
+        if tries >= 3:
             return -1
-        try:
-            value = motor.sdo[index][subindex].raw
-            self.unlatch_all_alarms()
-            self.can_bus_state = CANBusStatus.ONLINE
-            return value
-        except canopen.sdo.exceptions.SdoCommunicationError as e:
-            return self.read_and_log_sdo(motor, index, subindex, tries + 1)
-        except SdoAbortedError as e:
-            self.logger.error(f"SDO communication error [{hex(index)}:{subindex}]: {e}")
-            self.declare_alarm(Alarm.ERROR_READING_CAN_SDO)
-            self.can_bus_state = CANBusStatus.OFFLINE
-            self.network.add_node(self.motorB)
-            self.network.add_node(self.motorA)
-            return self.read_and_log_sdo(motor, index, subindex, tries + 1)
-        except RuntimeError as e:
-            self.logger.error(f"Error reading SDO [{hex(index)}:{subindex}]: {e}")
-            self.declare_alarm(Alarm.ERROR_READING_CAN_SDO)
-            self.can_bus_state = CANBusStatus.OFFLINE
-            self.network.add_node(self.motorA)
-            self.network.add_node(self.motorB)
-            return -1
+        with self._sdo_lock:
+            try:
+                value = motor.sdo[index][subindex].raw
+                self.unlatch_all_alarms()
+                self.can_bus_state = CANBusStatus.ONLINE
+                return value
+            except canopen.sdo.exceptions.SdoCommunicationError as e:
+                return self.read_and_log_sdo(motor, index, subindex, tries + 1)
+            except SdoAbortedError as e:
+                self.logger.error(f"SDO communication error [{hex(index)}:{subindex}]: {e}")
+                self.declare_alarm(Alarm.ERROR_READING_CAN_SDO)
+                self.can_bus_state = CANBusStatus.OFFLINE
+                return self.read_and_log_sdo(motor, index, subindex, tries + 1)
+            except RuntimeError as e:
+                self.logger.error(f"Error reading SDO [{hex(index)}:{subindex}]: {e}")
+                self.declare_alarm(Alarm.ERROR_READING_CAN_SDO)
+                self.can_bus_state = CANBusStatus.OFFLINE
+                return -1
 
     # These are SDOs retrieved from the controller via CANbus using above function
     # There is a wide list of sensor data that can be read, but these are the useful ones.
