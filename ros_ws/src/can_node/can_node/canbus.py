@@ -181,7 +181,7 @@ class CANBus:
 
                 self.publish_sdo_data(self.motorA, motorA_pub)
                 self.publish_sdo_data(self.motorB, motorB_pub)
-                time.sleep(0.1)
+                time.sleep(0.25)
             except Exception as e:
                 time.sleep(0.8)
                 self.logger.error(f"Error reading CAN message: {e}")
@@ -201,24 +201,23 @@ class CANBus:
     def read_and_log_sdo(self, motor: BaseNode402, index, subindex, tries = 0):
         if tries >= 3:
             return -1
-        with self._sdo_lock:
-            try:
-                value = motor.sdo[index][subindex].raw
-                self.unlatch_all_alarms()
-                self.can_bus_state = CANBusStatus.ONLINE
-                return value
-            except canopen.sdo.exceptions.SdoCommunicationError as e:
-                return self.read_and_log_sdo(motor, index, subindex, tries + 1)
-            except SdoAbortedError as e:
-                self.logger.error(f"SDO communication error [{hex(index)}:{subindex}]: {e}")
-                self.declare_alarm(Alarm.ERROR_READING_CAN_SDO)
-                self.can_bus_state = CANBusStatus.OFFLINE
-                return self.read_and_log_sdo(motor, index, subindex, tries + 1)
-            except RuntimeError as e:
-                self.logger.error(f"Error reading SDO [{hex(index)}:{subindex}]: {e}")
-                self.declare_alarm(Alarm.ERROR_READING_CAN_SDO)
-                self.can_bus_state = CANBusStatus.OFFLINE
-                return -1
+        try:
+            value = motor.sdo[index][subindex].raw
+            self.unlatch_all_alarms()
+            self.can_bus_state = CANBusStatus.ONLINE
+            return value
+        except canopen.sdo.exceptions.SdoCommunicationError as e:
+            return self.read_and_log_sdo(motor, index, subindex, tries + 1)
+        except SdoAbortedError as e:
+            self.logger.error(f"SDO communication error [{hex(index)}:{subindex}]: {e}")
+            self.declare_alarm(Alarm.ERROR_READING_CAN_SDO)
+            self.can_bus_state = CANBusStatus.OFFLINE
+            return self.read_and_log_sdo(motor, index, subindex, tries + 1)
+        except RuntimeError as e:
+            self.logger.error(f"Error reading SDO [{hex(index)}:{subindex}]: {e}")
+            self.declare_alarm(Alarm.ERROR_READING_CAN_SDO)
+            self.can_bus_state = CANBusStatus.OFFLINE
+            return -1
 
     # These are SDOs retrieved from the controller via CANbus using above function
     # There is a wide list of sensor data that can be read, but these are the useful ones.
