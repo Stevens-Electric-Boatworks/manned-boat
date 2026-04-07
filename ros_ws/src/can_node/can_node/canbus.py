@@ -8,7 +8,7 @@ from threading import Thread
 import can
 import canopen
 from can import CanError
-from canopen import BaseNode402, SdoCommunicationError, SdoAbortedError
+from canopen import BaseNode402, SdoCommunicationError, SdoAbortedError, Network
 from rclpy.impl.rcutils_logger import RcutilsLogger
 from rclpy.publisher import Publisher
 
@@ -36,7 +36,7 @@ class CANBus:
                  shutdown_node,
                  unlatch_all_alarms, bms_pack_sum_pub, bms_mcu_sum_pub, bms_cell_volt_pub, bms_thermistor_pub,
                  bms_soc_sum_pub):
-        self.network = None
+        self.network: Network = None
         self.sdo = None
         self.start_time = None
         self.can_thread = None
@@ -62,14 +62,23 @@ class CANBus:
         # This is to ensure that we can publish alarms
         time.sleep(1.5)
         self.logger.info("Setting up the old can...")
-        self.logger.warning("The throttle values and motor temperature are not real.")
 
         # test for can0 open
+        self.configure()
+
+    def configure(self):
         if not is_can_interface_up():
             self.logger.error("can0 is not up. Aborting startup!!")
             self.declare_alarm(Alarm.CAN0_INTERFACE_NOT_UP)
             self.can_bus_state = CANBusStatus.OFFLINE
             return
+
+        if self.network is not None:
+            self.is_node_ok = False
+            self.network.clear()
+            self.network.bus.shutdown()
+            print("shutting down bus...")
+            time.sleep(1)
 
         # Start with creating a new network representing one CAN bus
         self.network = canopen.Network()
@@ -86,7 +95,7 @@ class CANBus:
 
         self.logger.info("Connected to SocketCAN")
         # Subscribe to messages
-        self.network.subscribe(1 , self.on_msg_receive)
+        self.network.subscribe(1, self.on_msg_receive)
         self.logger.info("Using a dummy EDS file at \"" + self.dummy_efp + "\".")
         self.motorA = canopen.BaseNode402(7, canopen.import_od(self.dummy_efp))  # Use a dummy EDS here
         self.motorB = canopen.BaseNode402(6, canopen.import_od(self.dummy_efp))  # Use a dummy EDS here
@@ -95,7 +104,9 @@ class CANBus:
 
         self.can_thread = Thread(
             target=self.read_can_messages, args=[self.motorA_pub, self.motorB_pub], daemon=True)
+        self.is_node_ok = True
         self.can_thread.start()
+
 
         self.bms_thread = Thread(
             target=self.bms_thread_callback, args=[], daemon=True)
@@ -182,6 +193,8 @@ class CANBus:
 
     def bms_thread_callback(self):
         while True:
+            if self.network is None:
+                return
             self.query_bms()
 
     def read_can_messages(self, motorA_pub, motorB_pub):
@@ -210,7 +223,7 @@ class CANBus:
                     """.format(str(node_id), str(data), str(subindex)))
 
     # The SDO index (or address) is found in the parameters.csv file.
-    def read_and_log_sdo(self, motor: BaseNode402, index, subindex, tries = 0):
+    def read_and_log_sdo(self, motor: BaseNode402, index, subindex, tries=0):
         if tries >= 10:
             return -1
         try:
@@ -268,3 +281,13 @@ class CANBus:
 
     def get_bus_state(self):
         return self.can_bus_state
+
+    def restart_bus(self):
+        self.logger.error("[DANGEROUS] Restarting CAN Bus via a service call")
+        self.configure()
+
+    def flush_bus(self):
+        if self.network is None:
+            return
+        self.network.clear()
+        self.network.bus.flush_tx_buffer()

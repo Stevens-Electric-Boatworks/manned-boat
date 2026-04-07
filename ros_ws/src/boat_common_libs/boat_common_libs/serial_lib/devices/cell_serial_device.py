@@ -37,9 +37,9 @@ class CellSerialDevice(SerialDevice):
         self.on_cell_data = on_cell_data
         self.data = CellData()
         self._ready_for_next_msg = threading.Event()
-        threading.Thread(target=self._configure_then_signal).start()
+        threading.Thread(target=self.configure_then_signal).start()
 
-    def _configure_then_signal(self):
+    def configure_then_signal(self):
         self.configure()
         self._ready_for_next_msg.set()
 
