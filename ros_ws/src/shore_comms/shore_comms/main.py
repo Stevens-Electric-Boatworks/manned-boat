@@ -289,7 +289,7 @@ class ShoreDataCollector(Node):
         self.add_data("bms.cell_voltage_mean", msg.mean)
 
     def bms_pack_summary(self, msg: BMSPackSummary):
-        self.add_data("bms.pack_voltage_raw", msg.pack_voltage_raw / 10)
+        self.add_data("bms.pack_voltage_raw", msg.pack_voltage_raw)
         self.add_data("bms.pack_current_raw", msg.pack_current_raw)
 
     def bms_soc_summary(self, msg: BMSSOCSummary):

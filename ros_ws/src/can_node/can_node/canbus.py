@@ -136,18 +136,22 @@ class CANBus:
             # print(f"MCU Summary — ChargeState={charge_state}, PlugState={plug_state}, Alerts={alerts}")
         #
         elif b0 == 0x02:  # Pack Summary
-            pack_voltage_raw = int.from_bytes(data[2:4], 'little', signed=False)
-            pack_current_raw = int.from_bytes(data[4:6], 'little', signed=False)
+            pack_voltage_raw = int.from_bytes(data[2:4], 'little', signed=False) / 10.0
+            pack_current_raw = abs(int.from_bytes(data[4:6], 'little', signed=True) / 10.0)
             # Scale factors depend on your firmware config; check the doc for your version
             self.bms_pack_sum_pub.publish(
                 BMSPackSummary(pack_voltage_raw=pack_voltage_raw, pack_current_raw=pack_current_raw))
             # print(f"Pack Summary — Voltage bytes={data[2:4].hex()}, Current bytes={data[4:6].hex()}")
 
         elif b0 == 0x03:  # Cell Voltage Summary
-            cv_low = int.from_bytes(data[2:4], 'little')
-            cv_mean = int.from_bytes(data[4:6], 'little')
-            cv_hi = int.from_bytes(data[6:8], 'little')
-            self.bms_cell_volt_pub.publish(BMSCellVoltage(low=cv_low, mean=cv_mean, high=cv_hi))
+            self.logger.info(str(data))
+            cv_low = int.from_bytes(data[2:4], 'little', signed=False)
+            cv_mean = int.from_bytes(data[4:6], 'little', signed=False)
+            cv_hi = int.from_bytes(data[6:8], 'little', signed=False)
+            cv_low_v = cv_low / 1000.0
+            cv_mean_v = cv_mean / 1000.0
+            cv_hi_v = cv_hi / 1000.0
+            self.bms_cell_volt_pub.publish(BMSCellVoltage(low=cv_low_v, mean=cv_mean_v, high=cv_hi_v))
             # print(f"Cell Voltage — Low={cv_low}, Mean={cv_mean}, High={cv_hi}")
 
         elif b0 == 0x04:  # Thermistor Summary
@@ -157,10 +161,10 @@ class CANBus:
             # print(f"Thermistor — Min={th_min}, Max={th_max}")
 
         elif b0 == 0x05:  # SOC Summary
-            soc = data[1]
+            soc = int.from_bytes(data[1:2], 'little')
             pack_kwhr = int.from_bytes(data[2:4], 'little')
             pack_max_kwhr = int.from_bytes(data[6:8], 'little')
-            self.bms_soc_sum_pub.publish(BMSSOCSummary(pack_kwhr=pack_kwhr, pack_max_kwhr=pack_max_kwhr))
+            self.bms_soc_sum_pub.publish(BMSSOCSummary(soc_percent=float(soc),pack_kwhr=pack_kwhr, pack_max_kwhr=pack_max_kwhr))
             # print(f"SOC Summary — SOC={soc}%, PackKWHr={pack_kwhr}, MaxKWHr={pack_max_kwhr}")
 
     def _bms_request_loop(self):
