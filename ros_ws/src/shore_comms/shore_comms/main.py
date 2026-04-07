@@ -1,5 +1,3 @@
-from boat_data_interfaces.msg._gpgsa_data import GPGSAData
-from boat_data_interfaces.msg._gpssv_data import GPSSVData
 from builtin_interfaces.msg import Time
 from websockets.exceptions import ConnectionClosed, InvalidStatus
 import rclpy
@@ -10,7 +8,7 @@ from rclpy.node import Node
 from boat_common_libs.alarm_lib.alarms import Alarm
 from boat_data_interfaces.msg import ElectricalData, MotionData, BoatAlarm, \
     CANMotorData, CANBusStatus, GPSData, OutletCoolantData, InletCoolantData, GPSVTGData, CellData, ShoreBoatAlarm, \
-    SysUtilData
+    SysUtilData, BMSCellVoltage, BMSPackSummary, BMSSOCSummary, BMSMcuSummary, GPSSVData, GPGSAData
 from rcl_interfaces.msg import Log, ParameterDescriptor, SetParametersResult
 from boat_common_libs.alarm_lib import alarm_helper
 
