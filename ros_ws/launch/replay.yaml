@@ -5,12 +5,12 @@
 
 launch:
   - node:
-      pkg: "shore_comms_cpp"
+      pkg: "shore_comms"
       exec: "shore"
       name: "shore_comms"
       param:
         - name: "data_send"
-          value: 100
+          value: 100.0
         - name: "replay_mode"
           value: true
 
