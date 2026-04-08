@@ -339,7 +339,8 @@ def main(args=None):
     try:
         with rclpy.init(args=args):
             minimal_subscriber = ShoreDataCollector()
-            rclpy.spin(minimal_subscriber)
+            while rclpy.ok():
+                rclpy.spin_once(minimal_subscriber, timeout_sec=0.05)
     except (KeyboardInterrupt, ExternalShutdownException):
         pass
 
