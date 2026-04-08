@@ -13,7 +13,7 @@ class CANMotorTestingDataNode(Node):
     def __init__(self):
         super().__init__("motor_node_testing_data")
         self.motorA = {
-            "voltage": SmoothRandom(30, 2.0, 0, 57),  # int8,
+            "voltage": SmoothRandom(47.5, 2.0, 0, 57),  # int8,
             "throttle_mv": SmoothRandom(0, 20, 0, 5000),  # int16, mV
             "throttle_percentage": SmoothRandom(0, 3.0, 0, 100),  # int8, %
             "rpm": SmoothRandom(0, 400, -1200, 1800),  # int16, up to ~12k RPM
@@ -24,7 +24,7 @@ class CANMotorTestingDataNode(Node):
             "enabled": True
         }
         self.motorB = {
-            "voltage": SmoothRandom(180, 1.0, 100, 200),  # int8, ~200 V system
+            "voltage": SmoothRandom(47.5, 1.0, 0, 200),  # int8, ~200 V system
             "throttle_mv": SmoothRandom(0, 20, 0, 5000),  # int16, mV
             "throttle_percentage": SmoothRandom(0, 3.0, 0, 100),  # int8, %
             "rpm": SmoothRandom(0, 400, -1200, 1800),  # int16, up to ~12k RPM
