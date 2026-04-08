@@ -144,7 +144,6 @@ class CANBus:
             # print(f"Pack Summary — Voltage bytes={data[2:4].hex()}, Current bytes={data[4:6].hex()}")
 
         elif b0 == 0x03:  # Cell Voltage Summary
-            self.logger.info(str(data))
             cv_low = int.from_bytes(data[2:4], 'little', signed=False)
             cv_mean = int.from_bytes(data[4:6], 'little', signed=False)
             cv_hi = int.from_bytes(data[6:8], 'little', signed=False)
@@ -199,7 +198,7 @@ class CANBus:
 
     # The SDO index (or address) is found in the parameters.csv file.
     def read_and_log_sdo(self, motor: BaseNode402, index, subindex, tries = 0):
-        if tries >= 3:
+        if tries >= 10:
             return -1
         try:
             value = motor.sdo[index][subindex].raw
