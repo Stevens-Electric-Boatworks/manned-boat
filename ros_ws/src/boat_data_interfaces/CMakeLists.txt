@@ -49,6 +49,7 @@ rosidl_generate_interfaces(${PROJECT_NAME}
   "msg/BMSMcuSummary.msg"
   "msg/BMSThermistor.msg"
   "msg/SysUtilData.msg"
+  "msg/CANThermistor.msg"
   "srv/AlarmRaise.srv"
   "srv/AlarmDelatch.srv"
   DEPENDENCIES builtin_interfaces
