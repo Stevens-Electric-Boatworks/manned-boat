@@ -180,7 +180,7 @@ class CANBus:
 
                 self.publish_sdo_data(self.motorA, motorA_pub)
                 self.publish_sdo_data(self.motorB, motorB_pub)
-                time.sleep(0.25)
+                time.sleep(0.2)
             except Exception as e:
                 time.sleep(0.8)
                 self.logger.error(f"Error reading CAN message: {e}")
