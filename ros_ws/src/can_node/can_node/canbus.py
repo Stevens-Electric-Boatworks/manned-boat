@@ -137,7 +137,7 @@ class CANBus:
         #
         elif b0 == 0x02:  # Pack Summary
             pack_voltage_raw = int.from_bytes(data[2:4], 'little', signed=False) / 10.0
-            pack_current_raw = abs(int.from_bytes(data[4:6], 'little', signed=True) / 10.0)
+            pack_current_raw = abs(int.from_bytes(data[4:6], 'little', signed=True))
             # Scale factors depend on your firmware config; check the doc for your version
             self.bms_pack_sum_pub.publish(
                 BMSPackSummary(pack_voltage_raw=float(pack_voltage_raw), pack_current_raw=float(pack_current_raw)))
