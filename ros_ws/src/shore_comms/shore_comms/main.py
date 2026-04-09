@@ -8,11 +8,11 @@ from rclpy.node import Node
 from boat_common_libs.alarm_lib.alarms import Alarm
 from boat_data_interfaces.msg import ElectricalData, MotionData, BoatAlarm, \
     CANMotorData, CANBusStatus, GPSData, OutletCoolantData, InletCoolantData, GPSVTGData, CellData, ShoreBoatAlarm, \
-    SysUtilData, BMSCellVoltage, BMSPackSummary, BMSSOCSummary, BMSMcuSummary, GPSSVData, GPGSAData
+    SysUtilData, BMSCellVoltage, BMSPackSummary, BMSSOCSummary, BMSMcuSummary, GPSSVData, GPGSAData, CANThermistor
 from rcl_interfaces.msg import Log, ParameterDescriptor, SetParametersResult
 from boat_common_libs.alarm_lib import alarm_helper
 
-#Websockets
+# Websockets
 import asyncio
 from websockets.client import connect
 from websockets.client import WebSocketClientProtocol
@@ -82,6 +82,8 @@ class ShoreDataCollector(Node):
         self.create_sub(BMSPackSummary, "/bms/pack_summary", self.bms_pack_summary)
         self.create_sub(BMSSOCSummary, "/bms/soc_summary", self.bms_soc_summary)
         self.create_sub(BMSMcuSummary, "/bms/mcu_summary", self.bms_mcu_summary)
+
+        self.create_sub(CANThermistor, "/can/cooling_temp", self.can_cooling_temp_collector)
 
         self.create_sub(Time, "/boat_time", self.time_collector)
         self.create_sub(SysUtilData, "/sys_utilization", self.sys_util_collector)
@@ -187,7 +189,7 @@ class ShoreDataCollector(Node):
     async def send_alarms_to_shore(self, ignore_empty):
         if len(self.alarms) == 0 and ignore_empty:
             return
-        #go through all alarms in the queue
+        # go through all alarms in the queue
 
         for alarm in self.alarms:
             output_data = {
@@ -301,6 +303,9 @@ class ShoreDataCollector(Node):
         self.add_data("bms.charge_state", msg.charge_state)
         self.add_data("bms.alerts", msg.alerts)
         self.add_data("bms.plug_state", msg.plug_state)
+
+    def can_cooling_temp_collector(self, msg: CANThermistor):
+        self.add_data("cooling_temp", msg.temp)
 
     def bus_state_collector(self, msg: CANBusStatus):
         self.can_bus_state = msg.bus_state

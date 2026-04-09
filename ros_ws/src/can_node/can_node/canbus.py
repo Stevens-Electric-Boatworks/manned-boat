@@ -15,7 +15,7 @@ from rclpy.publisher import Publisher
 
 from boat_common_libs.alarm_lib.alarms import Alarm
 from boat_data_interfaces.msg import CANMotorData, CANBusStatus, BMSSOCSummary, BMSThermistor, BMSCellVoltage, \
-    BMSPackSummary, BMSMcuSummary
+    BMSPackSummary, BMSMcuSummary, CANThermistor
 
 
 def is_can_interface_up(interface: str = "can0") -> bool:
@@ -36,7 +36,7 @@ class CANBus:
     def __init__(self, logger: RcutilsLogger, dummy_efp, motorA_pub, motorB_pub, is_node_ok, declare_alarm,
                  shutdown_node,
                  unlatch_all_alarms, bms_pack_sum_pub, bms_mcu_sum_pub, bms_cell_volt_pub, bms_thermistor_pub,
-                 bms_soc_sum_pub):
+                 bms_soc_sum_pub, can_thermistor_pub):
         self.bms_thread = None
         self.network = None
         self.sdo = None
@@ -60,14 +60,11 @@ class CANBus:
         self.bms_soc_sum_pub: Publisher = bms_soc_sum_pub
         self.bms_thermistor_pub: Publisher = bms_thermistor_pub
 
+        self.can_thermistor_pub: Publisher = can_thermistor_pub
+
         self._sdo_lock = threading.Lock()
 
     def setup_can(self):
-        # This is to ensure that we can publish alarms
-        time.sleep(1.5)
-        self.logger.info("Setting up the old can...")
-        self.logger.warning("The throttle values and motor temperature are not real.")
-
         # test for can0 open
         if not is_can_interface_up():
             self.logger.error("can0 is not up. Aborting startup!!")
@@ -91,6 +88,7 @@ class CANBus:
         self.logger.info("Connected to SocketCAN")
         # Subscribe to messages
         self.network.subscribe(0x293, self.on_bms_data)
+        self.network.subscribe(0xbe, self.on_thermistor_data)
         self.logger.info("Using a dummy EDS file at \"" + self.dummy_efp + "\".")
         self.motorA = canopen.BaseNode402(7, canopen.import_od(self.dummy_efp))  # Use a dummy EDS here
         self.motorB = canopen.BaseNode402(6, canopen.import_od(self.dummy_efp))  # Use a dummy EDS here
@@ -123,7 +121,7 @@ class CANBus:
 
         send([0x01, 0x01, 0x01, 0x01, 0x01, 0x01, 0x01, 0x01])
 
-    def on_bms_data(self, can_id:int, data:bytearray, timestamp:float):
+    def on_bms_data(self, can_id: int, data: bytearray, timestamp: float):
         b0 = data[0]  # Message type identifier
 
         if b0 == 0x01:  # MCU Summary
@@ -163,8 +161,13 @@ class CANBus:
             soc = int.from_bytes(data[1:2], 'little')
             pack_kwhr = int.from_bytes(data[2:4], 'little')
             pack_max_kwhr = int.from_bytes(data[6:8], 'little')
-            self.bms_soc_sum_pub.publish(BMSSOCSummary(soc_percent=float(soc),pack_kwhr=pack_kwhr, pack_max_kwhr=pack_max_kwhr))
+            self.bms_soc_sum_pub.publish(
+                BMSSOCSummary(soc_percent=float(soc), pack_kwhr=pack_kwhr, pack_max_kwhr=pack_max_kwhr))
             # print(f"SOC Summary — SOC={soc}%, PackKWHr={pack_kwhr}, MaxKWHr={pack_max_kwhr}")
+
+    def on_thermistor_data(self, can_id: int, data: bytearray, timestamp: float):
+        temp = int.from_bytes(data[0:2], 'little', signed=True) / 100
+        self.can_thermistor_pub.publish(CANThermistor(temp=float(temp)))
 
     def _bms_request_loop(self):
         while True:
@@ -189,15 +192,8 @@ class CANBus:
                 self.declare_alarm(Alarm.INVALID_CAN_PACKET_READ)
                 self.can_bus_state = CANBusStatus.OFFLINE
 
-    def on_msg_receive(self, node_id: int, data: bytearray, subindex: float):
-        self.logger.info(f"""The following message was received from the CAN Bus.
-                    Node_ID: %s
-                    Data: %s
-                    SubIndex: %s
-                    """.format(str(node_id), str(data), str(subindex)))
-
     # The SDO index (or address) is found in the parameters.csv file.
-    def read_and_log_sdo(self, motor: BaseNode402, index, subindex, tries = 0):
+    def read_and_log_sdo(self, motor: BaseNode402, index, subindex, tries=0):
         if tries >= 10:
             return -1
         try:
@@ -223,7 +219,7 @@ class CANBus:
     # Feel free to browse the parameter list which is in testing/parameters.csv
     def publish_sdo_data(self, motor, publisher):
         voltage = self.read_and_log_sdo(motor, 0x2030, 2) * 0.01  # Volts
-        throttle_percent = self.read_and_log_sdo(motor, 0x2029, 6) / 10 # %
+        throttle_percent = self.read_and_log_sdo(motor, 0x2029, 6) / 10  # %
         rpm = self.read_and_log_sdo(motor, 0x2052, 1)  # rpm
         current = self.read_and_log_sdo(motor, 0x2073, 1)  # Arms
         if motor == self.motorB:

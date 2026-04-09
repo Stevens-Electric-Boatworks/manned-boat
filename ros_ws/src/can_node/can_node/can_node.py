@@ -8,7 +8,7 @@ from rclpy.node import Node
 from boat_common_libs.alarm_lib import alarm_helper
 from boat_common_libs.alarm_lib.alarms import Alarm
 from boat_data_interfaces.msg import CANMotorData, CANBusStatus, BMSMcuSummary, BMSPackSummary, BMSCellVoltage, \
-    BMSSOCSummary, BMSThermistor
+    BMSSOCSummary, BMSThermistor, CANThermistor
 from can_node.canbus import CANBus  # type: ignore
 
 
@@ -30,12 +30,14 @@ class MotorNode(Node):
         self.bms_soc_sum_pub = self.create_publisher(BMSSOCSummary, '/bms/soc_summary', 10)
         self.bms_thermistor_pub = self.create_publisher(BMSThermistor, '/bms/thermistor', 10)
 
+        self.can_thermistor_pub = self.create_publisher(CANThermistor, "/can/cooling_temp", 10)
+
         file_path = self.get_parameter('dummy_epf').get_parameter_value().string_value
         self.can = CANBus(self._logger, os.path.expanduser(file_path), self.motorA_pub, self.motorB_pub,
                           self.context.ok, self.declare_alarm, rclpy.shutdown, self.unlatch_all_alarms,
                           bms_pack_sum_pub=self.bms_pack_sum_pub, bms_thermistor_pub=self.bms_thermistor_pub,
                           bms_mcu_sum_pub=self.bms_mcu_sum_pub, bms_soc_sum_pub=self.bms_soc_sum_pub,
-                          bms_cell_volt_pub=self.bms_cell_volt_pub)
+                          bms_cell_volt_pub=self.bms_cell_volt_pub, can_thermistor_pub=self.can_thermistor_pub)
         self.create_timer(0.5, self.publish_bus_state)
         self.can.setup_can()
 
