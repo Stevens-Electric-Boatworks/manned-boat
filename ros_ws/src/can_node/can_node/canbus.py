@@ -99,6 +99,8 @@ class CANBus:
         # Subscribe to messages
         self.network.subscribe(0x293, self.on_bms_data)
         self.network.subscribe(0xbe, self.on_thermistor_data)
+        self.network.subscribe(0x80 + 7, self.on_motor_a_fault)
+        self.network.subscribe(0x80 + 6, self.on_motor_b_fault)
         self.logger.info("Using a dummy EDS file at \"" + self.dummy_efp + "\".")
         self.motorA = canopen.BaseNode402(7, canopen.import_od(self.dummy_efp))  # Use a dummy EDS here
         self.motorB = canopen.BaseNode402(6, canopen.import_od(self.dummy_efp))  # Use a dummy EDS here
@@ -211,12 +213,18 @@ class CANBus:
             time.sleep(0.5)
 
     def read_can_messages(self, motorA_pub, motorB_pub):
+        n = 0
         while True:
             try:
                 if not self.is_node_ok:
                     self.logger.info("Safely shutting down the CAN Motor reader thread")
                     return
 
+                if n == 0:
+                    # query for alarms
+                    self.send_sdo(self.motorA, 0x3012, 0, 0x00)
+                    self.send_sdo(self.motorB, 0x3012, 0, 0x00)
+                n = (n + 1) % 10
                 self.publish_sdo_data(self.motorA, motorA_pub)
                 self.publish_sdo_data(self.motorB, motorB_pub)
                 time.sleep(0.2)
@@ -227,6 +235,25 @@ class CANBus:
                 self.logger.error(str(traceback.format_exc()))
                 self.declare_alarm(Alarm.INVALID_CAN_PACKET_READ)
                 self.can_bus_state = CANBusStatus.OFFLINE
+
+    def send_sdo(self, motor: BaseNode402, index, subindex, value, tries=0):
+        if tries >= 10:
+            return
+        try:
+            motor.sdo[index].raw = 0x01
+            self.unlatch_all_alarms()
+            self.can_bus_state = CANBusStatus.ONLINE
+        except canopen.sdo.exceptions.SdoCommunicationError as e:
+            return self.read_and_log_sdo(motor, index, subindex, tries + 1)
+        except SdoAbortedError as e:
+            self.logger.error(f"SDO communication error [{hex(index)}:{subindex}]: {e}")
+            self.declare_alarm(Alarm.ERROR_READING_CAN_SDO)
+            self.can_bus_state = CANBusStatus.OFFLINE
+            return self.read_and_log_sdo(motor, index, subindex, tries + 1)
+        except RuntimeError as e:
+            self.logger.error(f"Error reading SDO [{hex(index)}:{subindex}]: {e}")
+            self.declare_alarm(Alarm.ERROR_READING_CAN_SDO)
+            self.can_bus_state = CANBusStatus.OFFLINE
 
     # The SDO index (or address) is found in the parameters.csv file.
     def read_and_log_sdo(self, motor: BaseNode402, index, subindex, tries=0):
@@ -283,6 +310,44 @@ class CANBus:
 
         if self.can_bus_state == CANBusStatus.ONLINE:
             publisher.publish(msg)
+
+    def read_error_log(self, motor: BaseNode402) -> list[int]:
+        """Read stored emergency error codes from the controller's error log."""
+        # Sub-index 0 = number of stored errors
+        count = self.read_and_log_sdo(motor, 0x1003, 0)
+        errors = []
+        for i in range(1, count + 1):
+            # Each entry is a U32: upper 16 bits = manufacturer code, lower 16 = CANopen emcy code
+            entry = self.read_and_log_sdo(motor, 0x1003, i)
+            if entry != -1:
+                errors.append(entry)
+        return errors
+
+    def on_motor_fault(self, can_id: int, data: bytearray, timestamp: float, motor_name: str):
+        """
+        EMCY frame layout (8 bytes):
+          Bytes 0-1: CANopen Emergency Error Code
+          Byte  2:   Error Register (same as SDO 0x1001)
+          Byte  3:   Not used
+          Bytes 4-7: Extended Errors (same as SDO 0x3010:2) — manufacturer-specific fault bits
+        """
+        emcy_code = int.from_bytes(data[0:2], 'little')
+        if emcy_code == 0x000:
+            return
+        error_register = data[2]
+        extended_errors = int.from_bytes(data[4:8], 'little')
+
+        self.logger.error(
+            f"[{motor_name}] EMCY fault — code=0x{emcy_code:04X}, "
+            f"register=0x{error_register:02X}, extended=0x{extended_errors:08X}"
+        )
+        self.declare_alarm(Alarm.DRIVE_MOTOR_FAULT)
+
+    def on_motor_a_fault(self, can_id, data, timestamp):
+        self.on_motor_fault(can_id, data, timestamp, "MotorA")
+
+    def on_motor_b_fault(self, can_id, data, timestamp):
+        self.on_motor_fault(can_id, data, timestamp, "MotorB")
 
     def get_bus_state(self):
         return self.can_bus_state
