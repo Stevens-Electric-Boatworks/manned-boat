@@ -110,13 +110,13 @@ class ShoreDataCollector(Node):
         """
         self.data[data_name] = data
 
-    def add_alarm(self, error_code: int, timestamp, msg: str):
+    def add_alarm(self, error_code: int, timestamp, msg: str, type:str):
         """
         Queues an alarm to be sent to the shore server.
          param error_code - The error code based on the spreadsheet
          param timestamp - The timestamp of when the alarm was issued
         """
-        self.alarms.append((error_code, timestamp, msg))
+        self.alarms.append((error_code, timestamp, msg, type))
 
     def clear_all_websocket_alarms(self):
         self.alarm_publisher.delatch_alarm(Alarm.WEBSOCKET_CONNECTION_CLOSED)
@@ -199,7 +199,7 @@ class ShoreDataCollector(Node):
                     "id": alarm[0],
                     "timestamp": alarm[1],
                     "message": alarm[2],
-                    "type": "error"
+                    "type": alarm[3]
                 }
             }
             try:
@@ -325,7 +325,7 @@ class ShoreDataCollector(Node):
         self.add_data("rpi.net.rx_mb", msg.rx_mb)
 
     def alarms_collector(self, msg: ShoreBoatAlarm):
-        self.add_alarm(msg.error_code, get_time_in_ms(msg.timestamp), msg.message)
+        self.add_alarm(msg.error_code, get_time_in_ms(msg.timestamp), msg.message, str(msg.severity))
 
     def logs_collector(self, msg: Log):
         logged_data = {

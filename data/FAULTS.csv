@@ -1,412 +1,412 @@
 ID,Type,Message,Condition,Sticky
--1,FAULT,Unknown Fault,Only if there is an unknown fault code that is published.,false
-0,WARN,Unknown Warning,Only if there Is an unknown warning code that is published.,false
-1,FAULT,Websocket Initial Connection Failure,Unable to open a connection to the shore server,false
-2,FAULT,Websocket Connection Closed,The websocket connection unexpectadely closed,false
-3,WARN,Websocket Is Not Initally Opened Yet,Websocket is still waiting to be opened,true
-4,FAULT,Websocket Closed,Websocket is reported as no longer open,true
-10,FAULT,CAN Motor Node Shutdown,If the motor node has to shutdown due to a fatal error.,true
-11,FAULT,"""can0"" Interface Not Up",If `ip link status can0` does not have `status UP`,true
-12,WARN,Invalid CAN Packet Read,A `canerror` was thrown by the underlying `canopen` library,false
-13,WARN,Error reading CAN SDO,Caused by an invalid CAN SDO,false
-14,FAULT,Failed CAN Network Init,Failed to initialize `canopen.Network()`,true
-15,FAULT,Serial device does not exist,Failed to open a serial device because it doesn't exist, true
-16,FAULT,Generic Serial Device Error,There was some kind of generic serial device error tht could not be attributed to a single error, false
-17,FAULT,Serial Device In-Use,The serial device is in use and is locked, true
-18,FAULT,Serial Device IO Error,There was an IO error thrown when trying to read from the serial device, false
-19,FAULT,Drive Motor Fault,Drive motor has a fault. Check logs for more info,true
-30,WARN,Cellular Signal Quality POOR WARNING,Cellular signal quality is poor.,true
-31,FAULT,Cellular Authentication Mode NOT READY,AT+CPIN? is not READY,true
-40,WARN,MCU Ccenus Fault,MCU Reports a CCENUS Fault,TRUE
-41,WARN,MCU Tcencus Fault,MCU Reports a Tcencus Fault,TRUE
-42,FAULT,MCU High Cell Voltage Fault,MCU Reports a High Voltage Fault,TRUE
-43,FAULT,MCU Low Cell Voltage Fault,MCU Reports a Low Voltage Fault,TRUE
-44,FAULT,MCU High Temp Fault,MCU Reports a Temperature too High,TRUE
-45,FAULT,MCU Low Temp Fault,MCU Reports a Temperature too Low,TRUE
-46,FAULT,MCU Hardware Fault,MCU Reports a Hardware Fault,TRUE
-1000,FAULT,"Drive A [0x2340, 100] Power Stage ShortCircuit Fault","Hw detected short circuit.If the short circuit protection detects a short circuit, the power stage will be shut down. This is done by Hw without Sw interaction.The Sw will restart the power stage within 500 microseconds.",TRUE
-1001,FAULT,"Drive A [0x2340, 101] Power Stage ShortCircuitCounter Fault",This is an inforamative event that in combination with the ShortCircuit-event can be usefull when analyzing short circuit situations. This event will be cleared when power stage is disabled.,TRUE
-1002,WARN,"Drive A [0x2341, 103] Power Stage ShortCGlitch Warning","Hw detected short circuit glitch.If the short circuit protection detects a short circuit, the power stage will be shut down. This is done by Hw without Sw interaction.This event is always set whenever this happens.",TRUE
-1003,FAULT,"Drive A [0x2351, 111] Power Stage OVPActive Fault",Hw detected Over Voltage protection.Event is set if an Over Voltage Protection trip is detected.,TRUE
-1004,FAULT,"Drive A [0x2360, 120] Power Stage PWMUnexpectedOff Fault",The power stage was unexpectedly turned off.,TRUE
-1005,WARN,"Drive A [0x2361, 121] Power Stage PWMUnexpectedOffGlitch Warning",The power stage was unexpectedly turned off but restarted successfully.,TRUE
-1006,FAULT,"Drive A [0x2370, 122] Power Stage SupervisionPwmDisable Fault",Event is set if the supervision CPU has disabled PWM.The exact reason for this must be obtained by communicating with that particular node.,TRUE
-1007,FAULT,"Drive A [0x5210, 200] Current Measurements SensorOffset Fault",Event is set if offset is too high.Offset is calibrated when drive is disabled.Limit is 10% of default offset that is 2047 (i.e. half of ADC full-scale value),TRUE
-1008,FAULT,"Drive A [0x2310, 202] Current Measurements OverCurrentError Fault","Event is set if measured current is too high in any of the U,V or W phases and glitch counter is above trip limit.",TRUE
-1009,FAULT,"Drive A [0x2311, 203] Current Measurements OverCurrGlitch Fault","Event is set if measured current is too high in any of the U, V or W phases and glitch counter is below trip limit.",TRUE
-1010,FAULT,"Drive A [0x2316, 207] Current Measurements PhaseUVNotConnected Fault",Event is set during startup check of motor connections if the measrued current i phase U is below a defined limit,TRUE
-1011,FAULT,"Drive A [0x2317, 208] Current Measurements PhaseUWNotConnected Fault",Event is set during startup check of motor connections if the measrued current i phase U is below a defined limit,TRUE
-1012,FAULT,"Drive A [0x2318, 209] Current Measurements PhaseVWNotConnected Fault",Event is set during startup check of motor connections if the measrued current i phase V is below a defined limit,TRUE
-1013,FAULT,"Drive A [0x2319, 211] Current Measurements DriveIsNotDisable Fault",Event is set during startup check of motor connections if the drive is not disabled when running the check,TRUE
-1014,FAULT,"Drive A [0x2320, 213] Current Measurements RotorRotationTooHigh Fault",Event is set during startup check of motor connections if the rotor rotation is too high,TRUE
-1015,FAULT,"Drive A [0x2310, 310] Current Measurements CustomizedOverCurrentError Fault",Event is set when unfiltered RMS current is above over current limit for the specified number of consecutive samples.,TRUE
-1016,FAULT,"Drive A [0x8060, 301] Motor SpeedLimit Fault",Event is set if motor speed is above a ramped speed limit. Typically used when Forced Braking or when a max speed limit is imposed by application.,TRUE
-1017,FAULT,"Drive A [0x8060, 302] Motor HighSpeed Fault",Event is set if motor speed is above predefined level.Limits: See related parameters.,TRUE
-1018,FAULT,"Drive A [0x8070, 306] Motor SlipInWrongDirection Fault",SlipSpeed is controlled to achive correct orientation of the dq-plane.Event is set if SlipSpeed is wrong compared to ExpectedSlipSpeed.,TRUE
-1019,FAULT,"Drive A [0x8071, 307] Motor TooHighZeroSpeedSlip Fault",SlipSpeed is controlled to achive correct orientation of the dq-plane.Event is set if SlipSpeed too high compared to expected slip speed at zero sensor speed.,TRUE
-1020,FAULT,"Drive A [0x8090, 308] Motor ACCurrentControlError Fault",Event is set if the difference between the expected AC current and the measured AC current is too high.This indicates faulty current measurement sensor(s) or badly tuned current controller.,TRUE
-1021,FAULT,"Drive A [0x80A0, 309] Motor ACCurrentMeasPlausibilityError Fault",Event is set if the reference AC voltage is higher than what the measured AC current indicates.This indicates that one or more motor phase cables are not connected properly or faulty current measurement sensor(s).,TRUE
-1022,FAULT,"Drive A [0x80B0, 320] Motor FrequencyAbove599Hz Fault",Due to high-frequency drive regulations the electrical frequency need to be limited to maximum 599Hz. Changing the configuration of this event in a library version of Plasma3 will have no effect. This event must be configured to trip power stage.,TRUE
-1023,FAULT,"Drive A [0x3212, 402] DC Bus HighVoltageHardware Fault",HW detected over voltage. Level is defined by HW design.,TRUE
-1024,FAULT,"Drive A [0x3211, 404] DC Bus High Fault",Event is set if filtered voltage is above predefined level.Limits: See related parameters.,TRUE
-1025,FAULT,"Drive A [0x3221, 406] DC Bus Low Fault",Event is set if filtered voltage is below predefined level.Limits: See related parameters.,TRUE
-1026,FAULT,"Drive A [0x3120, 407] DC Bus ChargingError Fault",Event is set if measured voltage is below predefined level after a predefined time at startup.Limits: See related parameters.,TRUE
-1027,WARN,"Drive A [0x4320, 500] Power Stage Temperature Sensor NotConnected Warning",Event is set if internal Power Stage temperature sensor is not connected.SW algorithm: Temperature measurement is out of range.Limits: Event is set when sensor measures 130 deg celsius,TRUE
-1028,WARN,"Drive A [0x4320, 501] Power Stage Temperature Sensor ShortCircuit Warning",Event is set if internal Power Stage temperature sensor is short circuited.SW algorithm: Temperature measurement is out of range.Limits: Event is set when sensor measures -50 deg celsius,TRUE
-1029,FAULT,"Drive A [0x4310, 503] Power Stage Temperature Sensor High Fault",Event is set if internal Power Stage temperature is above predefined level.Limits: Event is set at 110 deg celsius.,TRUE
-1030,WARN,"Drive A [0x4220, 600] Motor Temperature Sensor NotConnected Warning",Event is set if motor temperature sensor is not connected.SW algorithm: Temperature measurement is out of range.,TRUE
-1031,WARN,"Drive A [0x4220, 601] Motor Temperature Sensor ShortCircuit Warning",Event is set if motor temperature sensor is short circuited.SW algorithm: Temperature measurement is out of range.,TRUE
-1032,FAULT,"Drive A [0x4210, 603] Motor Temperature Sensor High Fault",Event is set if motor temperature is above predefined level.Limits: Event is set at 130 deg celsius.,TRUE
-1033,FAULT,"Drive A [0x7240, 804] Encoder Feedback Sensor DecTooHigh Fault",Event is set if change of sensor speed is too high (measured rotor acceleration).Detected if sensor is faulty during more than 40 ms +/-1ms or if there is been to many intermittent faults within a certain time.,TRUE
-1034,WARN,"Drive A [0x7260, 826] Encoder Feedback Sensor DecTooHighGlitch Warning",Event is set if intermittent change of sensor speed is too high (measured rotor deceleration) and DecTooHigh event is not detected. Event is cleared if enable command transits from enable to disable.,TRUE
-1035,FAULT,"Drive A [0x7250, 805] Encoder Feedback Sensor PlausabilityError Fault","Event is set if the sensor speed is too high, i.e a not plausible/possible speed.Limits: 15000rpm",TRUE
-1036,FAULT,"Drive A [0x7360, 802] Encoder Feedback Sensor Loss_Of_Ch_A Fault",Event is set if only Ch B is toggling and Ch A is not.,TRUE
-1037,FAULT,"Drive A [0x7370, 803] Encoder Feedback Sensor Loss_Of_Ch_B Fault",Event is set if only Ch A is toggling and Ch B is not.,TRUE
-1038,FAULT,"Drive A [0x7351, 827] Encoder Feedback Sensor BadOrShortedInputs Fault","Bad state machine transition, can indicate shorted inputs. This detection is active from 0 upto aprox. +-250 Hz. When using a 64 PPR sensor, the range can be interpreted as RPMEvaluated at 4 kHz. Checked at 50 Hz.",TRUE
-1039,FAULT,"Drive A [0x7390, 828] Encoder Feedback Sensor ZPulseCorrectionAngleIsTooLarge Fault",Becomes active if the difference between the quadrature counter angle and the defined index pulse angle is too big. Detection is active after the first turn of the rotor,TRUE
-1040,FAULT,"Drive A [0x7391, 829] Encoder Feedback Sensor NoZPulseDetected Fault","Detection is active before the first index pulse have been detected. If none index-pulse have been detected after a defined number of quadrature counts, the event becomes active.",TRUE
-1041,FAULT,"Drive A [0x739A, 833] Encoder Feedback Sensor ChannelOverFrequency Fault",Channel used for time measurement has detected that the pulse frequency detected is too high.,TRUE
-1042,FAULT,"Drive A [0x7290, 870] Sixstep Feedback Sensor SensorError Fault",Event is set if sixstep sensor is in illegal state.,TRUE
-1043,FAULT,"Drive A [0x7460, 2060] MotorPwmSensor LossOfChannelA Fault",Loss of channel A signal or too noisy.Event set if no valid pulse is seen during 20 ms.,TRUE
-1044,FAULT,"Drive A [0x7462, 2062] MotorPwmSensor BadPWM Fault","The received PWM signal is unstable and out of range (frequency, duty cycle or stuck high or low).",TRUE
-1045,FAULT,"Drive A [0x7250, 1620] Sensor Offset Calibration WrongDirection Fault",Sensor and stator frequency have different signs.Either sensor signals need to be inverted or motor phase cables are connected incorrectly.,TRUE
-1046,FAULT,"Drive A [0x7251, 1621] Sensor Offset Calibration NoRotation Fault","Motor does not accelerate to target speed within specified time. Possible causes could be too high inertia, too high friction, too low DC voltage, an error condition, current reduction etc.",TRUE
-1047,FAULT,"Drive A [0x7252, 1622] Sensor Offset Calibration LowDcBusVoltage Fault",Event is set when motor goes into field weakening before desired AC voltage amplitude is reached. Most likely cause is weak battery or power supply. Try decreasing acceleration current.,TRUE
-1048,WARN,"Drive A [0x5411, 1001] Open Drain Output ShortCircuitCh1 Warning",Set when HW Short Circuit signal is detected. Disabling of output required to clear event.,TRUE
-1049,WARN,"Drive A [0x5431, 1021] Open Drain Output HighCurrentCh1 Warning",Set when Peak Overcurrent or Overload is detected.,TRUE
-1050,WARN,"Drive A [0x5451, 1011] Open Drain Output NotConnectedCh1 Warning",Set when measured current is below the NotConnectedLevel.,TRUE
-1051,WARN,"Drive A [0x546A, 1031] Open Drain Output CurrMeasWhenOffCh1 Warning",Set when more than 200 mA current is measured when the output should be off.,TRUE
-1052,WARN,"Drive A [0x5412, 1002] Open Drain Output ShortCircuitCh2 Warning",Set when HW Short Circuit signal is detected. Disabling of output required to clear event.,TRUE
-1053,WARN,"Drive A [0x5452, 1012] Open Drain Output NotConnectedCh2 Warning",Set when measured current is below the NotConnectedLevel.,TRUE
-1054,WARN,"Drive A [0x5432, 1022] Open Drain Output HighCurrentCh2 Warning",Set when Peak Overcurrent or Overload is detected.,TRUE
-1055,WARN,"Drive A [0x546B, 1032] Open Drain Output CurrMeasWhenOffCh2 Warning",Set when more than 200 mA current is measured when the output should be off.,TRUE
-1056,WARN,"Drive A [0x5413, 1003] Open Drain Output ShortCircuitCh3 Warning",Set when HW Short Circuit signal is detected. Disabling of output required to clear event.,TRUE
-1057,WARN,"Drive A [0x5433, 1023] Open Drain Output HighCurrentCh3 Warning",Set when Peak Overcurrent or Overload is detected.,TRUE
-1058,WARN,"Drive A [0x5453, 1013] Open Drain Output NotConnectedCh3 Warning",Set when measured current is below the NotConnectedLevel.,TRUE
-1059,WARN,"Drive A [0x546C, 1033] Open Drain Output CurrMeasWhenOffCh3 Warning",Set when more than 200 mA current is measured when the output should be off.,TRUE
-1060,WARN,"Drive A [0x5414, 1004] Open Drain Output ShortCircuitCh4 Warning",Set when HW Short Circuit signal is detected. Disabling of output required to clear event.,TRUE
-1061,WARN,"Drive A [0x5434, 1024] Open Drain Output HighCurrentCh4 Warning",Set when Peak Overcurrent or Overload is detected.,TRUE
-1062,WARN,"Drive A [0x5454, 1014] Open Drain Output NotConnectedCh4 Warning",Set when measured current is below the NotConnectedLevel.,TRUE
-1063,WARN,"Drive A [0x546D, 1034] Open Drain Output CurrMeasWhenOffCh4 Warning",Set when more than 200 mA current is measured when the output should be off.,TRUE
-1064,WARN,"Drive A [0x5415, 1005] Open Drain Output ShortCircuitCh5 Warning",Set when HW Short Circuit signal is detected. Disabling of output required to clear event.,TRUE
-1065,WARN,"Drive A [0x5435, 1025] Open Drain Output HighCurrentCh5 Warning",Set when Peak Overcurrent or Overload is detected.,TRUE
-1066,WARN,"Drive A [0x5455, 1015] Open Drain Output NotConnectedCh5 Warning",Set when measured current is below the NotConnectedLevel.,TRUE
-1067,WARN,"Drive A [0x546E, 1035] Open Drain Output CurrMeasWhenOffCh5 Warning",Set when more than 200 mA current is measured when the output should be off.,TRUE
-1068,WARN,"Drive A [0x5416, 1006] Open Drain Output ShortCircuitCh6 Warning",Set when HW Short Circuit signal is detected. Disabling of output required to clear event.,TRUE
-1069,WARN,"Drive A [0x5436, 1026] Open Drain Output HighCurrentCh6 Warning",Set when Peak Overcurrent or Overload is detected.,TRUE
-1070,WARN,"Drive A [0x5456, 1016] Open Drain Output NotConnectedCh6 Warning",Set when measured current is below the NotConnectedLevel.,TRUE
-1071,WARN,"Drive A [0x545F, 1036] Open Drain Output CurrMeasWhenOffCh6 Warning",Set when more than 200 mA current is measured when the output should be off.,TRUE
-1072,WARN,"Drive A [0x5481, 1121] Open Drain Output LoadActiveWhenODOffCh1 Warning","When high-side in is high, the voltage drop across the load should be inactive (i.e. OD & HS voltage is at the same level) if the state of the OD & HS swtiches is exclusively off or both off.",TRUE
-1073,WARN,"Drive A [0x5482, 1122] Open Drain Output LoadActiveWhenODOffCh2 Warning","When high-side in is high, the voltage drop across the load should be inactive (i.e. OD & HS voltage is at the same level) if the state of the OD & HS swtiches is exclusively off or both off.",TRUE
-1074,WARN,"Drive A [0x5483, 1123] Open Drain Output LoadActiveWhenODOffCh3 Warning","When high-side in is high, th voltage drop across the load should be inactive (i.e. OD & HS voltage is at the same level) if the state of the OD & HS swtiches is exclusively off or both off.",TRUE
-1075,WARN,"Drive A [0x5541, 1141] Open Drain Output LoadActiveWhenHSOffCh1 Warning","When high-side in is high, the voltage drop across the load should be inactive (i.e. OD & HS voltage is at the same level) if the state of the OD & HS swtiches is exclusively off or both off.",TRUE
-1076,WARN,"Drive A [0x5542, 1142] Open Drain Output LoadActiveWhenHSOffCh2 Warning","When high-side in is high, the voltage drop across the load should be inactive (i.e. OD & HS voltage is at the same level) if the state of the OD & HS swtiches is exclusively off or both off.",TRUE
-1077,WARN,"Drive A [0x5543, 1143] Open Drain Output LoadActiveWhenHSOffCh3 Warning","When high-side in is high, the voltage drop across the load should be inactive (i.e. OD & HS voltage is at the same level) if the state of the OD & HS swtiches is exclusively off or both off.",TRUE
-1078,WARN,"Drive A [0x5500, 1100] HighSideDiagnostics HighSideShC Warning",Set when HW Short Circuit signal is detected. Disabling of output required to clear event.,TRUE
-1079,WARN,"Drive A [0x5501, 1101] HighSideDiagnostics HighSideInLow Warning",The high side input has been detected to be low. This indicates that high side input is not connected or has short-circuit to B-.,TRUE
-1080,WARN,"Drive A [0x5502, 1102] HighSideDiagnostics HighSideOutLow Warning",The high side output has been detected to be low.This indicate that the high side output is shorted to B-.,TRUE
-1081,WARN,"Drive A [0x5503, 1103] HighSideDiagnostics HighSideOutHighWhenOff Warning",The high side output has been detected to be high.This indicate that the high side output is shorted to B+.,TRUE
-1082,FAULT,"Drive A [0x5504, 1104] HighSideDiagnostics HighSideOverload Fault",High continuous current on High side out.,TRUE
-1083,FAULT,"Drive A [0x5505, 1105] HighSideDiagnostics HighSideHighPeakCurr Fault",High peak current on High side out.,TRUE
-1084,FAULT,"Drive A [0x8140, 1204] CAN SynchTimeout Fault",Event is set if Sync is not received within timeout time.,TRUE
-1085,FAULT,"Drive A [0x8100, 1205] CAN MapError Fault",Event is set if any PDO map has invalid configuration.,TRUE
-1086,FAULT,"Drive A [0x8141, 1206] CAN Sdo1Timeout Fault",Event is set if no SDO messages has been received within the timeout time on SDO1.The error detection is started after the first message is received.This event is evaluated in an application with no PDOs active.,TRUE
-1087,FAULT,"Drive A [0x8142, 1207] CAN Sdo2Timeout Fault",Event is set if no SDO message has been received within the timeout time on SDO2.The error detection is started after the first message is received.This event is evaluated in an application with no PDOs active.,TRUE
-1088,WARN,"Drive A [0x8143, 1208] CAN SDO1SessionBusy Warning",The event is set when an SDO1 request is not finished and a new SDO1 request is received.,TRUE
-1089,WARN,"Drive A [0x8144, 1209] CAN SDO2SessionBusy Warning",The event is set when an SDO2 request is not finished and a new SDO2 request is received.,TRUE
-1090,FAULT,"Drive A [0x814c, 1221] CAN Sdo3Timeout Fault",Event is set if no SDO messages has been received within the timeout time on SDO3.The error detection is started after the first message is received.This event is evaluated in an application with no PDOs active.,TRUE
-1091,FAULT,"Drive A [0x814d, 1222] CAN Sdo4Timeout Fault",Event is set if no SDO messages has been received within the timeout time on SDO4.The error detection is started after the first message is received.This event is evaluated in an application with no PDOs active.,TRUE
-1092,WARN,"Drive A [0x814e, 1223] CAN SDO3SessionBusy Warning",The event is set when an SDO3 request is not finished and a new SDO3 request is received.,TRUE
-1093,WARN,"Drive A [0x814f, 1224] CAN SDO4SessionBusy Warning",The event is set when an SDO4 request is not finished and a new SDO4 request is received.,TRUE
-1094,FAULT,"Drive A [0x8180, 1240] CAN RxMapLengthError Fault",Event is set if any RxPDO receives a short packet.,TRUE
-1095,FAULT,"Drive A [0x8101, 1250] CAN Pdo1Timeout Fault",Event is set if Rx PDO 1 is not received within timeout time.,TRUE
-1096,FAULT,"Drive A [0x8102, 1251] CAN Pdo2Timeout Fault",Event is set if Rx PDO 2 is not received within timeout time.,TRUE
-1097,FAULT,"Drive A [0x8103, 1252] CAN Pdo3Timeout Fault",Event is set if Rx PDO 3 is not received within timeout time.,TRUE
-1098,FAULT,"Drive A [0x8104, 1253] CAN Pdo4Timeout Fault",Event is set if Rx PDO 4 is not received within timeout time.,TRUE
-1099,FAULT,"Drive A [0x8105, 1254] CAN Pdo5Timeout Fault",Event is set if Rx PDO 5 is not received within timeout time.,TRUE
-1100,FAULT,"Drive A [0x8106, 1255] CAN Pdo6Timeout Fault",Event is set if Rx PDO 6 is not received within timeout time.,TRUE
-1101,FAULT,"Drive A [0x8107, 1256] CAN Pdo7Timeout Fault",Event is set if Rx PDO 7 is not received within timeout time.,TRUE
-1102,FAULT,"Drive A [0x8108, 1257] CAN Pdo8Timeout Fault",Event is set if Rx PDO 8 is not received within timeout time.,TRUE
-1103,FAULT,"Drive A [0x8109, 1258] CAN Pdo9Timeout Fault",Event is set if Rx PDO 9 is not received within timeout time.,TRUE
-1104,FAULT,"Drive A [0x810a, 1259] CAN Pdo10Timeout Fault",Event is set if Rx PDO 10 is not received within timeout time.,TRUE
-1105,FAULT,"Drive A [0x810b, 1260] CAN Pdo11Timeout Fault",Event is set if Rx PDO 11 is not received within timeout time.,TRUE
-1106,FAULT,"Drive A [0x810c, 1261] CAN Pdo12Timeout Fault",Event is set if Rx PDO 12 is not received within timeout time.,TRUE
-1107,FAULT,"Drive A [0x810d, 1262] CAN Pdo13Timeout Fault",Event is set if Rx PDO 13 is not received within timeout time.,TRUE
-1108,FAULT,"Drive A [0x810e, 1263] CAN Pdo14Timeout Fault",Event is set if Rx PDO 14 is not received within timeout time.,TRUE
-1109,FAULT,"Drive A [0x810f, 1264] CAN Pdo15Timeout Fault",Event is set if Rx PDO 15 is not received within timeout time.,TRUE
-1110,FAULT,"Drive A [0x8110, 1265] CAN Pdo16Timeout Fault",Event is set if Rx PDO 16 is not received within timeout time.,TRUE
-1111,FAULT,"Drive A [0x8111, 1266] CAN Pdo17Timeout Fault",Event is set if Rx PDO 17 is not received within timeout time.,TRUE
-1112,FAULT,"Drive A [0x8112, 1267] CAN Pdo18Timeout Fault",Event is set if Rx PDO 18 is not received within timeout time.,TRUE
-1113,FAULT,"Drive A [0x8113, 1268] CAN Pdo19Timeout Fault",Event is set if Rx PDO 19 is not received within timeout time.,TRUE
-1114,FAULT,"Drive A [0x8114, 1269] CAN Pdo20Timeout Fault",Event is set if Rx PDO 20 is not received within timeout time.,TRUE
-1115,FAULT,"Drive A [0x8115, 1270] CAN Pdo21Timeout Fault",Event is set if Rx PDO 21 is not received within timeout time.,TRUE
-1116,FAULT,"Drive A [0x8116, 1271] CAN Pdo22Timeout Fault",Event is set if Rx PDO 22 is not received within timeout time.,TRUE
-1117,FAULT,"Drive A [0x8117, 1272] CAN Pdo23Timeout Fault",Event is set if Rx PDO 23 is not received within timeout time.,TRUE
-1118,FAULT,"Drive A [0x8118, 1273] CAN Pdo24Timeout Fault",Event is set if Rx PDO 24 is not received within timeout time.,TRUE
-1119,FAULT,"Drive A [0x8119, 1274] CAN Pdo25Timeout Fault",Event is set if Rx PDO 25 is not received within timeout time.,TRUE
-1120,FAULT,"Drive A [0x811a, 1275] CAN Pdo26Timeout Fault",Event is set if Rx PDO 26 is not received within timeout time.,TRUE
-1121,FAULT,"Drive A [0x811b, 1276] CAN Pdo27Timeout Fault",Event is set if Rx PDO 27 is not received within timeout time.,TRUE
-1122,FAULT,"Drive A [0x811c, 1277] CAN Pdo28Timeout Fault",Event is set if Rx PDO 28 is not received within timeout time.,TRUE
-1123,FAULT,"Drive A [0x811d, 1278] CAN Pdo29Timeout Fault",Event is set if Rx PDO 29 is not received within timeout time.,TRUE
-1124,FAULT,"Drive A [0x811e, 1279] CAN Pdo30Timeout Fault",Event is set if Rx PDO 30 is not received within timeout time.,TRUE
-1125,FAULT,"Drive A [0x811f, 1280] CAN Pdo31Timeout Fault",Event is set if Rx PDO 31 is not received within timeout time.,TRUE
-1126,FAULT,"Drive A [0x8121, 1235] CAN SrdoMapError Fault",Event is set if any SRDO map has invalid configuration.,TRUE
-1127,FAULT,"Drive A [0x8122, 1236] CAN RxMapLengthError Fault",Event is set if any Rx SRDO receives a short packet.,TRUE
-1128,FAULT,"Drive A [0x8151, 1281] CAN Srdo1SrvtTimeout Fault",Event is to evaluate the timing between receiving frame-1 (Normal data) and frame-2 (inverted data).Event is set if frame2 (inverted data) in Rx SRDO 1 is not received within timeout.Srvt : Safety-Related Velidation Time,TRUE
-1129,FAULT,"Drive A [0x8171, 1313] CAN Srdo1SctTimeout Fault",Event is set if Rx SRDO 1 is not received within timeout time.Sct : Safeguard Cycle Time,TRUE
-1130,WARN,"Drive A [0x8191, 1345] CAN Srdo1DataInvalid Warning",Event is set if the normal data and inverted data is not matched in Rx SRDO 1.,TRUE
-1131,FAULT,"Drive A [0x81F5, 1225] CAN CanConfigError Fault",CAN Configuration conflict detected. MCU1 is running application but is tripped. MCU2 will stop in boot mode and has temporarily resolved the configuration conflict. Boot normally uses the NodeId and bitrate written to EEPROM by the application.,TRUE
-1132,FAULT,"Drive A [0x5530, 1430] Cpu EepromSizeError Fault",Fault is set if an eeprom memory size missmatch is detected. I.e. size configured in sw does not match detected size.This check is done before write operation has started and will inhibit write operation when detected.,TRUE
-1133,WARN,"Drive A [0x5520, 1403] Cpu ChecksumError Warning",Fault is set if there is a checksum error on any eeprom segment with checksum.Some segments also have idividual checksum error events.Some segments also have a default values event that will be set in case of checksum error on that segment.,TRUE
-1134,WARN,"Drive A [0x5521, 1420] Cpu ChecksumErrorOnSensorAngleOffset Warning",Event is set if checksum error has occured on sensor angle offset related eeprom segment (see SFIFMG_CAL in EEProm layout).,TRUE
-1135,WARN,"Drive A [0x5522, 1421] Cpu ChecksumErrorOnItemInfo Warning",Event is set if checksum error has occured on Item Info related eeprom segments (see ITEM_INFO_CAL and HW_SERIAL in EEProm layout).,TRUE
-1136,WARN,"Drive A [0x5523, 1422] Cpu ChecksumErrorOnItemMaxCurrent Warning",Event is set if checksum error has occured on Item Max Current eeprom segment (see ITEM_MAX_CURRENT in EEProm layout).,TRUE
-1137,WARN,"Drive A [0x5524, 1423] Cpu ChecksumErrorOnCANTalk Warning",Event is set if checksum error has occured on CANTalk eeprom segment (see CTLKCM in EEProm layout).,TRUE
-1138,WARN,"Drive A [0x8403, 1400] Cpu PowerOutReset Warning",MCU was unintentionally reset due to low 3.3V powersupply.Event also needs to be supported by boot sw.,TRUE
-1139,WARN,"Drive A [0x8404, 1404] Cpu BrownOutReset Warning",MCU was unintentionally reset due to low 3.3V powersupply.Event also needs to be supported by boot sw.,TRUE
-1140,WARN,"Drive A [0x8400, 1406] Cpu I_WatchdogTimeout Warning",MCU internal Independent watchdog not reset in time causing the MCU to reset.,TRUE
-1141,WARN,"Drive A [0x8401, 1407] Cpu W_WatchdogTimeout Warning",MCU internal Windowed watchdog not reset in time or reset too early causing the MCU to reset.,TRUE
-1142,FAULT,"Drive A [0x8410, 1409] Cpu ExeTimeHigh_4kHz Fault",Set when average execution time is higher than 150U us.,TRUE
-1143,FAULT,"Drive A [0x8411, 1410] Cpu ExeTimeHigh_50Hz Fault",Set when average execution time is higher than 7000U us.,TRUE
-1144,FAULT,"Drive A [0x8412, 1411] Cpu ExeTimeHigh_IndependentSupervision Fault",Set when average execution time is higher than 50U us.,TRUE
-1145,FAULT,"Drive A [0x8413, 1412] Cpu ExeTimeHigh_CAN Fault",Set when average execution time is higher than 1000U us.,TRUE
-1146,FAULT,"Drive A [0x8414, 1413] Cpu ExeTimeHigh_SlowApp Fault",Set when average execution time is higher than 2000U us.,TRUE
-1147,FAULT,"Drive A [0x8415, 1414] Cpu ExeTimeHigh_FastApp Fault",Set when average execution time is higher than 400U us.,TRUE
-1148,WARN,"Drive A [0x8416, 1415] Cpu ExeTimeModHigh_SlowApp Warning",Set when average execution time is higher than 1000U us.,TRUE
-1149,WARN,"Drive A [0x8417, 1416] Cpu ExeTimeModHigh_FastApp Warning",Set when average execution time is higher than 300U us.,TRUE
-1150,WARN,"Drive A [0x8450, 1450] Cpu InternalError Warning","Internal error occurred. It is most likely a static configuration error that is not caught at compile time, such asImpossible configuration in flash memory.Illegal ErrorBit configured for an eventSame EventId on two different event.",TRUE
-1151,WARN,"Drive A [0x8452, 1451] Cpu BootInternalError Warning",Internal error occurred in boot. It may occure if an incompatible application is running with the boot code.,TRUE
-1152,FAULT,"Drive A [0x8451, 1460] Cpu ClockFailure Fault",CPU clock failure. Either External crystal or internal PLL failed to generate a stable clock.CPU will be clocked by the internal 8MHz RC-oscillator.,TRUE
-1153,FAULT,"Drive A [0x8460, 1455] RuntimeTests MCU_Flash_Application_Check Fault",Checksum error(CRC32) detected in the application part of the FLASH memory.Evaluation conditionAlways.FilteringNone.Set conditionChecksum error (CRC32) deteteced in the application part of the FLASH memory during runtime.,TRUE
-1154,FAULT,"Drive A [0x8461, 1456] RuntimeTests MCU_Flash_Boot_Check Fault",Checksum error(CRC32) detected in the boot part of the FLASH memory.Evaluation conditionAlways.FilteringNone.Set conditionChecksum error (CRC32) deteteced in the boot part of the FLASH memory during runtime.Clear conditionReset/Restart node.,TRUE
-1155,FAULT,"Drive A [0x8460, 1484] RuntimeTests MCU_RegisterConf_Supv Fault",Signature check of peripherals and I/O configuration failed.Evaluation conditionAlways.FilteringNone.Set conditionThe signature check of peripherals and I/O configuration failed during runtime.,TRUE
-1156,FAULT,"Drive A [0x8460, 1486] RuntimeTests MCU_MemoryVerificationFault Fault",A write with verify of data to RAM failed.Evaluation conditionAlways.FilteringNone.Set conditionWhen writing data to RAM with verify it was detected that the data readback from RAM was not the same data as was written.,TRUE
-1157,FAULT,"Drive A [0x5527, 1425] ConfigurationManager BadConfiguration Fault","The combination of motor and sensor configuration is not verified.Recommended configuration:PM with Sixstep, Incremental encoder with Z-pulse, Analog Hall, Resolve sensors.IM with Incremental encoder sensor.",TRUE
-1158,FAULT,"Drive A [0x5528, 1426] ConfigurationManager MotorTypeReconfigured Fault",Motor type configuration is changed. New configuration takes effect after restarting.,TRUE
-1159,FAULT,"Drive A [0x5529, 1427] ConfigurationManager SensorTypeReconfigured Fault",Sensor type configuration is changed. New configuration takes effect after restarting.,TRUE
-1160,FAULT,"Drive A [0x3301, 1700] InternalSupply 15VOutOfRange Fault",Internal 15V supply out of range. Valid range 13.00 to 16.00 V.,TRUE
-1161,FAULT,"Drive A [0x3302, 1701] InternalSupply 5VOutOfRange Fault",Internal 5V supply out of range. Valid range 4.50 to 5.50 V.,TRUE
-1162,FAULT,"Drive A [0x3304, 1709] InternalSupply 5VCOutOfRange Fault",Internal 5V C supply out of range. Valid range 4.50 to 5.50 V.,TRUE
-1163,FAULT,"Drive A [0x3302, 1702] InternalSupply 3V3Low Fault",Internal 3.3V supply too low. Limit 2.9V. Uses MCU internal PVD (Programmable Voltage Detection). A flag is set by MCU hardware and event is set when VDD is below the limit and cleared if above. Hysteresis is 100mV,TRUE
-1164,FAULT,"Drive A [0x7221, 800] InternalSupply SensorSupNotCon Fault",Fault is set if Sensor Supply current is too low. Limit 0.000 A.Note: If you have multiple sensors connected to this supply this event might only be set if all devices are disconnected.,TRUE
-1165,FAULT,"Drive A [0x7220, 801] InternalSupply SensorSupSHC Fault",Fault is set if Sensor Supply current is too high. Limit 0.068 A.,TRUE
-1166,FAULT,"Drive A [0x7231, 811] InternalSupply SensorSupRange Fault",Sensor Supply voltage out of range. Valid range10.00 to 16.00 V.,TRUE
-1167,FAULT,"Drive A [0x7230, 810] InternalSupply SensSupRefRange Fault",Sensor Supply Ref voltage out of range. Valid range 10.00 to 16.00 V.,TRUE
-1168,WARN,"Drive A [0x7270, 1735] InternalSupply SensorSupply1OutputVoltage_OutOfRange Warning",Internal SensorSupply1OutputVoltage out of range. Valid range 10.80 to 13.20 V.,TRUE
-1169,FAULT,"Drive A [0x3330, 1730] InternalSupply ExtGndTripped Fault",Set when HW EXT_GND_TRIP signal is detected. Reset of node required to clear error. Events related to speed feedback and motor temp measurement may follow this event.,TRUE
-1170,FAULT,"Drive A [0x3410, 10000] Application ThrottleBadSignal Fault",Throttle pot is out of range.,TRUE
-1171,FAULT,"Drive A [0x7210, 1600] MotorSinCosSensor Signal1GainOutOfRange Fault",Signal 1 gain out of range. The adapted gain is too high or low.,TRUE
-1172,FAULT,"Drive A [0x7211, 1601] MotorSinCosSensor Signal2GainOutOfRange Fault",Signal 2 gain out of range. The adapted gain is too high or low.,TRUE
-1173,FAULT,"Drive A [0x7212, 1602] MotorSinCosSensor Signal1OffsetOutOfRange Fault",Signal 1 offset out of range. The adapted offset is too high or low.,TRUE
-1174,FAULT,"Drive A [0x7213, 1603] MotorSinCosSensor Signal2OffsetOutOfRange Fault",Signal 2 offset out of range. The adapted offset is too high or low.,TRUE
-1175,FAULT,"Drive A [0x7214, 1604] MotorSinCosSensor Signal1SaturatedHigh Fault",Signal 1 raw AD value saturated high. Indicates short circuit.,TRUE
-1176,FAULT,"Drive A [0x7215, 1605] MotorSinCosSensor Signal1SaturatedLow Fault",Signal 1 raw AD value saturated low. Indicates short circuit.,TRUE
-1177,FAULT,"Drive A [0x7216, 1606] MotorSinCosSensor Signal2SaturatedHigh Fault",Signal 2 raw AD value saturated high. Indicates short circuit.,TRUE
-1178,FAULT,"Drive A [0x7217, 1607] MotorSinCosSensor Signal2SaturatedLow Fault",Signal 2 raw AD value saturated low. Indicates short circuit.,TRUE
-1179,FAULT,"Drive A [0x7218, 1608] MotorSinCosSensor SinCosSensorNotConnected Fault",Check that unit circle is constant. Will detect one broken signal even if sensor is not rotating.The equation x^2 + y^2 = 1 should always be valid for a SinCosSensor.,TRUE
-1180,FAULT,"Drive A [0x8420, 1900] StartupTest CpuTest Fault",Startup test of CPU failed.,TRUE
-1181,FAULT,"Drive A [0x8420, 1901] StartupTest Watchdog Fault",Startup test of Watchdog failed.,TRUE
-1182,FAULT,"Drive A [0x8420, 1903] StartupTest Checkpoint1 Fault",Startup test of Checkpoint1 Control flow failed.,TRUE
-1183,FAULT,"Drive A [0x8420, 1904] StartupTest FullRamMarch Fault",Startup test of Full Ram March failed.,TRUE
-1184,FAULT,"Drive A [0x8420, 1905] StartupTest SwitchOffPll Fault",Startup failed do switch off PLL.,TRUE
-1185,FAULT,"Drive A [0x8420, 1906] StartupTest LsiStart Fault",Failed to start LSI.,TRUE
-1186,FAULT,"Drive A [0x8420, 1907] StartupTest HseStart Fault",Failed to start HSE.,TRUE
-1187,FAULT,"Drive A [0x8420, 1908] StartupTest HsiHse Fault",Startup test of HSI HSE switch failed.,TRUE
-1188,FAULT,"Drive A [0x8420, 1909] StartupTest ExtSource Fault",Startup test of Ext source failed.,TRUE
-1189,FAULT,"Drive A [0x8420, 1910] StartupTest ClockFreq Fault",Startup test of Clock frequency failed.,TRUE
-1190,FAULT,"Drive A [0x8420, 1911] StartupTest Checkpoint2 Fault",Startup test of Checkpoint2 Control flow failed.,TRUE
-1191,FAULT,"Drive A [0x8420, 1912] StartupTest IncompatibleSwHwConfiguration Fault",The sofware configuration regarding OVP/HVL does not match the hardware configuration.Evaluation conditionAt Startup.,TRUE
-1999,FAULT,"Drive A Unknown Fault",Drive A has emitted a fault that is not in the lookup table. Please check logs.,TRUE
-2000,FAULT,"Drive B [0x2340, 100] Power Stage ShortCircuit Fault","Hw detected short circuit.If the short circuit protection detects a short circuit, the power stage will be shut down. This is done by Hw without Sw interaction.The Sw will restart the power stage within 500 microseconds.",TRUE
-2001,FAULT,"Drive B [0x2340, 101] Power Stage ShortCircuitCounter Fault",This is an inforamative event that in combination with the ShortCircuit-event can be usefull when analyzing short circuit situations. This event will be cleared when power stage is disabled.,TRUE
-2002,WARN,"Drive B [0x2341, 103] Power Stage ShortCGlitch Warning","Hw detected short circuit glitch.If the short circuit protection detects a short circuit, the power stage will be shut down. This is done by Hw without Sw interaction.This event is always set whenever this happens.",TRUE
-2003,FAULT,"Drive B [0x2351, 111] Power Stage OVPActive Fault",Hw detected Over Voltage protection.Event is set if an Over Voltage Protection trip is detected.,TRUE
-2004,FAULT,"Drive B [0x2360, 120] Power Stage PWMUnexpectedOff Fault",The power stage was unexpectedly turned off.,TRUE
-2005,WARN,"Drive B [0x2361, 121] Power Stage PWMUnexpectedOffGlitch Warning",The power stage was unexpectedly turned off but restarted successfully.,TRUE
-2006,FAULT,"Drive B [0x2370, 122] Power Stage SupervisionPwmDisable Fault",Event is set if the supervision CPU has disabled PWM.The exact reason for this must be obtained by communicating with that particular node.,TRUE
-2007,FAULT,"Drive B [0x5210, 200] Current Measurements SensorOffset Fault",Event is set if offset is too high.Offset is calibrated when drive is disabled.Limit is 10% of default offset that is 2047 (i.e. half of ADC full-scale value),TRUE
-2008,FAULT,"Drive B [0x2310, 202] Current Measurements OverCurrentError Fault","Event is set if measured current is too high in any of the U,V or W phases and glitch counter is above trip limit.",TRUE
-2009,FAULT,"Drive B [0x2311, 203] Current Measurements OverCurrGlitch Fault","Event is set if measured current is too high in any of the U, V or W phases and glitch counter is below trip limit.",TRUE
-2010,FAULT,"Drive B [0x2316, 207] Current Measurements PhaseUVNotConnected Fault",Event is set during startup check of motor connections if the measrued current i phase U is below a defined limit,TRUE
-2011,FAULT,"Drive B [0x2317, 208] Current Measurements PhaseUWNotConnected Fault",Event is set during startup check of motor connections if the measrued current i phase U is below a defined limit,TRUE
-2012,FAULT,"Drive B [0x2318, 209] Current Measurements PhaseVWNotConnected Fault",Event is set during startup check of motor connections if the measrued current i phase V is below a defined limit,TRUE
-2013,FAULT,"Drive B [0x2319, 211] Current Measurements DriveIsNotDisable Fault",Event is set during startup check of motor connections if the drive is not disabled when running the check,TRUE
-2014,FAULT,"Drive B [0x2320, 213] Current Measurements RotorRotationTooHigh Fault",Event is set during startup check of motor connections if the rotor rotation is too high,TRUE
-2015,FAULT,"Drive B [0x2310, 310] Current Measurements CustomizedOverCurrentError Fault",Event is set when unfiltered RMS current is above over current limit for the specified number of consecutive samples.,TRUE
-2016,FAULT,"Drive B [0x8060, 301] Motor SpeedLimit Fault",Event is set if motor speed is above a ramped speed limit. Typically used when Forced Braking or when a max speed limit is imposed by application.,TRUE
-2017,FAULT,"Drive B [0x8060, 302] Motor HighSpeed Fault",Event is set if motor speed is above predefined level.Limits: See related parameters.,TRUE
-2018,FAULT,"Drive B [0x8070, 306] Motor SlipInWrongDirection Fault",SlipSpeed is controlled to achive correct orientation of the dq-plane.Event is set if SlipSpeed is wrong compared to ExpectedSlipSpeed.,TRUE
-2019,FAULT,"Drive B [0x8071, 307] Motor TooHighZeroSpeedSlip Fault",SlipSpeed is controlled to achive correct orientation of the dq-plane.Event is set if SlipSpeed too high compared to expected slip speed at zero sensor speed.,TRUE
-2020,FAULT,"Drive B [0x8090, 308] Motor ACCurrentControlError Fault",Event is set if the difference between the expected AC current and the measured AC current is too high.This indicates faulty current measurement sensor(s) or badly tuned current controller.,TRUE
-2021,FAULT,"Drive B [0x80A0, 309] Motor ACCurrentMeasPlausibilityError Fault",Event is set if the reference AC voltage is higher than what the measured AC current indicates.This indicates that one or more motor phase cables are not connected properly or faulty current measurement sensor(s).,TRUE
-2022,FAULT,"Drive B [0x80B0, 320] Motor FrequencyAbove599Hz Fault",Due to high-frequency drive regulations the electrical frequency need to be limited to maximum 599Hz. Changing the configuration of this event in a library version of Plasma3 will have no effect. This event must be configured to trip power stage.,TRUE
-2023,FAULT,"Drive B [0x3212, 402] DC Bus HighVoltageHardware Fault",HW detected over voltage. Level is defined by HW design.,TRUE
-2024,FAULT,"Drive B [0x3211, 404] DC Bus High Fault",Event is set if filtered voltage is above predefined level.Limits: See related parameters.,TRUE
-2025,FAULT,"Drive B [0x3221, 406] DC Bus Low Fault",Event is set if filtered voltage is below predefined level.Limits: See related parameters.,TRUE
-2026,FAULT,"Drive B [0x3120, 407] DC Bus ChargingError Fault",Event is set if measured voltage is below predefined level after a predefined time at startup.Limits: See related parameters.,TRUE
-2027,WARN,"Drive B [0x4320, 500] Power Stage Temperature Sensor NotConnected Warning",Event is set if internal Power Stage temperature sensor is not connected.SW algorithm: Temperature measurement is out of range.Limits: Event is set when sensor measures 130 deg celsius,TRUE
-2028,WARN,"Drive B [0x4320, 501] Power Stage Temperature Sensor ShortCircuit Warning",Event is set if internal Power Stage temperature sensor is short circuited.SW algorithm: Temperature measurement is out of range.Limits: Event is set when sensor measures -50 deg celsius,TRUE
-2029,FAULT,"Drive B [0x4310, 503] Power Stage Temperature Sensor High Fault",Event is set if internal Power Stage temperature is above predefined level.Limits: Event is set at 110 deg celsius.,TRUE
-2030,WARN,"Drive B [0x4220, 600] Motor Temperature Sensor NotConnected Warning",Event is set if motor temperature sensor is not connected.SW algorithm: Temperature measurement is out of range.,TRUE
-2031,WARN,"Drive B [0x4220, 601] Motor Temperature Sensor ShortCircuit Warning",Event is set if motor temperature sensor is short circuited.SW algorithm: Temperature measurement is out of range.,TRUE
-2032,FAULT,"Drive B [0x4210, 603] Motor Temperature Sensor High Fault",Event is set if motor temperature is above predefined level.Limits: Event is set at 130 deg celsius.,TRUE
-2033,FAULT,"Drive B [0x7240, 804] Encoder Feedback Sensor DecTooHigh Fault",Event is set if change of sensor speed is too high (measured rotor acceleration).Detected if sensor is faulty during more than 40 ms +/-1ms or if there is been to many intermittent faults within a certain time.,TRUE
-2034,WARN,"Drive B [0x7260, 826] Encoder Feedback Sensor DecTooHighGlitch Warning",Event is set if intermittent change of sensor speed is too high (measured rotor deceleration) and DecTooHigh event is not detected. Event is cleared if enable command transits from enable to disable.,TRUE
-2035,FAULT,"Drive B [0x7250, 805] Encoder Feedback Sensor PlausabilityError Fault","Event is set if the sensor speed is too high, i.e a not plausible/possible speed.Limits: 15000rpm",TRUE
-2036,FAULT,"Drive B [0x7360, 802] Encoder Feedback Sensor Loss_Of_Ch_A Fault",Event is set if only Ch B is toggling and Ch A is not.,TRUE
-2037,FAULT,"Drive B [0x7370, 803] Encoder Feedback Sensor Loss_Of_Ch_B Fault",Event is set if only Ch A is toggling and Ch B is not.,TRUE
-2038,FAULT,"Drive B [0x7351, 827] Encoder Feedback Sensor BadOrShortedInputs Fault","Bad state machine transition, can indicate shorted inputs. This detection is active from 0 upto aprox. +-250 Hz. When using a 64 PPR sensor, the range can be interpreted as RPMEvaluated at 4 kHz. Checked at 50 Hz.",TRUE
-2039,FAULT,"Drive B [0x7390, 828] Encoder Feedback Sensor ZPulseCorrectionAngleIsTooLarge Fault",Becomes active if the difference between the quadrature counter angle and the defined index pulse angle is too big. Detection is active after the first turn of the rotor,TRUE
-2040,FAULT,"Drive B [0x7391, 829] Encoder Feedback Sensor NoZPulseDetected Fault","Detection is active before the first index pulse have been detected. If none index-pulse have been detected after a defined number of quadrature counts, the event becomes active.",TRUE
-2041,FAULT,"Drive B [0x739A, 833] Encoder Feedback Sensor ChannelOverFrequency Fault",Channel used for time measurement has detected that the pulse frequency detected is too high.,TRUE
-2042,FAULT,"Drive B [0x7290, 870] Sixstep Feedback Sensor SensorError Fault",Event is set if sixstep sensor is in illegal state.,TRUE
-2043,FAULT,"Drive B [0x7460, 2060] MotorPwmSensor LossOfChannelA Fault",Loss of channel A signal or too noisy.Event set if no valid pulse is seen during 20 ms.,TRUE
-2044,FAULT,"Drive B [0x7462, 2062] MotorPwmSensor BadPWM Fault","The received PWM signal is unstable and out of range (frequency, duty cycle or stuck high or low).",TRUE
-2045,FAULT,"Drive B [0x7250, 1620] Sensor Offset Calibration WrongDirection Fault",Sensor and stator frequency have different signs.Either sensor signals need to be inverted or motor phase cables are connected incorrectly.,TRUE
-2046,FAULT,"Drive B [0x7251, 1621] Sensor Offset Calibration NoRotation Fault","Motor does not accelerate to target speed within specified time. Possible causes could be too high inertia, too high friction, too low DC voltage, an error condition, current reduction etc.",TRUE
-2047,FAULT,"Drive B [0x7252, 1622] Sensor Offset Calibration LowDcBusVoltage Fault",Event is set when motor goes into field weakening before desired AC voltage amplitude is reached. Most likely cause is weak battery or power supply. Try decreasing acceleration current.,TRUE
-2048,WARN,"Drive B [0x5411, 1001] Open Drain Output ShortCircuitCh1 Warning",Set when HW Short Circuit signal is detected. Disabling of output required to clear event.,TRUE
-2049,WARN,"Drive B [0x5431, 1021] Open Drain Output HighCurrentCh1 Warning",Set when Peak Overcurrent or Overload is detected.,TRUE
-2050,WARN,"Drive B [0x5451, 1011] Open Drain Output NotConnectedCh1 Warning",Set when measured current is below the NotConnectedLevel.,TRUE
-2051,WARN,"Drive B [0x546A, 1031] Open Drain Output CurrMeasWhenOffCh1 Warning",Set when more than 200 mA current is measured when the output should be off.,TRUE
-2052,WARN,"Drive B [0x5412, 1002] Open Drain Output ShortCircuitCh2 Warning",Set when HW Short Circuit signal is detected. Disabling of output required to clear event.,TRUE
-2053,WARN,"Drive B [0x5452, 1012] Open Drain Output NotConnectedCh2 Warning",Set when measured current is below the NotConnectedLevel.,TRUE
-2054,WARN,"Drive B [0x5432, 1022] Open Drain Output HighCurrentCh2 Warning",Set when Peak Overcurrent or Overload is detected.,TRUE
-2055,WARN,"Drive B [0x546B, 1032] Open Drain Output CurrMeasWhenOffCh2 Warning",Set when more than 200 mA current is measured when the output should be off.,TRUE
-2056,WARN,"Drive B [0x5413, 1003] Open Drain Output ShortCircuitCh3 Warning",Set when HW Short Circuit signal is detected. Disabling of output required to clear event.,TRUE
-2057,WARN,"Drive B [0x5433, 1023] Open Drain Output HighCurrentCh3 Warning",Set when Peak Overcurrent or Overload is detected.,TRUE
-2058,WARN,"Drive B [0x5453, 1013] Open Drain Output NotConnectedCh3 Warning",Set when measured current is below the NotConnectedLevel.,TRUE
-2059,WARN,"Drive B [0x546C, 1033] Open Drain Output CurrMeasWhenOffCh3 Warning",Set when more than 200 mA current is measured when the output should be off.,TRUE
-2060,WARN,"Drive B [0x5414, 1004] Open Drain Output ShortCircuitCh4 Warning",Set when HW Short Circuit signal is detected. Disabling of output required to clear event.,TRUE
-2061,WARN,"Drive B [0x5434, 1024] Open Drain Output HighCurrentCh4 Warning",Set when Peak Overcurrent or Overload is detected.,TRUE
-2062,WARN,"Drive B [0x5454, 1014] Open Drain Output NotConnectedCh4 Warning",Set when measured current is below the NotConnectedLevel.,TRUE
-2063,WARN,"Drive B [0x546D, 1034] Open Drain Output CurrMeasWhenOffCh4 Warning",Set when more than 200 mA current is measured when the output should be off.,TRUE
-2064,WARN,"Drive B [0x5415, 1005] Open Drain Output ShortCircuitCh5 Warning",Set when HW Short Circuit signal is detected. Disabling of output required to clear event.,TRUE
-2065,WARN,"Drive B [0x5435, 1025] Open Drain Output HighCurrentCh5 Warning",Set when Peak Overcurrent or Overload is detected.,TRUE
-2066,WARN,"Drive B [0x5455, 1015] Open Drain Output NotConnectedCh5 Warning",Set when measured current is below the NotConnectedLevel.,TRUE
-2067,WARN,"Drive B [0x546E, 1035] Open Drain Output CurrMeasWhenOffCh5 Warning",Set when more than 200 mA current is measured when the output should be off.,TRUE
-2068,WARN,"Drive B [0x5416, 1006] Open Drain Output ShortCircuitCh6 Warning",Set when HW Short Circuit signal is detected. Disabling of output required to clear event.,TRUE
-2069,WARN,"Drive B [0x5436, 1026] Open Drain Output HighCurrentCh6 Warning",Set when Peak Overcurrent or Overload is detected.,TRUE
-2070,WARN,"Drive B [0x5456, 1016] Open Drain Output NotConnectedCh6 Warning",Set when measured current is below the NotConnectedLevel.,TRUE
-2071,WARN,"Drive B [0x545F, 1036] Open Drain Output CurrMeasWhenOffCh6 Warning",Set when more than 200 mA current is measured when the output should be off.,TRUE
-2072,WARN,"Drive B [0x5481, 1121] Open Drain Output LoadActiveWhenODOffCh1 Warning","When high-side in is high, the voltage drop across the load should be inactive (i.e. OD & HS voltage is at the same level) if the state of the OD & HS swtiches is exclusively off or both off.",TRUE
-2073,WARN,"Drive B [0x5482, 1122] Open Drain Output LoadActiveWhenODOffCh2 Warning","When high-side in is high, the voltage drop across the load should be inactive (i.e. OD & HS voltage is at the same level) if the state of the OD & HS swtiches is exclusively off or both off.",TRUE
-2074,WARN,"Drive B [0x5483, 1123] Open Drain Output LoadActiveWhenODOffCh3 Warning","When high-side in is high, th voltage drop across the load should be inactive (i.e. OD & HS voltage is at the same level) if the state of the OD & HS swtiches is exclusively off or both off.",TRUE
-2075,WARN,"Drive B [0x5541, 1141] Open Drain Output LoadActiveWhenHSOffCh1 Warning","When high-side in is high, the voltage drop across the load should be inactive (i.e. OD & HS voltage is at the same level) if the state of the OD & HS swtiches is exclusively off or both off.",TRUE
-2076,WARN,"Drive B [0x5542, 1142] Open Drain Output LoadActiveWhenHSOffCh2 Warning","When high-side in is high, the voltage drop across the load should be inactive (i.e. OD & HS voltage is at the same level) if the state of the OD & HS swtiches is exclusively off or both off.",TRUE
-2077,WARN,"Drive B [0x5543, 1143] Open Drain Output LoadActiveWhenHSOffCh3 Warning","When high-side in is high, the voltage drop across the load should be inactive (i.e. OD & HS voltage is at the same level) if the state of the OD & HS swtiches is exclusively off or both off.",TRUE
-2078,WARN,"Drive B [0x5500, 1100] HighSideDiagnostics HighSideShC Warning",Set when HW Short Circuit signal is detected. Disabling of output required to clear event.,TRUE
-2079,WARN,"Drive B [0x5501, 1101] HighSideDiagnostics HighSideInLow Warning",The high side input has been detected to be low. This indicates that high side input is not connected or has short-circuit to B-.,TRUE
-2080,WARN,"Drive B [0x5502, 1102] HighSideDiagnostics HighSideOutLow Warning",The high side output has been detected to be low.This indicate that the high side output is shorted to B-.,TRUE
-2081,WARN,"Drive B [0x5503, 1103] HighSideDiagnostics HighSideOutHighWhenOff Warning",The high side output has been detected to be high.This indicate that the high side output is shorted to B+.,TRUE
-2082,FAULT,"Drive B [0x5504, 1104] HighSideDiagnostics HighSideOverload Fault",High continuous current on High side out.,TRUE
-2083,FAULT,"Drive B [0x5505, 1105] HighSideDiagnostics HighSideHighPeakCurr Fault",High peak current on High side out.,TRUE
-2084,FAULT,"Drive B [0x8140, 1204] CAN SynchTimeout Fault",Event is set if Sync is not received within timeout time.,TRUE
-2085,FAULT,"Drive B [0x8100, 1205] CAN MapError Fault",Event is set if any PDO map has invalid configuration.,TRUE
-2086,FAULT,"Drive B [0x8141, 1206] CAN Sdo1Timeout Fault",Event is set if no SDO messages has been received within the timeout time on SDO1.The error detection is started after the first message is received.This event is evaluated in an application with no PDOs active.,TRUE
-2087,FAULT,"Drive B [0x8142, 1207] CAN Sdo2Timeout Fault",Event is set if no SDO message has been received within the timeout time on SDO2.The error detection is started after the first message is received.This event is evaluated in an application with no PDOs active.,TRUE
-2088,WARN,"Drive B [0x8143, 1208] CAN SDO1SessionBusy Warning",The event is set when an SDO1 request is not finished and a new SDO1 request is received.,TRUE
-2089,WARN,"Drive B [0x8144, 1209] CAN SDO2SessionBusy Warning",The event is set when an SDO2 request is not finished and a new SDO2 request is received.,TRUE
-2090,FAULT,"Drive B [0x814c, 1221] CAN Sdo3Timeout Fault",Event is set if no SDO messages has been received within the timeout time on SDO3.The error detection is started after the first message is received.This event is evaluated in an application with no PDOs active.,TRUE
-2091,FAULT,"Drive B [0x814d, 1222] CAN Sdo4Timeout Fault",Event is set if no SDO messages has been received within the timeout time on SDO4.The error detection is started after the first message is received.This event is evaluated in an application with no PDOs active.,TRUE
-2092,WARN,"Drive B [0x814e, 1223] CAN SDO3SessionBusy Warning",The event is set when an SDO3 request is not finished and a new SDO3 request is received.,TRUE
-2093,WARN,"Drive B [0x814f, 1224] CAN SDO4SessionBusy Warning",The event is set when an SDO4 request is not finished and a new SDO4 request is received.,TRUE
-2094,FAULT,"Drive B [0x8180, 1240] CAN RxMapLengthError Fault",Event is set if any RxPDO receives a short packet.,TRUE
-2095,FAULT,"Drive B [0x8101, 1250] CAN Pdo1Timeout Fault",Event is set if Rx PDO 1 is not received within timeout time.,TRUE
-2096,FAULT,"Drive B [0x8102, 1251] CAN Pdo2Timeout Fault",Event is set if Rx PDO 2 is not received within timeout time.,TRUE
-2097,FAULT,"Drive B [0x8103, 1252] CAN Pdo3Timeout Fault",Event is set if Rx PDO 3 is not received within timeout time.,TRUE
-2098,FAULT,"Drive B [0x8104, 1253] CAN Pdo4Timeout Fault",Event is set if Rx PDO 4 is not received within timeout time.,TRUE
-2099,FAULT,"Drive B [0x8105, 1254] CAN Pdo5Timeout Fault",Event is set if Rx PDO 5 is not received within timeout time.,TRUE
-2100,FAULT,"Drive B [0x8106, 1255] CAN Pdo6Timeout Fault",Event is set if Rx PDO 6 is not received within timeout time.,TRUE
-2101,FAULT,"Drive B [0x8107, 1256] CAN Pdo7Timeout Fault",Event is set if Rx PDO 7 is not received within timeout time.,TRUE
-2102,FAULT,"Drive B [0x8108, 1257] CAN Pdo8Timeout Fault",Event is set if Rx PDO 8 is not received within timeout time.,TRUE
-2103,FAULT,"Drive B [0x8109, 1258] CAN Pdo9Timeout Fault",Event is set if Rx PDO 9 is not received within timeout time.,TRUE
-2104,FAULT,"Drive B [0x810a, 1259] CAN Pdo10Timeout Fault",Event is set if Rx PDO 10 is not received within timeout time.,TRUE
-2105,FAULT,"Drive B [0x810b, 1260] CAN Pdo11Timeout Fault",Event is set if Rx PDO 11 is not received within timeout time.,TRUE
-2106,FAULT,"Drive B [0x810c, 1261] CAN Pdo12Timeout Fault",Event is set if Rx PDO 12 is not received within timeout time.,TRUE
-2107,FAULT,"Drive B [0x810d, 1262] CAN Pdo13Timeout Fault",Event is set if Rx PDO 13 is not received within timeout time.,TRUE
-2108,FAULT,"Drive B [0x810e, 1263] CAN Pdo14Timeout Fault",Event is set if Rx PDO 14 is not received within timeout time.,TRUE
-2109,FAULT,"Drive B [0x810f, 1264] CAN Pdo15Timeout Fault",Event is set if Rx PDO 15 is not received within timeout time.,TRUE
-2110,FAULT,"Drive B [0x8110, 1265] CAN Pdo16Timeout Fault",Event is set if Rx PDO 16 is not received within timeout time.,TRUE
-2111,FAULT,"Drive B [0x8111, 1266] CAN Pdo17Timeout Fault",Event is set if Rx PDO 17 is not received within timeout time.,TRUE
-2112,FAULT,"Drive B [0x8112, 1267] CAN Pdo18Timeout Fault",Event is set if Rx PDO 18 is not received within timeout time.,TRUE
-2113,FAULT,"Drive B [0x8113, 1268] CAN Pdo19Timeout Fault",Event is set if Rx PDO 19 is not received within timeout time.,TRUE
-2114,FAULT,"Drive B [0x8114, 1269] CAN Pdo20Timeout Fault",Event is set if Rx PDO 20 is not received within timeout time.,TRUE
-2115,FAULT,"Drive B [0x8115, 1270] CAN Pdo21Timeout Fault",Event is set if Rx PDO 21 is not received within timeout time.,TRUE
-2116,FAULT,"Drive B [0x8116, 1271] CAN Pdo22Timeout Fault",Event is set if Rx PDO 22 is not received within timeout time.,TRUE
-2117,FAULT,"Drive B [0x8117, 1272] CAN Pdo23Timeout Fault",Event is set if Rx PDO 23 is not received within timeout time.,TRUE
-2118,FAULT,"Drive B [0x8118, 1273] CAN Pdo24Timeout Fault",Event is set if Rx PDO 24 is not received within timeout time.,TRUE
-2119,FAULT,"Drive B [0x8119, 1274] CAN Pdo25Timeout Fault",Event is set if Rx PDO 25 is not received within timeout time.,TRUE
-2120,FAULT,"Drive B [0x811a, 1275] CAN Pdo26Timeout Fault",Event is set if Rx PDO 26 is not received within timeout time.,TRUE
-2121,FAULT,"Drive B [0x811b, 1276] CAN Pdo27Timeout Fault",Event is set if Rx PDO 27 is not received within timeout time.,TRUE
-2122,FAULT,"Drive B [0x811c, 1277] CAN Pdo28Timeout Fault",Event is set if Rx PDO 28 is not received within timeout time.,TRUE
-2123,FAULT,"Drive B [0x811d, 1278] CAN Pdo29Timeout Fault",Event is set if Rx PDO 29 is not received within timeout time.,TRUE
-2124,FAULT,"Drive B [0x811e, 1279] CAN Pdo30Timeout Fault",Event is set if Rx PDO 30 is not received within timeout time.,TRUE
-2125,FAULT,"Drive B [0x811f, 1280] CAN Pdo31Timeout Fault",Event is set if Rx PDO 31 is not received within timeout time.,TRUE
-2126,FAULT,"Drive B [0x8121, 1235] CAN SrdoMapError Fault",Event is set if any SRDO map has invalid configuration.,TRUE
-2127,FAULT,"Drive B [0x8122, 1236] CAN RxMapLengthError Fault",Event is set if any Rx SRDO receives a short packet.,TRUE
-2128,FAULT,"Drive B [0x8151, 1281] CAN Srdo1SrvtTimeout Fault",Event is to evaluate the timing between receiving frame-1 (Normal data) and frame-2 (inverted data).Event is set if frame2 (inverted data) in Rx SRDO 1 is not received within timeout.Srvt : Safety-Related Velidation Time,TRUE
-2129,FAULT,"Drive B [0x8171, 1313] CAN Srdo1SctTimeout Fault",Event is set if Rx SRDO 1 is not received within timeout time.Sct : Safeguard Cycle Time,TRUE
-2130,WARN,"Drive B [0x8191, 1345] CAN Srdo1DataInvalid Warning",Event is set if the normal data and inverted data is not matched in Rx SRDO 1.,TRUE
-2131,FAULT,"Drive B [0x81F5, 1225] CAN CanConfigError Fault",CAN Configuration conflict detected. MCU1 is running application but is tripped. MCU2 will stop in boot mode and has temporarily resolved the configuration conflict. Boot normally uses the NodeId and bitrate written to EEPROM by the application.,TRUE
-2132,FAULT,"Drive B [0x5530, 1430] Cpu EepromSizeError Fault",Fault is set if an eeprom memory size missmatch is detected. I.e. size configured in sw does not match detected size.This check is done before write operation has started and will inhibit write operation when detected.,TRUE
-2133,WARN,"Drive B [0x5520, 1403] Cpu ChecksumError Warning",Fault is set if there is a checksum error on any eeprom segment with checksum.Some segments also have idividual checksum error events.Some segments also have a default values event that will be set in case of checksum error on that segment.,TRUE
-2134,WARN,"Drive B [0x5521, 1420] Cpu ChecksumErrorOnSensorAngleOffset Warning",Event is set if checksum error has occured on sensor angle offset related eeprom segment (see SFIFMG_CAL in EEProm layout).,TRUE
-2135,WARN,"Drive B [0x5522, 1421] Cpu ChecksumErrorOnItemInfo Warning",Event is set if checksum error has occured on Item Info related eeprom segments (see ITEM_INFO_CAL and HW_SERIAL in EEProm layout).,TRUE
-2136,WARN,"Drive B [0x5523, 1422] Cpu ChecksumErrorOnItemMaxCurrent Warning",Event is set if checksum error has occured on Item Max Current eeprom segment (see ITEM_MAX_CURRENT in EEProm layout).,TRUE
-2137,WARN,"Drive B [0x5524, 1423] Cpu ChecksumErrorOnCANTalk Warning",Event is set if checksum error has occured on CANTalk eeprom segment (see CTLKCM in EEProm layout).,TRUE
-2138,WARN,"Drive B [0x8403, 1400] Cpu PowerOutReset Warning",MCU was unintentionally reset due to low 3.3V powersupply.Event also needs to be supported by boot sw.,TRUE
-2139,WARN,"Drive B [0x8404, 1404] Cpu BrownOutReset Warning",MCU was unintentionally reset due to low 3.3V powersupply.Event also needs to be supported by boot sw.,TRUE
-2140,WARN,"Drive B [0x8400, 1406] Cpu I_WatchdogTimeout Warning",MCU internal Independent watchdog not reset in time causing the MCU to reset.,TRUE
-2141,WARN,"Drive B [0x8401, 1407] Cpu W_WatchdogTimeout Warning",MCU internal Windowed watchdog not reset in time or reset too early causing the MCU to reset.,TRUE
-2142,FAULT,"Drive B [0x8410, 1409] Cpu ExeTimeHigh_4kHz Fault",Set when average execution time is higher than 150U us.,TRUE
-2143,FAULT,"Drive B [0x8411, 1410] Cpu ExeTimeHigh_50Hz Fault",Set when average execution time is higher than 7000U us.,TRUE
-2144,FAULT,"Drive B [0x8412, 1411] Cpu ExeTimeHigh_IndependentSupervision Fault",Set when average execution time is higher than 50U us.,TRUE
-2145,FAULT,"Drive B [0x8413, 1412] Cpu ExeTimeHigh_CAN Fault",Set when average execution time is higher than 1000U us.,TRUE
-2146,FAULT,"Drive B [0x8414, 1413] Cpu ExeTimeHigh_SlowApp Fault",Set when average execution time is higher than 2000U us.,TRUE
-2147,FAULT,"Drive B [0x8415, 1414] Cpu ExeTimeHigh_FastApp Fault",Set when average execution time is higher than 400U us.,TRUE
-2148,WARN,"Drive B [0x8416, 1415] Cpu ExeTimeModHigh_SlowApp Warning",Set when average execution time is higher than 1000U us.,TRUE
-2149,WARN,"Drive B [0x8417, 1416] Cpu ExeTimeModHigh_FastApp Warning",Set when average execution time is higher than 300U us.,TRUE
-2150,WARN,"Drive B [0x8450, 1450] Cpu InternalError Warning","Internal error occurred. It is most likely a static configuration error that is not caught at compile time, such asImpossible configuration in flash memory.Illegal ErrorBit configured for an eventSame EventId on two different event.",TRUE
-2151,WARN,"Drive B [0x8452, 1451] Cpu BootInternalError Warning",Internal error occurred in boot. It may occure if an incompatible application is running with the boot code.,TRUE
-2152,FAULT,"Drive B [0x8451, 1460] Cpu ClockFailure Fault",CPU clock failure. Either External crystal or internal PLL failed to generate a stable clock.CPU will be clocked by the internal 8MHz RC-oscillator.,TRUE
-2153,FAULT,"Drive B [0x8460, 1455] RuntimeTests MCU_Flash_Application_Check Fault",Checksum error(CRC32) detected in the application part of the FLASH memory.Evaluation conditionAlways.FilteringNone.Set conditionChecksum error (CRC32) deteteced in the application part of the FLASH memory during runtime.,TRUE
-2154,FAULT,"Drive B [0x8461, 1456] RuntimeTests MCU_Flash_Boot_Check Fault",Checksum error(CRC32) detected in the boot part of the FLASH memory.Evaluation conditionAlways.FilteringNone.Set conditionChecksum error (CRC32) deteteced in the boot part of the FLASH memory during runtime.Clear conditionReset/Restart node.,TRUE
-2155,FAULT,"Drive B [0x8460, 1484] RuntimeTests MCU_RegisterConf_Supv Fault",Signature check of peripherals and I/O configuration failed.Evaluation conditionAlways.FilteringNone.Set conditionThe signature check of peripherals and I/O configuration failed during runtime.,TRUE
-2156,FAULT,"Drive B [0x8460, 1486] RuntimeTests MCU_MemoryVerificationFault Fault",A write with verify of data to RAM failed.Evaluation conditionAlways.FilteringNone.Set conditionWhen writing data to RAM with verify it was detected that the data readback from RAM was not the same data as was written.,TRUE
-2157,FAULT,"Drive B [0x5527, 1425] ConfigurationManager BadConfiguration Fault","The combination of motor and sensor configuration is not verified.Recommended configuration:PM with Sixstep, Incremental encoder with Z-pulse, Analog Hall, Resolve sensors.IM with Incremental encoder sensor.",TRUE
-2158,FAULT,"Drive B [0x5528, 1426] ConfigurationManager MotorTypeReconfigured Fault",Motor type configuration is changed. New configuration takes effect after restarting.,TRUE
-2159,FAULT,"Drive B [0x5529, 1427] ConfigurationManager SensorTypeReconfigured Fault",Sensor type configuration is changed. New configuration takes effect after restarting.,TRUE
-2160,FAULT,"Drive B [0x3301, 1700] InternalSupply 15VOutOfRange Fault",Internal 15V supply out of range. Valid range 13.00 to 16.00 V.,TRUE
-2161,FAULT,"Drive B [0x3302, 1701] InternalSupply 5VOutOfRange Fault",Internal 5V supply out of range. Valid range 4.50 to 5.50 V.,TRUE
-2162,FAULT,"Drive B [0x3304, 1709] InternalSupply 5VCOutOfRange Fault",Internal 5V C supply out of range. Valid range 4.50 to 5.50 V.,TRUE
-2163,FAULT,"Drive B [0x3302, 1702] InternalSupply 3V3Low Fault",Internal 3.3V supply too low. Limit 2.9V. Uses MCU internal PVD (Programmable Voltage Detection). A flag is set by MCU hardware and event is set when VDD is below the limit and cleared if above. Hysteresis is 100mV,TRUE
-2164,FAULT,"Drive B [0x7221, 800] InternalSupply SensorSupNotCon Fault",Fault is set if Sensor Supply current is too low. Limit 0.000 A.Note: If you have multiple sensors connected to this supply this event might only be set if all devices are disconnected.,TRUE
-2165,FAULT,"Drive B [0x7220, 801] InternalSupply SensorSupSHC Fault",Fault is set if Sensor Supply current is too high. Limit 0.068 A.,TRUE
-2166,FAULT,"Drive B [0x7231, 811] InternalSupply SensorSupRange Fault",Sensor Supply voltage out of range. Valid range10.00 to 16.00 V.,TRUE
-2167,FAULT,"Drive B [0x7230, 810] InternalSupply SensSupRefRange Fault",Sensor Supply Ref voltage out of range. Valid range 10.00 to 16.00 V.,TRUE
-2168,WARN,"Drive B [0x7270, 1735] InternalSupply SensorSupply1OutputVoltage_OutOfRange Warning",Internal SensorSupply1OutputVoltage out of range. Valid range 10.80 to 13.20 V.,TRUE
-2169,FAULT,"Drive B [0x3330, 1730] InternalSupply ExtGndTripped Fault",Set when HW EXT_GND_TRIP signal is detected. Reset of node required to clear error. Events related to speed feedback and motor temp measurement may follow this event.,TRUE
-2170,FAULT,"Drive B [0x3410, 10000] Application ThrottleBadSignal Fault",Throttle pot is out of range.,TRUE
-2171,FAULT,"Drive B [0x7210, 1600] MotorSinCosSensor Signal1GainOutOfRange Fault",Signal 1 gain out of range. The adapted gain is too high or low.,TRUE
-2172,FAULT,"Drive B [0x7211, 1601] MotorSinCosSensor Signal2GainOutOfRange Fault",Signal 2 gain out of range. The adapted gain is too high or low.,TRUE
-2173,FAULT,"Drive B [0x7212, 1602] MotorSinCosSensor Signal1OffsetOutOfRange Fault",Signal 1 offset out of range. The adapted offset is too high or low.,TRUE
-2174,FAULT,"Drive B [0x7213, 1603] MotorSinCosSensor Signal2OffsetOutOfRange Fault",Signal 2 offset out of range. The adapted offset is too high or low.,TRUE
-2175,FAULT,"Drive B [0x7214, 1604] MotorSinCosSensor Signal1SaturatedHigh Fault",Signal 1 raw AD value saturated high. Indicates short circuit.,TRUE
-2176,FAULT,"Drive B [0x7215, 1605] MotorSinCosSensor Signal1SaturatedLow Fault",Signal 1 raw AD value saturated low. Indicates short circuit.,TRUE
-2177,FAULT,"Drive B [0x7216, 1606] MotorSinCosSensor Signal2SaturatedHigh Fault",Signal 2 raw AD value saturated high. Indicates short circuit.,TRUE
-2178,FAULT,"Drive B [0x7217, 1607] MotorSinCosSensor Signal2SaturatedLow Fault",Signal 2 raw AD value saturated low. Indicates short circuit.,TRUE
-2179,FAULT,"Drive B [0x7218, 1608] MotorSinCosSensor SinCosSensorNotConnected Fault",Check that unit circle is constant. Will detect one broken signal even if sensor is not rotating.The equation x^2 + y^2 = 1 should always be valid for a SinCosSensor.,TRUE
-2180,FAULT,"Drive B [0x8420, 1900] StartupTest CpuTest Fault",Startup test of CPU failed.,TRUE
-2181,FAULT,"Drive B [0x8420, 1901] StartupTest Watchdog Fault",Startup test of Watchdog failed.,TRUE
-2182,FAULT,"Drive B [0x8420, 1903] StartupTest Checkpoint1 Fault",Startup test of Checkpoint1 Control flow failed.,TRUE
-2183,FAULT,"Drive B [0x8420, 1904] StartupTest FullRamMarch Fault",Startup test of Full Ram March failed.,TRUE
-2184,FAULT,"Drive B [0x8420, 1905] StartupTest SwitchOffPll Fault",Startup failed do switch off PLL.,TRUE
-2185,FAULT,"Drive B [0x8420, 1906] StartupTest LsiStart Fault",Failed to start LSI.,TRUE
-2186,FAULT,"Drive B [0x8420, 1907] StartupTest HseStart Fault",Failed to start HSE.,TRUE
-2187,FAULT,"Drive B [0x8420, 1908] StartupTest HsiHse Fault",Startup test of HSI HSE switch failed.,TRUE
-2188,FAULT,"Drive B [0x8420, 1909] StartupTest ExtSource Fault",Startup test of Ext source failed.,TRUE
-2189,FAULT,"Drive B [0x8420, 1910] StartupTest ClockFreq Fault",Startup test of Clock frequency failed.,TRUE
-2190,FAULT,"Drive B [0x8420, 1911] StartupTest Checkpoint2 Fault",Startup test of Checkpoint2 Control flow failed.,TRUE
-2191,FAULT,"Drive B [0x8420, 1912] StartupTest IncompatibleSwHwConfiguration Fault",The sofware configuration regarding OVP/HVL does not match the hardware configuration.Evaluation conditionAt Startup.,TRUE
-2999,FAULT,"Drive B Unknown Fault",Drive B has emitted a fault that is not in the lookup table. Please check logs.,TRUE
+-1,ERROR,Unknown Fault,Only if there is an unknown fault code that is published.,false
+0,WARNING,Unknown Warning,Only if there Is an unknown warning code that is published.,false
+1,ERROR,Websocket Initial Connection Failure,Unable to open a connection to the shore server,false
+2,ERROR,Websocket Connection Closed,The websocket connection unexpectadely closed,false
+3,WARNING,Websocket Is Not Initally Opened Yet,Websocket is still waiting to be opened,true
+4,ERROR,Websocket Closed,Websocket is reported as no longer open,true
+10,ERROR,CAN Motor Node Shutdown,If the motor node has to shutdown due to a fatal error.,true
+11,ERROR,"""can0"" Interface Not Up",If `ip link status can0` does not have `status UP`,true
+12,WARNING,Invalid CAN Packet Read,A `canerror` was thrown by the underlying `canopen` library,false
+13,WARNING,Error reading CAN SDO,Caused by an invalid CAN SDO,true
+14,ERROR,Failed CAN Network Init,Failed to initialize `canopen.Network()`,true
+15,ERROR,Serial device does not exist,Failed to open a serial device because it doesn't exist, true
+16,ERROR,Generic Serial Device Error,There was some kind of generic serial device error tht could not be attributed to a single error, false
+17,ERROR,Serial Device In-Use,The serial device is in use and is locked, true
+18,ERROR,Serial Device IO Error,There was an IO error thrown when trying to read from the serial device, false
+19,ERROR,Drive Motor Fault,Drive motor has a fault. Check logs for more info,true
+30,WARNING,Cellular Signal Quality POOR WARNING,Cellular signal quality is poor.,true
+31,ERROR,Cellular Authentication Mode NOT READY,AT+CPIN? is not READY,true
+40,WARNING,MCU Ccenus Fault,MCU Reports a CCENUS Fault,TRUE
+41,WARNING,MCU Tcencus Fault,MCU Reports a Tcencus Fault,TRUE
+42,ERROR,MCU High Cell Voltage Fault,MCU Reports a High Voltage Fault,TRUE
+43,ERROR,MCU Low Cell Voltage Fault,MCU Reports a Low Voltage Fault,TRUE
+44,ERROR,MCU High Temp Fault,MCU Reports a Temperature too High,TRUE
+45,ERROR,MCU Low Temp Fault,MCU Reports a Temperature too Low,TRUE
+46,ERROR,MCU Hardware Fault,MCU Reports a Hardware Fault,TRUE
+1000,ERROR,"Drive A [0x2340, 100] Power Stage ShortCircuit Fault","Hw detected short circuit.If the short circuit protection detects a short circuit, the power stage will be shut down. This is done by Hw without Sw interaction.The Sw will restart the power stage within 500 microseconds.",TRUE
+1001,ERROR,"Drive A [0x2340, 101] Power Stage ShortCircuitCounter Fault",This is an inforamative event that in combination with the ShortCircuit-event can be usefull when analyzing short circuit situations. This event will be cleared when power stage is disabled.,TRUE
+1002,WARNING,"Drive A [0x2341, 103] Power Stage ShortCGlitch Warning","Hw detected short circuit glitch.If the short circuit protection detects a short circuit, the power stage will be shut down. This is done by Hw without Sw interaction.This event is always set whenever this happens.",TRUE
+1003,ERROR,"Drive A [0x2351, 111] Power Stage OVPActive Fault",Hw detected Over Voltage protection.Event is set if an Over Voltage Protection trip is detected.,TRUE
+1004,ERROR,"Drive A [0x2360, 120] Power Stage PWMUnexpectedOff Fault",The power stage was unexpectedly turned off.,TRUE
+1005,WARNING,"Drive A [0x2361, 121] Power Stage PWMUnexpectedOffGlitch Warning",The power stage was unexpectedly turned off but restarted successfully.,TRUE
+1006,ERROR,"Drive A [0x2370, 122] Power Stage SupervisionPwmDisable Fault",Event is set if the supervision CPU has disabled PWM.The exact reason for this must be obtained by communicating with that particular node.,TRUE
+1007,ERROR,"Drive A [0x5210, 200] Current Measurements SensorOffset Fault",Event is set if offset is too high.Offset is calibrated when drive is disabled.Limit is 10% of default offset that is 2047 (i.e. half of ADC full-scale value),TRUE
+1008,ERROR,"Drive A [0x2310, 202] Current Measurements OverCurrentError Fault","Event is set if measured current is too high in any of the U,V or W phases and glitch counter is above trip limit.",TRUE
+1009,ERROR,"Drive A [0x2311, 203] Current Measurements OverCurrGlitch Fault","Event is set if measured current is too high in any of the U, V or W phases and glitch counter is below trip limit.",TRUE
+1010,ERROR,"Drive A [0x2316, 207] Current Measurements PhaseUVNotConnected Fault",Event is set during startup check of motor connections if the measrued current i phase U is below a defined limit,TRUE
+1011,ERROR,"Drive A [0x2317, 208] Current Measurements PhaseUWNotConnected Fault",Event is set during startup check of motor connections if the measrued current i phase U is below a defined limit,TRUE
+1012,ERROR,"Drive A [0x2318, 209] Current Measurements PhaseVWNotConnected Fault",Event is set during startup check of motor connections if the measrued current i phase V is below a defined limit,TRUE
+1013,ERROR,"Drive A [0x2319, 211] Current Measurements DriveIsNotDisable Fault",Event is set during startup check of motor connections if the drive is not disabled when running the check,TRUE
+1014,ERROR,"Drive A [0x2320, 213] Current Measurements RotorRotationTooHigh Fault",Event is set during startup check of motor connections if the rotor rotation is too high,TRUE
+1015,ERROR,"Drive A [0x2310, 310] Current Measurements CustomizedOverCurrentError Fault",Event is set when unfiltered RMS current is above over current limit for the specified number of consecutive samples.,TRUE
+1016,ERROR,"Drive A [0x8060, 301] Motor SpeedLimit Fault",Event is set if motor speed is above a ramped speed limit. Typically used when Forced Braking or when a max speed limit is imposed by application.,TRUE
+1017,ERROR,"Drive A [0x8060, 302] Motor HighSpeed Fault",Event is set if motor speed is above predefined level.Limits: See related parameters.,TRUE
+1018,ERROR,"Drive A [0x8070, 306] Motor SlipInWrongDirection Fault",SlipSpeed is controlled to achive correct orientation of the dq-plane.Event is set if SlipSpeed is wrong compared to ExpectedSlipSpeed.,TRUE
+1019,ERROR,"Drive A [0x8071, 307] Motor TooHighZeroSpeedSlip Fault",SlipSpeed is controlled to achive correct orientation of the dq-plane.Event is set if SlipSpeed too high compared to expected slip speed at zero sensor speed.,TRUE
+1020,ERROR,"Drive A [0x8090, 308] Motor ACCurrentControlError Fault",Event is set if the difference between the expected AC current and the measured AC current is too high.This indicates faulty current measurement sensor(s) or badly tuned current controller.,TRUE
+1021,ERROR,"Drive A [0x80A0, 309] Motor ACCurrentMeasPlausibilityError Fault",Event is set if the reference AC voltage is higher than what the measured AC current indicates.This indicates that one or more motor phase cables are not connected properly or faulty current measurement sensor(s).,TRUE
+1022,ERROR,"Drive A [0x80B0, 320] Motor FrequencyAbove599Hz Fault",Due to high-frequency drive regulations the electrical frequency need to be limited to maximum 599Hz. Changing the configuration of this event in a library version of Plasma3 will have no effect. This event must be configured to trip power stage.,TRUE
+1023,ERROR,"Drive A [0x3212, 402] DC Bus HighVoltageHardware Fault",HW detected over voltage. Level is defined by HW design.,TRUE
+1024,ERROR,"Drive A [0x3211, 404] DC Bus High Fault",Event is set if filtered voltage is above predefined level.Limits: See related parameters.,TRUE
+1025,ERROR,"Drive A [0x3221, 406] DC Bus Low Fault",Event is set if filtered voltage is below predefined level.Limits: See related parameters.,TRUE
+1026,ERROR,"Drive A [0x3120, 407] DC Bus ChargingError Fault",Event is set if measured voltage is below predefined level after a predefined time at startup.Limits: See related parameters.,TRUE
+1027,WARNING,"Drive A [0x4320, 500] Power Stage Temperature Sensor NotConnected Warning",Event is set if internal Power Stage temperature sensor is not connected.SW algorithm: Temperature measurement is out of range.Limits: Event is set when sensor measures 130 deg celsius,TRUE
+1028,WARNING,"Drive A [0x4320, 501] Power Stage Temperature Sensor ShortCircuit Warning",Event is set if internal Power Stage temperature sensor is short circuited.SW algorithm: Temperature measurement is out of range.Limits: Event is set when sensor measures -50 deg celsius,TRUE
+1029,ERROR,"Drive A [0x4310, 503] Power Stage Temperature Sensor High Fault",Event is set if internal Power Stage temperature is above predefined level.Limits: Event is set at 110 deg celsius.,TRUE
+1030,WARNING,"Drive A [0x4220, 600] Motor Temperature Sensor NotConnected Warning",Event is set if motor temperature sensor is not connected.SW algorithm: Temperature measurement is out of range.,TRUE
+1031,WARNING,"Drive A [0x4220, 601] Motor Temperature Sensor ShortCircuit Warning",Event is set if motor temperature sensor is short circuited.SW algorithm: Temperature measurement is out of range.,TRUE
+1032,ERROR,"Drive A [0x4210, 603] Motor Temperature Sensor High Fault",Event is set if motor temperature is above predefined level.Limits: Event is set at 130 deg celsius.,TRUE
+1033,ERROR,"Drive A [0x7240, 804] Encoder Feedback Sensor DecTooHigh Fault",Event is set if change of sensor speed is too high (measured rotor acceleration).Detected if sensor is faulty during more than 40 ms +/-1ms or if there is been to many intermittent faults within a certain time.,TRUE
+1034,WARNING,"Drive A [0x7260, 826] Encoder Feedback Sensor DecTooHighGlitch Warning",Event is set if intermittent change of sensor speed is too high (measured rotor deceleration) and DecTooHigh event is not detected. Event is cleared if enable command transits from enable to disable.,TRUE
+1035,ERROR,"Drive A [0x7250, 805] Encoder Feedback Sensor PlausabilityError Fault","Event is set if the sensor speed is too high, i.e a not plausible/possible speed.Limits: 15000rpm",TRUE
+1036,ERROR,"Drive A [0x7360, 802] Encoder Feedback Sensor Loss_Of_Ch_A Fault",Event is set if only Ch B is toggling and Ch A is not.,TRUE
+1037,ERROR,"Drive A [0x7370, 803] Encoder Feedback Sensor Loss_Of_Ch_B Fault",Event is set if only Ch A is toggling and Ch B is not.,TRUE
+1038,ERROR,"Drive A [0x7351, 827] Encoder Feedback Sensor BadOrShortedInputs Fault","Bad state machine transition, can indicate shorted inputs. This detection is active from 0 upto aprox. +-250 Hz. When using a 64 PPR sensor, the range can be interpreted as RPMEvaluated at 4 kHz. Checked at 50 Hz.",TRUE
+1039,ERROR,"Drive A [0x7390, 828] Encoder Feedback Sensor ZPulseCorrectionAngleIsTooLarge Fault",Becomes active if the difference between the quadrature counter angle and the defined index pulse angle is too big. Detection is active after the first turn of the rotor,TRUE
+1040,ERROR,"Drive A [0x7391, 829] Encoder Feedback Sensor NoZPulseDetected Fault","Detection is active before the first index pulse have been detected. If none index-pulse have been detected after a defined number of quadrature counts, the event becomes active.",TRUE
+1041,ERROR,"Drive A [0x739A, 833] Encoder Feedback Sensor ChannelOverFrequency Fault",Channel used for time measurement has detected that the pulse frequency detected is too high.,TRUE
+1042,ERROR,"Drive A [0x7290, 870] Sixstep Feedback Sensor SensorError Fault",Event is set if sixstep sensor is in illegal state.,TRUE
+1043,ERROR,"Drive A [0x7460, 2060] MotorPwmSensor LossOfChannelA Fault",Loss of channel A signal or too noisy.Event set if no valid pulse is seen during 20 ms.,TRUE
+1044,ERROR,"Drive A [0x7462, 2062] MotorPwmSensor BadPWM Fault","The received PWM signal is unstable and out of range (frequency, duty cycle or stuck high or low).",TRUE
+1045,ERROR,"Drive A [0x7250, 1620] Sensor Offset Calibration WrongDirection Fault",Sensor and stator frequency have different signs.Either sensor signals need to be inverted or motor phase cables are connected incorrectly.,TRUE
+1046,ERROR,"Drive A [0x7251, 1621] Sensor Offset Calibration NoRotation Fault","Motor does not accelerate to target speed within specified time. Possible causes could be too high inertia, too high friction, too low DC voltage, an error condition, current reduction etc.",TRUE
+1047,ERROR,"Drive A [0x7252, 1622] Sensor Offset Calibration LowDcBusVoltage Fault",Event is set when motor goes into field weakening before desired AC voltage amplitude is reached. Most likely cause is weak battery or power supply. Try decreasing acceleration current.,TRUE
+1048,WARNING,"Drive A [0x5411, 1001] Open Drain Output ShortCircuitCh1 Warning",Set when HW Short Circuit signal is detected. Disabling of output required to clear event.,TRUE
+1049,WARNING,"Drive A [0x5431, 1021] Open Drain Output HighCurrentCh1 Warning",Set when Peak Overcurrent or Overload is detected.,TRUE
+1050,WARNING,"Drive A [0x5451, 1011] Open Drain Output NotConnectedCh1 Warning",Set when measured current is below the NotConnectedLevel.,TRUE
+1051,WARNING,"Drive A [0x546A, 1031] Open Drain Output CurrMeasWhenOffCh1 Warning",Set when more than 200 mA current is measured when the output should be off.,TRUE
+1052,WARNING,"Drive A [0x5412, 1002] Open Drain Output ShortCircuitCh2 Warning",Set when HW Short Circuit signal is detected. Disabling of output required to clear event.,TRUE
+1053,WARNING,"Drive A [0x5452, 1012] Open Drain Output NotConnectedCh2 Warning",Set when measured current is below the NotConnectedLevel.,TRUE
+1054,WARNING,"Drive A [0x5432, 1022] Open Drain Output HighCurrentCh2 Warning",Set when Peak Overcurrent or Overload is detected.,TRUE
+1055,WARNING,"Drive A [0x546B, 1032] Open Drain Output CurrMeasWhenOffCh2 Warning",Set when more than 200 mA current is measured when the output should be off.,TRUE
+1056,WARNING,"Drive A [0x5413, 1003] Open Drain Output ShortCircuitCh3 Warning",Set when HW Short Circuit signal is detected. Disabling of output required to clear event.,TRUE
+1057,WARNING,"Drive A [0x5433, 1023] Open Drain Output HighCurrentCh3 Warning",Set when Peak Overcurrent or Overload is detected.,TRUE
+1058,WARNING,"Drive A [0x5453, 1013] Open Drain Output NotConnectedCh3 Warning",Set when measured current is below the NotConnectedLevel.,TRUE
+1059,WARNING,"Drive A [0x546C, 1033] Open Drain Output CurrMeasWhenOffCh3 Warning",Set when more than 200 mA current is measured when the output should be off.,TRUE
+1060,WARNING,"Drive A [0x5414, 1004] Open Drain Output ShortCircuitCh4 Warning",Set when HW Short Circuit signal is detected. Disabling of output required to clear event.,TRUE
+1061,WARNING,"Drive A [0x5434, 1024] Open Drain Output HighCurrentCh4 Warning",Set when Peak Overcurrent or Overload is detected.,TRUE
+1062,WARNING,"Drive A [0x5454, 1014] Open Drain Output NotConnectedCh4 Warning",Set when measured current is below the NotConnectedLevel.,TRUE
+1063,WARNING,"Drive A [0x546D, 1034] Open Drain Output CurrMeasWhenOffCh4 Warning",Set when more than 200 mA current is measured when the output should be off.,TRUE
+1064,WARNING,"Drive A [0x5415, 1005] Open Drain Output ShortCircuitCh5 Warning",Set when HW Short Circuit signal is detected. Disabling of output required to clear event.,TRUE
+1065,WARNING,"Drive A [0x5435, 1025] Open Drain Output HighCurrentCh5 Warning",Set when Peak Overcurrent or Overload is detected.,TRUE
+1066,WARNING,"Drive A [0x5455, 1015] Open Drain Output NotConnectedCh5 Warning",Set when measured current is below the NotConnectedLevel.,TRUE
+1067,WARNING,"Drive A [0x546E, 1035] Open Drain Output CurrMeasWhenOffCh5 Warning",Set when more than 200 mA current is measured when the output should be off.,TRUE
+1068,WARNING,"Drive A [0x5416, 1006] Open Drain Output ShortCircuitCh6 Warning",Set when HW Short Circuit signal is detected. Disabling of output required to clear event.,TRUE
+1069,WARNING,"Drive A [0x5436, 1026] Open Drain Output HighCurrentCh6 Warning",Set when Peak Overcurrent or Overload is detected.,TRUE
+1070,WARNING,"Drive A [0x5456, 1016] Open Drain Output NotConnectedCh6 Warning",Set when measured current is below the NotConnectedLevel.,TRUE
+1071,WARNING,"Drive A [0x545F, 1036] Open Drain Output CurrMeasWhenOffCh6 Warning",Set when more than 200 mA current is measured when the output should be off.,TRUE
+1072,WARNING,"Drive A [0x5481, 1121] Open Drain Output LoadActiveWhenODOffCh1 Warning","When high-side in is high, the voltage drop across the load should be inactive (i.e. OD & HS voltage is at the same level) if the state of the OD & HS swtiches is exclusively off or both off.",TRUE
+1073,WARNING,"Drive A [0x5482, 1122] Open Drain Output LoadActiveWhenODOffCh2 Warning","When high-side in is high, the voltage drop across the load should be inactive (i.e. OD & HS voltage is at the same level) if the state of the OD & HS swtiches is exclusively off or both off.",TRUE
+1074,WARNING,"Drive A [0x5483, 1123] Open Drain Output LoadActiveWhenODOffCh3 Warning","When high-side in is high, th voltage drop across the load should be inactive (i.e. OD & HS voltage is at the same level) if the state of the OD & HS swtiches is exclusively off or both off.",TRUE
+1075,WARNING,"Drive A [0x5541, 1141] Open Drain Output LoadActiveWhenHSOffCh1 Warning","When high-side in is high, the voltage drop across the load should be inactive (i.e. OD & HS voltage is at the same level) if the state of the OD & HS swtiches is exclusively off or both off.",TRUE
+1076,WARNING,"Drive A [0x5542, 1142] Open Drain Output LoadActiveWhenHSOffCh2 Warning","When high-side in is high, the voltage drop across the load should be inactive (i.e. OD & HS voltage is at the same level) if the state of the OD & HS swtiches is exclusively off or both off.",TRUE
+1077,WARNING,"Drive A [0x5543, 1143] Open Drain Output LoadActiveWhenHSOffCh3 Warning","When high-side in is high, the voltage drop across the load should be inactive (i.e. OD & HS voltage is at the same level) if the state of the OD & HS swtiches is exclusively off or both off.",TRUE
+1078,WARNING,"Drive A [0x5500, 1100] HighSideDiagnostics HighSideShC Warning",Set when HW Short Circuit signal is detected. Disabling of output required to clear event.,TRUE
+1079,WARNING,"Drive A [0x5501, 1101] HighSideDiagnostics HighSideInLow Warning",The high side input has been detected to be low. This indicates that high side input is not connected or has short-circuit to B-.,TRUE
+1080,WARNING,"Drive A [0x5502, 1102] HighSideDiagnostics HighSideOutLow Warning",The high side output has been detected to be low.This indicate that the high side output is shorted to B-.,TRUE
+1081,WARNING,"Drive A [0x5503, 1103] HighSideDiagnostics HighSideOutHighWhenOff Warning",The high side output has been detected to be high.This indicate that the high side output is shorted to B+.,TRUE
+1082,ERROR,"Drive A [0x5504, 1104] HighSideDiagnostics HighSideOverload Fault",High continuous current on High side out.,TRUE
+1083,ERROR,"Drive A [0x5505, 1105] HighSideDiagnostics HighSideHighPeakCurr Fault",High peak current on High side out.,TRUE
+1084,ERROR,"Drive A [0x8140, 1204] CAN SynchTimeout Fault",Event is set if Sync is not received within timeout time.,TRUE
+1085,ERROR,"Drive A [0x8100, 1205] CAN MapError Fault",Event is set if any PDO map has invalid configuration.,TRUE
+1086,ERROR,"Drive A [0x8141, 1206] CAN Sdo1Timeout Fault",Event is set if no SDO messages has been received within the timeout time on SDO1.The error detection is started after the first message is received.This event is evaluated in an application with no PDOs active.,TRUE
+1087,ERROR,"Drive A [0x8142, 1207] CAN Sdo2Timeout Fault",Event is set if no SDO message has been received within the timeout time on SDO2.The error detection is started after the first message is received.This event is evaluated in an application with no PDOs active.,TRUE
+1088,WARNING,"Drive A [0x8143, 1208] CAN SDO1SessionBusy Warning",The event is set when an SDO1 request is not finished and a new SDO1 request is received.,TRUE
+1089,WARNING,"Drive A [0x8144, 1209] CAN SDO2SessionBusy Warning",The event is set when an SDO2 request is not finished and a new SDO2 request is received.,TRUE
+1090,ERROR,"Drive A [0x814c, 1221] CAN Sdo3Timeout Fault",Event is set if no SDO messages has been received within the timeout time on SDO3.The error detection is started after the first message is received.This event is evaluated in an application with no PDOs active.,TRUE
+1091,ERROR,"Drive A [0x814d, 1222] CAN Sdo4Timeout Fault",Event is set if no SDO messages has been received within the timeout time on SDO4.The error detection is started after the first message is received.This event is evaluated in an application with no PDOs active.,TRUE
+1092,WARNING,"Drive A [0x814e, 1223] CAN SDO3SessionBusy Warning",The event is set when an SDO3 request is not finished and a new SDO3 request is received.,TRUE
+1093,WARNING,"Drive A [0x814f, 1224] CAN SDO4SessionBusy Warning",The event is set when an SDO4 request is not finished and a new SDO4 request is received.,TRUE
+1094,ERROR,"Drive A [0x8180, 1240] CAN RxMapLengthError Fault",Event is set if any RxPDO receives a short packet.,TRUE
+1095,ERROR,"Drive A [0x8101, 1250] CAN Pdo1Timeout Fault",Event is set if Rx PDO 1 is not received within timeout time.,TRUE
+1096,ERROR,"Drive A [0x8102, 1251] CAN Pdo2Timeout Fault",Event is set if Rx PDO 2 is not received within timeout time.,TRUE
+1097,ERROR,"Drive A [0x8103, 1252] CAN Pdo3Timeout Fault",Event is set if Rx PDO 3 is not received within timeout time.,TRUE
+1098,ERROR,"Drive A [0x8104, 1253] CAN Pdo4Timeout Fault",Event is set if Rx PDO 4 is not received within timeout time.,TRUE
+1099,ERROR,"Drive A [0x8105, 1254] CAN Pdo5Timeout Fault",Event is set if Rx PDO 5 is not received within timeout time.,TRUE
+1100,ERROR,"Drive A [0x8106, 1255] CAN Pdo6Timeout Fault",Event is set if Rx PDO 6 is not received within timeout time.,TRUE
+1101,ERROR,"Drive A [0x8107, 1256] CAN Pdo7Timeout Fault",Event is set if Rx PDO 7 is not received within timeout time.,TRUE
+1102,ERROR,"Drive A [0x8108, 1257] CAN Pdo8Timeout Fault",Event is set if Rx PDO 8 is not received within timeout time.,TRUE
+1103,ERROR,"Drive A [0x8109, 1258] CAN Pdo9Timeout Fault",Event is set if Rx PDO 9 is not received within timeout time.,TRUE
+1104,ERROR,"Drive A [0x810a, 1259] CAN Pdo10Timeout Fault",Event is set if Rx PDO 10 is not received within timeout time.,TRUE
+1105,ERROR,"Drive A [0x810b, 1260] CAN Pdo11Timeout Fault",Event is set if Rx PDO 11 is not received within timeout time.,TRUE
+1106,ERROR,"Drive A [0x810c, 1261] CAN Pdo12Timeout Fault",Event is set if Rx PDO 12 is not received within timeout time.,TRUE
+1107,ERROR,"Drive A [0x810d, 1262] CAN Pdo13Timeout Fault",Event is set if Rx PDO 13 is not received within timeout time.,TRUE
+1108,ERROR,"Drive A [0x810e, 1263] CAN Pdo14Timeout Fault",Event is set if Rx PDO 14 is not received within timeout time.,TRUE
+1109,ERROR,"Drive A [0x810f, 1264] CAN Pdo15Timeout Fault",Event is set if Rx PDO 15 is not received within timeout time.,TRUE
+1110,ERROR,"Drive A [0x8110, 1265] CAN Pdo16Timeout Fault",Event is set if Rx PDO 16 is not received within timeout time.,TRUE
+1111,ERROR,"Drive A [0x8111, 1266] CAN Pdo17Timeout Fault",Event is set if Rx PDO 17 is not received within timeout time.,TRUE
+1112,ERROR,"Drive A [0x8112, 1267] CAN Pdo18Timeout Fault",Event is set if Rx PDO 18 is not received within timeout time.,TRUE
+1113,ERROR,"Drive A [0x8113, 1268] CAN Pdo19Timeout Fault",Event is set if Rx PDO 19 is not received within timeout time.,TRUE
+1114,ERROR,"Drive A [0x8114, 1269] CAN Pdo20Timeout Fault",Event is set if Rx PDO 20 is not received within timeout time.,TRUE
+1115,ERROR,"Drive A [0x8115, 1270] CAN Pdo21Timeout Fault",Event is set if Rx PDO 21 is not received within timeout time.,TRUE
+1116,ERROR,"Drive A [0x8116, 1271] CAN Pdo22Timeout Fault",Event is set if Rx PDO 22 is not received within timeout time.,TRUE
+1117,ERROR,"Drive A [0x8117, 1272] CAN Pdo23Timeout Fault",Event is set if Rx PDO 23 is not received within timeout time.,TRUE
+1118,ERROR,"Drive A [0x8118, 1273] CAN Pdo24Timeout Fault",Event is set if Rx PDO 24 is not received within timeout time.,TRUE
+1119,ERROR,"Drive A [0x8119, 1274] CAN Pdo25Timeout Fault",Event is set if Rx PDO 25 is not received within timeout time.,TRUE
+1120,ERROR,"Drive A [0x811a, 1275] CAN Pdo26Timeout Fault",Event is set if Rx PDO 26 is not received within timeout time.,TRUE
+1121,ERROR,"Drive A [0x811b, 1276] CAN Pdo27Timeout Fault",Event is set if Rx PDO 27 is not received within timeout time.,TRUE
+1122,ERROR,"Drive A [0x811c, 1277] CAN Pdo28Timeout Fault",Event is set if Rx PDO 28 is not received within timeout time.,TRUE
+1123,ERROR,"Drive A [0x811d, 1278] CAN Pdo29Timeout Fault",Event is set if Rx PDO 29 is not received within timeout time.,TRUE
+1124,ERROR,"Drive A [0x811e, 1279] CAN Pdo30Timeout Fault",Event is set if Rx PDO 30 is not received within timeout time.,TRUE
+1125,ERROR,"Drive A [0x811f, 1280] CAN Pdo31Timeout Fault",Event is set if Rx PDO 31 is not received within timeout time.,TRUE
+1126,ERROR,"Drive A [0x8121, 1235] CAN SrdoMapError Fault",Event is set if any SRDO map has invalid configuration.,TRUE
+1127,ERROR,"Drive A [0x8122, 1236] CAN RxMapLengthError Fault",Event is set if any Rx SRDO receives a short packet.,TRUE
+1128,ERROR,"Drive A [0x8151, 1281] CAN Srdo1SrvtTimeout Fault",Event is to evaluate the timing between receiving frame-1 (Normal data) and frame-2 (inverted data).Event is set if frame2 (inverted data) in Rx SRDO 1 is not received within timeout.Srvt : Safety-Related Velidation Time,TRUE
+1129,ERROR,"Drive A [0x8171, 1313] CAN Srdo1SctTimeout Fault",Event is set if Rx SRDO 1 is not received within timeout time.Sct : Safeguard Cycle Time,TRUE
+1130,WARNING,"Drive A [0x8191, 1345] CAN Srdo1DataInvalid Warning",Event is set if the normal data and inverted data is not matched in Rx SRDO 1.,TRUE
+1131,ERROR,"Drive A [0x81F5, 1225] CAN CanConfigError Fault",CAN Configuration conflict detected. MCU1 is running application but is tripped. MCU2 will stop in boot mode and has temporarily resolved the configuration conflict. Boot normally uses the NodeId and bitrate written to EEPROM by the application.,TRUE
+1132,ERROR,"Drive A [0x5530, 1430] Cpu EepromSizeError Fault",Fault is set if an eeprom memory size missmatch is detected. I.e. size configured in sw does not match detected size.This check is done before write operation has started and will inhibit write operation when detected.,TRUE
+1133,WARNING,"Drive A [0x5520, 1403] Cpu ChecksumError Warning",Fault is set if there is a checksum error on any eeprom segment with checksum.Some segments also have idividual checksum error events.Some segments also have a default values event that will be set in case of checksum error on that segment.,TRUE
+1134,WARNING,"Drive A [0x5521, 1420] Cpu ChecksumErrorOnSensorAngleOffset Warning",Event is set if checksum error has occured on sensor angle offset related eeprom segment (see SFIFMG_CAL in EEProm layout).,TRUE
+1135,WARNING,"Drive A [0x5522, 1421] Cpu ChecksumErrorOnItemInfo Warning",Event is set if checksum error has occured on Item Info related eeprom segments (see ITEM_INFO_CAL and HW_SERIAL in EEProm layout).,TRUE
+1136,WARNING,"Drive A [0x5523, 1422] Cpu ChecksumErrorOnItemMaxCurrent Warning",Event is set if checksum error has occured on Item Max Current eeprom segment (see ITEM_MAX_CURRENT in EEProm layout).,TRUE
+1137,WARNING,"Drive A [0x5524, 1423] Cpu ChecksumErrorOnCANTalk Warning",Event is set if checksum error has occured on CANTalk eeprom segment (see CTLKCM in EEProm layout).,TRUE
+1138,WARNING,"Drive A [0x8403, 1400] Cpu PowerOutReset Warning",MCU was unintentionally reset due to low 3.3V powersupply.Event also needs to be supported by boot sw.,TRUE
+1139,WARNING,"Drive A [0x8404, 1404] Cpu BrownOutReset Warning",MCU was unintentionally reset due to low 3.3V powersupply.Event also needs to be supported by boot sw.,TRUE
+1140,WARNING,"Drive A [0x8400, 1406] Cpu I_WatchdogTimeout Warning",MCU internal Independent watchdog not reset in time causing the MCU to reset.,TRUE
+1141,WARNING,"Drive A [0x8401, 1407] Cpu W_WatchdogTimeout Warning",MCU internal Windowed watchdog not reset in time or reset too early causing the MCU to reset.,TRUE
+1142,ERROR,"Drive A [0x8410, 1409] Cpu ExeTimeHigh_4kHz Fault",Set when average execution time is higher than 150U us.,TRUE
+1143,ERROR,"Drive A [0x8411, 1410] Cpu ExeTimeHigh_50Hz Fault",Set when average execution time is higher than 7000U us.,TRUE
+1144,ERROR,"Drive A [0x8412, 1411] Cpu ExeTimeHigh_IndependentSupervision Fault",Set when average execution time is higher than 50U us.,TRUE
+1145,ERROR,"Drive A [0x8413, 1412] Cpu ExeTimeHigh_CAN Fault",Set when average execution time is higher than 1000U us.,TRUE
+1146,ERROR,"Drive A [0x8414, 1413] Cpu ExeTimeHigh_SlowApp Fault",Set when average execution time is higher than 2000U us.,TRUE
+1147,ERROR,"Drive A [0x8415, 1414] Cpu ExeTimeHigh_FastApp Fault",Set when average execution time is higher than 400U us.,TRUE
+1148,WARNING,"Drive A [0x8416, 1415] Cpu ExeTimeModHigh_SlowApp Warning",Set when average execution time is higher than 1000U us.,TRUE
+1149,WARNING,"Drive A [0x8417, 1416] Cpu ExeTimeModHigh_FastApp Warning",Set when average execution time is higher than 300U us.,TRUE
+1150,WARNING,"Drive A [0x8450, 1450] Cpu InternalError Warning","Internal error occurred. It is most likely a static configuration error that is not caught at compile time, such asImpossible configuration in flash memory.Illegal ErrorBit configured for an eventSame EventId on two different event.",TRUE
+1151,WARNING,"Drive A [0x8452, 1451] Cpu BootInternalError Warning",Internal error occurred in boot. It may occure if an incompatible application is running with the boot code.,TRUE
+1152,ERROR,"Drive A [0x8451, 1460] Cpu ClockFailure Fault",CPU clock failure. Either External crystal or internal PLL failed to generate a stable clock.CPU will be clocked by the internal 8MHz RC-oscillator.,TRUE
+1153,ERROR,"Drive A [0x8460, 1455] RuntimeTests MCU_Flash_Application_Check Fault",Checksum error(CRC32) detected in the application part of the FLASH memory.Evaluation conditionAlways.FilteringNone.Set conditionChecksum error (CRC32) deteteced in the application part of the FLASH memory during runtime.,TRUE
+1154,ERROR,"Drive A [0x8461, 1456] RuntimeTests MCU_Flash_Boot_Check Fault",Checksum error(CRC32) detected in the boot part of the FLASH memory.Evaluation conditionAlways.FilteringNone.Set conditionChecksum error (CRC32) deteteced in the boot part of the FLASH memory during runtime.Clear conditionReset/Restart node.,TRUE
+1155,ERROR,"Drive A [0x8460, 1484] RuntimeTests MCU_RegisterConf_Supv Fault",Signature check of peripherals and I/O configuration failed.Evaluation conditionAlways.FilteringNone.Set conditionThe signature check of peripherals and I/O configuration failed during runtime.,TRUE
+1156,ERROR,"Drive A [0x8460, 1486] RuntimeTests MCU_MemoryVerificationFault Fault",A write with verify of data to RAM failed.Evaluation conditionAlways.FilteringNone.Set conditionWhen writing data to RAM with verify it was detected that the data readback from RAM was not the same data as was written.,TRUE
+1157,ERROR,"Drive A [0x5527, 1425] ConfigurationManager BadConfiguration Fault","The combination of motor and sensor configuration is not verified.Recommended configuration:PM with Sixstep, Incremental encoder with Z-pulse, Analog Hall, Resolve sensors.IM with Incremental encoder sensor.",TRUE
+1158,ERROR,"Drive A [0x5528, 1426] ConfigurationManager MotorTypeReconfigured Fault",Motor type configuration is changed. New configuration takes effect after restarting.,TRUE
+1159,ERROR,"Drive A [0x5529, 1427] ConfigurationManager SensorTypeReconfigured Fault",Sensor type configuration is changed. New configuration takes effect after restarting.,TRUE
+1160,ERROR,"Drive A [0x3301, 1700] InternalSupply 15VOutOfRange Fault",Internal 15V supply out of range. Valid range 13.00 to 16.00 V.,TRUE
+1161,ERROR,"Drive A [0x3302, 1701] InternalSupply 5VOutOfRange Fault",Internal 5V supply out of range. Valid range 4.50 to 5.50 V.,TRUE
+1162,ERROR,"Drive A [0x3304, 1709] InternalSupply 5VCOutOfRange Fault",Internal 5V C supply out of range. Valid range 4.50 to 5.50 V.,TRUE
+1163,ERROR,"Drive A [0x3302, 1702] InternalSupply 3V3Low Fault",Internal 3.3V supply too low. Limit 2.9V. Uses MCU internal PVD (Programmable Voltage Detection). A flag is set by MCU hardware and event is set when VDD is below the limit and cleared if above. Hysteresis is 100mV,TRUE
+1164,ERROR,"Drive A [0x7221, 800] InternalSupply SensorSupNotCon Fault",Fault is set if Sensor Supply current is too low. Limit 0.000 A.Note: If you have multiple sensors connected to this supply this event might only be set if all devices are disconnected.,TRUE
+1165,ERROR,"Drive A [0x7220, 801] InternalSupply SensorSupSHC Fault",Fault is set if Sensor Supply current is too high. Limit 0.068 A.,TRUE
+1166,ERROR,"Drive A [0x7231, 811] InternalSupply SensorSupRange Fault",Sensor Supply voltage out of range. Valid range10.00 to 16.00 V.,TRUE
+1167,ERROR,"Drive A [0x7230, 810] InternalSupply SensSupRefRange Fault",Sensor Supply Ref voltage out of range. Valid range 10.00 to 16.00 V.,TRUE
+1168,WARNING,"Drive A [0x7270, 1735] InternalSupply SensorSupply1OutputVoltage_OutOfRange Warning",Internal SensorSupply1OutputVoltage out of range. Valid range 10.80 to 13.20 V.,TRUE
+1169,ERROR,"Drive A [0x3330, 1730] InternalSupply ExtGndTripped Fault",Set when HW EXT_GND_TRIP signal is detected. Reset of node required to clear error. Events related to speed feedback and motor temp measurement may follow this event.,TRUE
+1170,ERROR,"Drive A [0x3410, 10000] Application ThrottleBadSignal Fault",Throttle pot is out of range.,TRUE
+1171,ERROR,"Drive A [0x7210, 1600] MotorSinCosSensor Signal1GainOutOfRange Fault",Signal 1 gain out of range. The adapted gain is too high or low.,TRUE
+1172,ERROR,"Drive A [0x7211, 1601] MotorSinCosSensor Signal2GainOutOfRange Fault",Signal 2 gain out of range. The adapted gain is too high or low.,TRUE
+1173,ERROR,"Drive A [0x7212, 1602] MotorSinCosSensor Signal1OffsetOutOfRange Fault",Signal 1 offset out of range. The adapted offset is too high or low.,TRUE
+1174,ERROR,"Drive A [0x7213, 1603] MotorSinCosSensor Signal2OffsetOutOfRange Fault",Signal 2 offset out of range. The adapted offset is too high or low.,TRUE
+1175,ERROR,"Drive A [0x7214, 1604] MotorSinCosSensor Signal1SaturatedHigh Fault",Signal 1 raw AD value saturated high. Indicates short circuit.,TRUE
+1176,ERROR,"Drive A [0x7215, 1605] MotorSinCosSensor Signal1SaturatedLow Fault",Signal 1 raw AD value saturated low. Indicates short circuit.,TRUE
+1177,ERROR,"Drive A [0x7216, 1606] MotorSinCosSensor Signal2SaturatedHigh Fault",Signal 2 raw AD value saturated high. Indicates short circuit.,TRUE
+1178,ERROR,"Drive A [0x7217, 1607] MotorSinCosSensor Signal2SaturatedLow Fault",Signal 2 raw AD value saturated low. Indicates short circuit.,TRUE
+1179,ERROR,"Drive A [0x7218, 1608] MotorSinCosSensor SinCosSensorNotConnected Fault",Check that unit circle is constant. Will detect one broken signal even if sensor is not rotating.The equation x^2 + y^2 = 1 should always be valid for a SinCosSensor.,TRUE
+1180,ERROR,"Drive A [0x8420, 1900] StartupTest CpuTest Fault",Startup test of CPU failed.,TRUE
+1181,ERROR,"Drive A [0x8420, 1901] StartupTest Watchdog Fault",Startup test of Watchdog failed.,TRUE
+1182,ERROR,"Drive A [0x8420, 1903] StartupTest Checkpoint1 Fault",Startup test of Checkpoint1 Control flow failed.,TRUE
+1183,ERROR,"Drive A [0x8420, 1904] StartupTest FullRamMarch Fault",Startup test of Full Ram March failed.,TRUE
+1184,ERROR,"Drive A [0x8420, 1905] StartupTest SwitchOffPll Fault",Startup failed do switch off PLL.,TRUE
+1185,ERROR,"Drive A [0x8420, 1906] StartupTest LsiStart Fault",Failed to start LSI.,TRUE
+1186,ERROR,"Drive A [0x8420, 1907] StartupTest HseStart Fault",Failed to start HSE.,TRUE
+1187,ERROR,"Drive A [0x8420, 1908] StartupTest HsiHse Fault",Startup test of HSI HSE switch failed.,TRUE
+1188,ERROR,"Drive A [0x8420, 1909] StartupTest ExtSource Fault",Startup test of Ext source failed.,TRUE
+1189,ERROR,"Drive A [0x8420, 1910] StartupTest ClockFreq Fault",Startup test of Clock frequency failed.,TRUE
+1190,ERROR,"Drive A [0x8420, 1911] StartupTest Checkpoint2 Fault",Startup test of Checkpoint2 Control flow failed.,TRUE
+1191,ERROR,"Drive A [0x8420, 1912] StartupTest IncompatibleSwHwConfiguration Fault",The sofware configuration regarding OVP/HVL does not match the hardware configuration.Evaluation conditionAt Startup.,TRUE
+1999,ERROR,Drive A Unknown Fault,Drive A has emitted a fault that is not in the lookup table. Please check logs.,TRUE
+2000,ERROR,"Drive B [0x2340, 100] Power Stage ShortCircuit Fault","Hw detected short circuit.If the short circuit protection detects a short circuit, the power stage will be shut down. This is done by Hw without Sw interaction.The Sw will restart the power stage within 500 microseconds.",TRUE
+2001,ERROR,"Drive B [0x2340, 101] Power Stage ShortCircuitCounter Fault",This is an inforamative event that in combination with the ShortCircuit-event can be usefull when analyzing short circuit situations. This event will be cleared when power stage is disabled.,TRUE
+2002,WARNING,"Drive B [0x2341, 103] Power Stage ShortCGlitch Warning","Hw detected short circuit glitch.If the short circuit protection detects a short circuit, the power stage will be shut down. This is done by Hw without Sw interaction.This event is always set whenever this happens.",TRUE
+2003,ERROR,"Drive B [0x2351, 111] Power Stage OVPActive Fault",Hw detected Over Voltage protection.Event is set if an Over Voltage Protection trip is detected.,TRUE
+2004,ERROR,"Drive B [0x2360, 120] Power Stage PWMUnexpectedOff Fault",The power stage was unexpectedly turned off.,TRUE
+2005,WARNING,"Drive B [0x2361, 121] Power Stage PWMUnexpectedOffGlitch Warning",The power stage was unexpectedly turned off but restarted successfully.,TRUE
+2006,ERROR,"Drive B [0x2370, 122] Power Stage SupervisionPwmDisable Fault",Event is set if the supervision CPU has disabled PWM.The exact reason for this must be obtained by communicating with that particular node.,TRUE
+2007,ERROR,"Drive B [0x5210, 200] Current Measurements SensorOffset Fault",Event is set if offset is too high.Offset is calibrated when drive is disabled.Limit is 10% of default offset that is 2047 (i.e. half of ADC full-scale value),TRUE
+2008,ERROR,"Drive B [0x2310, 202] Current Measurements OverCurrentError Fault","Event is set if measured current is too high in any of the U,V or W phases and glitch counter is above trip limit.",TRUE
+2009,ERROR,"Drive B [0x2311, 203] Current Measurements OverCurrGlitch Fault","Event is set if measured current is too high in any of the U, V or W phases and glitch counter is below trip limit.",TRUE
+2010,ERROR,"Drive B [0x2316, 207] Current Measurements PhaseUVNotConnected Fault",Event is set during startup check of motor connections if the measrued current i phase U is below a defined limit,TRUE
+2011,ERROR,"Drive B [0x2317, 208] Current Measurements PhaseUWNotConnected Fault",Event is set during startup check of motor connections if the measrued current i phase U is below a defined limit,TRUE
+2012,ERROR,"Drive B [0x2318, 209] Current Measurements PhaseVWNotConnected Fault",Event is set during startup check of motor connections if the measrued current i phase V is below a defined limit,TRUE
+2013,ERROR,"Drive B [0x2319, 211] Current Measurements DriveIsNotDisable Fault",Event is set during startup check of motor connections if the drive is not disabled when running the check,TRUE
+2014,ERROR,"Drive B [0x2320, 213] Current Measurements RotorRotationTooHigh Fault",Event is set during startup check of motor connections if the rotor rotation is too high,TRUE
+2015,ERROR,"Drive B [0x2310, 310] Current Measurements CustomizedOverCurrentError Fault",Event is set when unfiltered RMS current is above over current limit for the specified number of consecutive samples.,TRUE
+2016,ERROR,"Drive B [0x8060, 301] Motor SpeedLimit Fault",Event is set if motor speed is above a ramped speed limit. Typically used when Forced Braking or when a max speed limit is imposed by application.,TRUE
+2017,ERROR,"Drive B [0x8060, 302] Motor HighSpeed Fault",Event is set if motor speed is above predefined level.Limits: See related parameters.,TRUE
+2018,ERROR,"Drive B [0x8070, 306] Motor SlipInWrongDirection Fault",SlipSpeed is controlled to achive correct orientation of the dq-plane.Event is set if SlipSpeed is wrong compared to ExpectedSlipSpeed.,TRUE
+2019,ERROR,"Drive B [0x8071, 307] Motor TooHighZeroSpeedSlip Fault",SlipSpeed is controlled to achive correct orientation of the dq-plane.Event is set if SlipSpeed too high compared to expected slip speed at zero sensor speed.,TRUE
+2020,ERROR,"Drive B [0x8090, 308] Motor ACCurrentControlError Fault",Event is set if the difference between the expected AC current and the measured AC current is too high.This indicates faulty current measurement sensor(s) or badly tuned current controller.,TRUE
+2021,ERROR,"Drive B [0x80A0, 309] Motor ACCurrentMeasPlausibilityError Fault",Event is set if the reference AC voltage is higher than what the measured AC current indicates.This indicates that one or more motor phase cables are not connected properly or faulty current measurement sensor(s).,TRUE
+2022,ERROR,"Drive B [0x80B0, 320] Motor FrequencyAbove599Hz Fault",Due to high-frequency drive regulations the electrical frequency need to be limited to maximum 599Hz. Changing the configuration of this event in a library version of Plasma3 will have no effect. This event must be configured to trip power stage.,TRUE
+2023,ERROR,"Drive B [0x3212, 402] DC Bus HighVoltageHardware Fault",HW detected over voltage. Level is defined by HW design.,TRUE
+2024,ERROR,"Drive B [0x3211, 404] DC Bus High Fault",Event is set if filtered voltage is above predefined level.Limits: See related parameters.,TRUE
+2025,ERROR,"Drive B [0x3221, 406] DC Bus Low Fault",Event is set if filtered voltage is below predefined level.Limits: See related parameters.,TRUE
+2026,ERROR,"Drive B [0x3120, 407] DC Bus ChargingError Fault",Event is set if measured voltage is below predefined level after a predefined time at startup.Limits: See related parameters.,TRUE
+2027,WARNING,"Drive B [0x4320, 500] Power Stage Temperature Sensor NotConnected Warning",Event is set if internal Power Stage temperature sensor is not connected.SW algorithm: Temperature measurement is out of range.Limits: Event is set when sensor measures 130 deg celsius,TRUE
+2028,WARNING,"Drive B [0x4320, 501] Power Stage Temperature Sensor ShortCircuit Warning",Event is set if internal Power Stage temperature sensor is short circuited.SW algorithm: Temperature measurement is out of range.Limits: Event is set when sensor measures -50 deg celsius,TRUE
+2029,ERROR,"Drive B [0x4310, 503] Power Stage Temperature Sensor High Fault",Event is set if internal Power Stage temperature is above predefined level.Limits: Event is set at 110 deg celsius.,TRUE
+2030,WARNING,"Drive B [0x4220, 600] Motor Temperature Sensor NotConnected Warning",Event is set if motor temperature sensor is not connected.SW algorithm: Temperature measurement is out of range.,TRUE
+2031,WARNING,"Drive B [0x4220, 601] Motor Temperature Sensor ShortCircuit Warning",Event is set if motor temperature sensor is short circuited.SW algorithm: Temperature measurement is out of range.,TRUE
+2032,ERROR,"Drive B [0x4210, 603] Motor Temperature Sensor High Fault",Event is set if motor temperature is above predefined level.Limits: Event is set at 130 deg celsius.,TRUE
+2033,ERROR,"Drive B [0x7240, 804] Encoder Feedback Sensor DecTooHigh Fault",Event is set if change of sensor speed is too high (measured rotor acceleration).Detected if sensor is faulty during more than 40 ms +/-1ms or if there is been to many intermittent faults within a certain time.,TRUE
+2034,WARNING,"Drive B [0x7260, 826] Encoder Feedback Sensor DecTooHighGlitch Warning",Event is set if intermittent change of sensor speed is too high (measured rotor deceleration) and DecTooHigh event is not detected. Event is cleared if enable command transits from enable to disable.,TRUE
+2035,ERROR,"Drive B [0x7250, 805] Encoder Feedback Sensor PlausabilityError Fault","Event is set if the sensor speed is too high, i.e a not plausible/possible speed.Limits: 15000rpm",TRUE
+2036,ERROR,"Drive B [0x7360, 802] Encoder Feedback Sensor Loss_Of_Ch_A Fault",Event is set if only Ch B is toggling and Ch A is not.,TRUE
+2037,ERROR,"Drive B [0x7370, 803] Encoder Feedback Sensor Loss_Of_Ch_B Fault",Event is set if only Ch A is toggling and Ch B is not.,TRUE
+2038,ERROR,"Drive B [0x7351, 827] Encoder Feedback Sensor BadOrShortedInputs Fault","Bad state machine transition, can indicate shorted inputs. This detection is active from 0 upto aprox. +-250 Hz. When using a 64 PPR sensor, the range can be interpreted as RPMEvaluated at 4 kHz. Checked at 50 Hz.",TRUE
+2039,ERROR,"Drive B [0x7390, 828] Encoder Feedback Sensor ZPulseCorrectionAngleIsTooLarge Fault",Becomes active if the difference between the quadrature counter angle and the defined index pulse angle is too big. Detection is active after the first turn of the rotor,TRUE
+2040,ERROR,"Drive B [0x7391, 829] Encoder Feedback Sensor NoZPulseDetected Fault","Detection is active before the first index pulse have been detected. If none index-pulse have been detected after a defined number of quadrature counts, the event becomes active.",TRUE
+2041,ERROR,"Drive B [0x739A, 833] Encoder Feedback Sensor ChannelOverFrequency Fault",Channel used for time measurement has detected that the pulse frequency detected is too high.,TRUE
+2042,ERROR,"Drive B [0x7290, 870] Sixstep Feedback Sensor SensorError Fault",Event is set if sixstep sensor is in illegal state.,TRUE
+2043,ERROR,"Drive B [0x7460, 2060] MotorPwmSensor LossOfChannelA Fault",Loss of channel A signal or too noisy.Event set if no valid pulse is seen during 20 ms.,TRUE
+2044,ERROR,"Drive B [0x7462, 2062] MotorPwmSensor BadPWM Fault","The received PWM signal is unstable and out of range (frequency, duty cycle or stuck high or low).",TRUE
+2045,ERROR,"Drive B [0x7250, 1620] Sensor Offset Calibration WrongDirection Fault",Sensor and stator frequency have different signs.Either sensor signals need to be inverted or motor phase cables are connected incorrectly.,TRUE
+2046,ERROR,"Drive B [0x7251, 1621] Sensor Offset Calibration NoRotation Fault","Motor does not accelerate to target speed within specified time. Possible causes could be too high inertia, too high friction, too low DC voltage, an error condition, current reduction etc.",TRUE
+2047,ERROR,"Drive B [0x7252, 1622] Sensor Offset Calibration LowDcBusVoltage Fault",Event is set when motor goes into field weakening before desired AC voltage amplitude is reached. Most likely cause is weak battery or power supply. Try decreasing acceleration current.,TRUE
+2048,WARNING,"Drive B [0x5411, 1001] Open Drain Output ShortCircuitCh1 Warning",Set when HW Short Circuit signal is detected. Disabling of output required to clear event.,TRUE
+2049,WARNING,"Drive B [0x5431, 1021] Open Drain Output HighCurrentCh1 Warning",Set when Peak Overcurrent or Overload is detected.,TRUE
+2050,WARNING,"Drive B [0x5451, 1011] Open Drain Output NotConnectedCh1 Warning",Set when measured current is below the NotConnectedLevel.,TRUE
+2051,WARNING,"Drive B [0x546A, 1031] Open Drain Output CurrMeasWhenOffCh1 Warning",Set when more than 200 mA current is measured when the output should be off.,TRUE
+2052,WARNING,"Drive B [0x5412, 1002] Open Drain Output ShortCircuitCh2 Warning",Set when HW Short Circuit signal is detected. Disabling of output required to clear event.,TRUE
+2053,WARNING,"Drive B [0x5452, 1012] Open Drain Output NotConnectedCh2 Warning",Set when measured current is below the NotConnectedLevel.,TRUE
+2054,WARNING,"Drive B [0x5432, 1022] Open Drain Output HighCurrentCh2 Warning",Set when Peak Overcurrent or Overload is detected.,TRUE
+2055,WARNING,"Drive B [0x546B, 1032] Open Drain Output CurrMeasWhenOffCh2 Warning",Set when more than 200 mA current is measured when the output should be off.,TRUE
+2056,WARNING,"Drive B [0x5413, 1003] Open Drain Output ShortCircuitCh3 Warning",Set when HW Short Circuit signal is detected. Disabling of output required to clear event.,TRUE
+2057,WARNING,"Drive B [0x5433, 1023] Open Drain Output HighCurrentCh3 Warning",Set when Peak Overcurrent or Overload is detected.,TRUE
+2058,WARNING,"Drive B [0x5453, 1013] Open Drain Output NotConnectedCh3 Warning",Set when measured current is below the NotConnectedLevel.,TRUE
+2059,WARNING,"Drive B [0x546C, 1033] Open Drain Output CurrMeasWhenOffCh3 Warning",Set when more than 200 mA current is measured when the output should be off.,TRUE
+2060,WARNING,"Drive B [0x5414, 1004] Open Drain Output ShortCircuitCh4 Warning",Set when HW Short Circuit signal is detected. Disabling of output required to clear event.,TRUE
+2061,WARNING,"Drive B [0x5434, 1024] Open Drain Output HighCurrentCh4 Warning",Set when Peak Overcurrent or Overload is detected.,TRUE
+2062,WARNING,"Drive B [0x5454, 1014] Open Drain Output NotConnectedCh4 Warning",Set when measured current is below the NotConnectedLevel.,TRUE
+2063,WARNING,"Drive B [0x546D, 1034] Open Drain Output CurrMeasWhenOffCh4 Warning",Set when more than 200 mA current is measured when the output should be off.,TRUE
+2064,WARNING,"Drive B [0x5415, 1005] Open Drain Output ShortCircuitCh5 Warning",Set when HW Short Circuit signal is detected. Disabling of output required to clear event.,TRUE
+2065,WARNING,"Drive B [0x5435, 1025] Open Drain Output HighCurrentCh5 Warning",Set when Peak Overcurrent or Overload is detected.,TRUE
+2066,WARNING,"Drive B [0x5455, 1015] Open Drain Output NotConnectedCh5 Warning",Set when measured current is below the NotConnectedLevel.,TRUE
+2067,WARNING,"Drive B [0x546E, 1035] Open Drain Output CurrMeasWhenOffCh5 Warning",Set when more than 200 mA current is measured when the output should be off.,TRUE
+2068,WARNING,"Drive B [0x5416, 1006] Open Drain Output ShortCircuitCh6 Warning",Set when HW Short Circuit signal is detected. Disabling of output required to clear event.,TRUE
+2069,WARNING,"Drive B [0x5436, 1026] Open Drain Output HighCurrentCh6 Warning",Set when Peak Overcurrent or Overload is detected.,TRUE
+2070,WARNING,"Drive B [0x5456, 1016] Open Drain Output NotConnectedCh6 Warning",Set when measured current is below the NotConnectedLevel.,TRUE
+2071,WARNING,"Drive B [0x545F, 1036] Open Drain Output CurrMeasWhenOffCh6 Warning",Set when more than 200 mA current is measured when the output should be off.,TRUE
+2072,WARNING,"Drive B [0x5481, 1121] Open Drain Output LoadActiveWhenODOffCh1 Warning","When high-side in is high, the voltage drop across the load should be inactive (i.e. OD & HS voltage is at the same level) if the state of the OD & HS swtiches is exclusively off or both off.",TRUE
+2073,WARNING,"Drive B [0x5482, 1122] Open Drain Output LoadActiveWhenODOffCh2 Warning","When high-side in is high, the voltage drop across the load should be inactive (i.e. OD & HS voltage is at the same level) if the state of the OD & HS swtiches is exclusively off or both off.",TRUE
+2074,WARNING,"Drive B [0x5483, 1123] Open Drain Output LoadActiveWhenODOffCh3 Warning","When high-side in is high, th voltage drop across the load should be inactive (i.e. OD & HS voltage is at the same level) if the state of the OD & HS swtiches is exclusively off or both off.",TRUE
+2075,WARNING,"Drive B [0x5541, 1141] Open Drain Output LoadActiveWhenHSOffCh1 Warning","When high-side in is high, the voltage drop across the load should be inactive (i.e. OD & HS voltage is at the same level) if the state of the OD & HS swtiches is exclusively off or both off.",TRUE
+2076,WARNING,"Drive B [0x5542, 1142] Open Drain Output LoadActiveWhenHSOffCh2 Warning","When high-side in is high, the voltage drop across the load should be inactive (i.e. OD & HS voltage is at the same level) if the state of the OD & HS swtiches is exclusively off or both off.",TRUE
+2077,WARNING,"Drive B [0x5543, 1143] Open Drain Output LoadActiveWhenHSOffCh3 Warning","When high-side in is high, the voltage drop across the load should be inactive (i.e. OD & HS voltage is at the same level) if the state of the OD & HS swtiches is exclusively off or both off.",TRUE
+2078,WARNING,"Drive B [0x5500, 1100] HighSideDiagnostics HighSideShC Warning",Set when HW Short Circuit signal is detected. Disabling of output required to clear event.,TRUE
+2079,WARNING,"Drive B [0x5501, 1101] HighSideDiagnostics HighSideInLow Warning",The high side input has been detected to be low. This indicates that high side input is not connected or has short-circuit to B-.,TRUE
+2080,WARNING,"Drive B [0x5502, 1102] HighSideDiagnostics HighSideOutLow Warning",The high side output has been detected to be low.This indicate that the high side output is shorted to B-.,TRUE
+2081,WARNING,"Drive B [0x5503, 1103] HighSideDiagnostics HighSideOutHighWhenOff Warning",The high side output has been detected to be high.This indicate that the high side output is shorted to B+.,TRUE
+2082,ERROR,"Drive B [0x5504, 1104] HighSideDiagnostics HighSideOverload Fault",High continuous current on High side out.,TRUE
+2083,ERROR,"Drive B [0x5505, 1105] HighSideDiagnostics HighSideHighPeakCurr Fault",High peak current on High side out.,TRUE
+2084,ERROR,"Drive B [0x8140, 1204] CAN SynchTimeout Fault",Event is set if Sync is not received within timeout time.,TRUE
+2085,ERROR,"Drive B [0x8100, 1205] CAN MapError Fault",Event is set if any PDO map has invalid configuration.,TRUE
+2086,ERROR,"Drive B [0x8141, 1206] CAN Sdo1Timeout Fault",Event is set if no SDO messages has been received within the timeout time on SDO1.The error detection is started after the first message is received.This event is evaluated in an application with no PDOs active.,TRUE
+2087,ERROR,"Drive B [0x8142, 1207] CAN Sdo2Timeout Fault",Event is set if no SDO message has been received within the timeout time on SDO2.The error detection is started after the first message is received.This event is evaluated in an application with no PDOs active.,TRUE
+2088,WARNING,"Drive B [0x8143, 1208] CAN SDO1SessionBusy Warning",The event is set when an SDO1 request is not finished and a new SDO1 request is received.,TRUE
+2089,WARNING,"Drive B [0x8144, 1209] CAN SDO2SessionBusy Warning",The event is set when an SDO2 request is not finished and a new SDO2 request is received.,TRUE
+2090,ERROR,"Drive B [0x814c, 1221] CAN Sdo3Timeout Fault",Event is set if no SDO messages has been received within the timeout time on SDO3.The error detection is started after the first message is received.This event is evaluated in an application with no PDOs active.,TRUE
+2091,ERROR,"Drive B [0x814d, 1222] CAN Sdo4Timeout Fault",Event is set if no SDO messages has been received within the timeout time on SDO4.The error detection is started after the first message is received.This event is evaluated in an application with no PDOs active.,TRUE
+2092,WARNING,"Drive B [0x814e, 1223] CAN SDO3SessionBusy Warning",The event is set when an SDO3 request is not finished and a new SDO3 request is received.,TRUE
+2093,WARNING,"Drive B [0x814f, 1224] CAN SDO4SessionBusy Warning",The event is set when an SDO4 request is not finished and a new SDO4 request is received.,TRUE
+2094,ERROR,"Drive B [0x8180, 1240] CAN RxMapLengthError Fault",Event is set if any RxPDO receives a short packet.,TRUE
+2095,ERROR,"Drive B [0x8101, 1250] CAN Pdo1Timeout Fault",Event is set if Rx PDO 1 is not received within timeout time.,TRUE
+2096,ERROR,"Drive B [0x8102, 1251] CAN Pdo2Timeout Fault",Event is set if Rx PDO 2 is not received within timeout time.,TRUE
+2097,ERROR,"Drive B [0x8103, 1252] CAN Pdo3Timeout Fault",Event is set if Rx PDO 3 is not received within timeout time.,TRUE
+2098,ERROR,"Drive B [0x8104, 1253] CAN Pdo4Timeout Fault",Event is set if Rx PDO 4 is not received within timeout time.,TRUE
+2099,ERROR,"Drive B [0x8105, 1254] CAN Pdo5Timeout Fault",Event is set if Rx PDO 5 is not received within timeout time.,TRUE
+2100,ERROR,"Drive B [0x8106, 1255] CAN Pdo6Timeout Fault",Event is set if Rx PDO 6 is not received within timeout time.,TRUE
+2101,ERROR,"Drive B [0x8107, 1256] CAN Pdo7Timeout Fault",Event is set if Rx PDO 7 is not received within timeout time.,TRUE
+2102,ERROR,"Drive B [0x8108, 1257] CAN Pdo8Timeout Fault",Event is set if Rx PDO 8 is not received within timeout time.,TRUE
+2103,ERROR,"Drive B [0x8109, 1258] CAN Pdo9Timeout Fault",Event is set if Rx PDO 9 is not received within timeout time.,TRUE
+2104,ERROR,"Drive B [0x810a, 1259] CAN Pdo10Timeout Fault",Event is set if Rx PDO 10 is not received within timeout time.,TRUE
+2105,ERROR,"Drive B [0x810b, 1260] CAN Pdo11Timeout Fault",Event is set if Rx PDO 11 is not received within timeout time.,TRUE
+2106,ERROR,"Drive B [0x810c, 1261] CAN Pdo12Timeout Fault",Event is set if Rx PDO 12 is not received within timeout time.,TRUE
+2107,ERROR,"Drive B [0x810d, 1262] CAN Pdo13Timeout Fault",Event is set if Rx PDO 13 is not received within timeout time.,TRUE
+2108,ERROR,"Drive B [0x810e, 1263] CAN Pdo14Timeout Fault",Event is set if Rx PDO 14 is not received within timeout time.,TRUE
+2109,ERROR,"Drive B [0x810f, 1264] CAN Pdo15Timeout Fault",Event is set if Rx PDO 15 is not received within timeout time.,TRUE
+2110,ERROR,"Drive B [0x8110, 1265] CAN Pdo16Timeout Fault",Event is set if Rx PDO 16 is not received within timeout time.,TRUE
+2111,ERROR,"Drive B [0x8111, 1266] CAN Pdo17Timeout Fault",Event is set if Rx PDO 17 is not received within timeout time.,TRUE
+2112,ERROR,"Drive B [0x8112, 1267] CAN Pdo18Timeout Fault",Event is set if Rx PDO 18 is not received within timeout time.,TRUE
+2113,ERROR,"Drive B [0x8113, 1268] CAN Pdo19Timeout Fault",Event is set if Rx PDO 19 is not received within timeout time.,TRUE
+2114,ERROR,"Drive B [0x8114, 1269] CAN Pdo20Timeout Fault",Event is set if Rx PDO 20 is not received within timeout time.,TRUE
+2115,ERROR,"Drive B [0x8115, 1270] CAN Pdo21Timeout Fault",Event is set if Rx PDO 21 is not received within timeout time.,TRUE
+2116,ERROR,"Drive B [0x8116, 1271] CAN Pdo22Timeout Fault",Event is set if Rx PDO 22 is not received within timeout time.,TRUE
+2117,ERROR,"Drive B [0x8117, 1272] CAN Pdo23Timeout Fault",Event is set if Rx PDO 23 is not received within timeout time.,TRUE
+2118,ERROR,"Drive B [0x8118, 1273] CAN Pdo24Timeout Fault",Event is set if Rx PDO 24 is not received within timeout time.,TRUE
+2119,ERROR,"Drive B [0x8119, 1274] CAN Pdo25Timeout Fault",Event is set if Rx PDO 25 is not received within timeout time.,TRUE
+2120,ERROR,"Drive B [0x811a, 1275] CAN Pdo26Timeout Fault",Event is set if Rx PDO 26 is not received within timeout time.,TRUE
+2121,ERROR,"Drive B [0x811b, 1276] CAN Pdo27Timeout Fault",Event is set if Rx PDO 27 is not received within timeout time.,TRUE
+2122,ERROR,"Drive B [0x811c, 1277] CAN Pdo28Timeout Fault",Event is set if Rx PDO 28 is not received within timeout time.,TRUE
+2123,ERROR,"Drive B [0x811d, 1278] CAN Pdo29Timeout Fault",Event is set if Rx PDO 29 is not received within timeout time.,TRUE
+2124,ERROR,"Drive B [0x811e, 1279] CAN Pdo30Timeout Fault",Event is set if Rx PDO 30 is not received within timeout time.,TRUE
+2125,ERROR,"Drive B [0x811f, 1280] CAN Pdo31Timeout Fault",Event is set if Rx PDO 31 is not received within timeout time.,TRUE
+2126,ERROR,"Drive B [0x8121, 1235] CAN SrdoMapError Fault",Event is set if any SRDO map has invalid configuration.,TRUE
+2127,ERROR,"Drive B [0x8122, 1236] CAN RxMapLengthError Fault",Event is set if any Rx SRDO receives a short packet.,TRUE
+2128,ERROR,"Drive B [0x8151, 1281] CAN Srdo1SrvtTimeout Fault",Event is to evaluate the timing between receiving frame-1 (Normal data) and frame-2 (inverted data).Event is set if frame2 (inverted data) in Rx SRDO 1 is not received within timeout.Srvt : Safety-Related Velidation Time,TRUE
+2129,ERROR,"Drive B [0x8171, 1313] CAN Srdo1SctTimeout Fault",Event is set if Rx SRDO 1 is not received within timeout time.Sct : Safeguard Cycle Time,TRUE
+2130,WARNING,"Drive B [0x8191, 1345] CAN Srdo1DataInvalid Warning",Event is set if the normal data and inverted data is not matched in Rx SRDO 1.,TRUE
+2131,ERROR,"Drive B [0x81F5, 1225] CAN CanConfigError Fault",CAN Configuration conflict detected. MCU1 is running application but is tripped. MCU2 will stop in boot mode and has temporarily resolved the configuration conflict. Boot normally uses the NodeId and bitrate written to EEPROM by the application.,TRUE
+2132,ERROR,"Drive B [0x5530, 1430] Cpu EepromSizeError Fault",Fault is set if an eeprom memory size missmatch is detected. I.e. size configured in sw does not match detected size.This check is done before write operation has started and will inhibit write operation when detected.,TRUE
+2133,WARNING,"Drive B [0x5520, 1403] Cpu ChecksumError Warning",Fault is set if there is a checksum error on any eeprom segment with checksum.Some segments also have idividual checksum error events.Some segments also have a default values event that will be set in case of checksum error on that segment.,TRUE
+2134,WARNING,"Drive B [0x5521, 1420] Cpu ChecksumErrorOnSensorAngleOffset Warning",Event is set if checksum error has occured on sensor angle offset related eeprom segment (see SFIFMG_CAL in EEProm layout).,TRUE
+2135,WARNING,"Drive B [0x5522, 1421] Cpu ChecksumErrorOnItemInfo Warning",Event is set if checksum error has occured on Item Info related eeprom segments (see ITEM_INFO_CAL and HW_SERIAL in EEProm layout).,TRUE
+2136,WARNING,"Drive B [0x5523, 1422] Cpu ChecksumErrorOnItemMaxCurrent Warning",Event is set if checksum error has occured on Item Max Current eeprom segment (see ITEM_MAX_CURRENT in EEProm layout).,TRUE
+2137,WARNING,"Drive B [0x5524, 1423] Cpu ChecksumErrorOnCANTalk Warning",Event is set if checksum error has occured on CANTalk eeprom segment (see CTLKCM in EEProm layout).,TRUE
+2138,WARNING,"Drive B [0x8403, 1400] Cpu PowerOutReset Warning",MCU was unintentionally reset due to low 3.3V powersupply.Event also needs to be supported by boot sw.,TRUE
+2139,WARNING,"Drive B [0x8404, 1404] Cpu BrownOutReset Warning",MCU was unintentionally reset due to low 3.3V powersupply.Event also needs to be supported by boot sw.,TRUE
+2140,WARNING,"Drive B [0x8400, 1406] Cpu I_WatchdogTimeout Warning",MCU internal Independent watchdog not reset in time causing the MCU to reset.,TRUE
+2141,WARNING,"Drive B [0x8401, 1407] Cpu W_WatchdogTimeout Warning",MCU internal Windowed watchdog not reset in time or reset too early causing the MCU to reset.,TRUE
+2142,ERROR,"Drive B [0x8410, 1409] Cpu ExeTimeHigh_4kHz Fault",Set when average execution time is higher than 150U us.,TRUE
+2143,ERROR,"Drive B [0x8411, 1410] Cpu ExeTimeHigh_50Hz Fault",Set when average execution time is higher than 7000U us.,TRUE
+2144,ERROR,"Drive B [0x8412, 1411] Cpu ExeTimeHigh_IndependentSupervision Fault",Set when average execution time is higher than 50U us.,TRUE
+2145,ERROR,"Drive B [0x8413, 1412] Cpu ExeTimeHigh_CAN Fault",Set when average execution time is higher than 1000U us.,TRUE
+2146,ERROR,"Drive B [0x8414, 1413] Cpu ExeTimeHigh_SlowApp Fault",Set when average execution time is higher than 2000U us.,TRUE
+2147,ERROR,"Drive B [0x8415, 1414] Cpu ExeTimeHigh_FastApp Fault",Set when average execution time is higher than 400U us.,TRUE
+2148,WARNING,"Drive B [0x8416, 1415] Cpu ExeTimeModHigh_SlowApp Warning",Set when average execution time is higher than 1000U us.,TRUE
+2149,WARNING,"Drive B [0x8417, 1416] Cpu ExeTimeModHigh_FastApp Warning",Set when average execution time is higher than 300U us.,TRUE
+2150,WARNING,"Drive B [0x8450, 1450] Cpu InternalError Warning","Internal error occurred. It is most likely a static configuration error that is not caught at compile time, such asImpossible configuration in flash memory.Illegal ErrorBit configured for an eventSame EventId on two different event.",TRUE
+2151,WARNING,"Drive B [0x8452, 1451] Cpu BootInternalError Warning",Internal error occurred in boot. It may occure if an incompatible application is running with the boot code.,TRUE
+2152,ERROR,"Drive B [0x8451, 1460] Cpu ClockFailure Fault",CPU clock failure. Either External crystal or internal PLL failed to generate a stable clock.CPU will be clocked by the internal 8MHz RC-oscillator.,TRUE
+2153,ERROR,"Drive B [0x8460, 1455] RuntimeTests MCU_Flash_Application_Check Fault",Checksum error(CRC32) detected in the application part of the FLASH memory.Evaluation conditionAlways.FilteringNone.Set conditionChecksum error (CRC32) deteteced in the application part of the FLASH memory during runtime.,TRUE
+2154,ERROR,"Drive B [0x8461, 1456] RuntimeTests MCU_Flash_Boot_Check Fault",Checksum error(CRC32) detected in the boot part of the FLASH memory.Evaluation conditionAlways.FilteringNone.Set conditionChecksum error (CRC32) deteteced in the boot part of the FLASH memory during runtime.Clear conditionReset/Restart node.,TRUE
+2155,ERROR,"Drive B [0x8460, 1484] RuntimeTests MCU_RegisterConf_Supv Fault",Signature check of peripherals and I/O configuration failed.Evaluation conditionAlways.FilteringNone.Set conditionThe signature check of peripherals and I/O configuration failed during runtime.,TRUE
+2156,ERROR,"Drive B [0x8460, 1486] RuntimeTests MCU_MemoryVerificationFault Fault",A write with verify of data to RAM failed.Evaluation conditionAlways.FilteringNone.Set conditionWhen writing data to RAM with verify it was detected that the data readback from RAM was not the same data as was written.,TRUE
+2157,ERROR,"Drive B [0x5527, 1425] ConfigurationManager BadConfiguration Fault","The combination of motor and sensor configuration is not verified.Recommended configuration:PM with Sixstep, Incremental encoder with Z-pulse, Analog Hall, Resolve sensors.IM with Incremental encoder sensor.",TRUE
+2158,ERROR,"Drive B [0x5528, 1426] ConfigurationManager MotorTypeReconfigured Fault",Motor type configuration is changed. New configuration takes effect after restarting.,TRUE
+2159,ERROR,"Drive B [0x5529, 1427] ConfigurationManager SensorTypeReconfigured Fault",Sensor type configuration is changed. New configuration takes effect after restarting.,TRUE
+2160,ERROR,"Drive B [0x3301, 1700] InternalSupply 15VOutOfRange Fault",Internal 15V supply out of range. Valid range 13.00 to 16.00 V.,TRUE
+2161,ERROR,"Drive B [0x3302, 1701] InternalSupply 5VOutOfRange Fault",Internal 5V supply out of range. Valid range 4.50 to 5.50 V.,TRUE
+2162,ERROR,"Drive B [0x3304, 1709] InternalSupply 5VCOutOfRange Fault",Internal 5V C supply out of range. Valid range 4.50 to 5.50 V.,TRUE
+2163,ERROR,"Drive B [0x3302, 1702] InternalSupply 3V3Low Fault",Internal 3.3V supply too low. Limit 2.9V. Uses MCU internal PVD (Programmable Voltage Detection). A flag is set by MCU hardware and event is set when VDD is below the limit and cleared if above. Hysteresis is 100mV,TRUE
+2164,ERROR,"Drive B [0x7221, 800] InternalSupply SensorSupNotCon Fault",Fault is set if Sensor Supply current is too low. Limit 0.000 A.Note: If you have multiple sensors connected to this supply this event might only be set if all devices are disconnected.,TRUE
+2165,ERROR,"Drive B [0x7220, 801] InternalSupply SensorSupSHC Fault",Fault is set if Sensor Supply current is too high. Limit 0.068 A.,TRUE
+2166,ERROR,"Drive B [0x7231, 811] InternalSupply SensorSupRange Fault",Sensor Supply voltage out of range. Valid range10.00 to 16.00 V.,TRUE
+2167,ERROR,"Drive B [0x7230, 810] InternalSupply SensSupRefRange Fault",Sensor Supply Ref voltage out of range. Valid range 10.00 to 16.00 V.,TRUE
+2168,WARNING,"Drive B [0x7270, 1735] InternalSupply SensorSupply1OutputVoltage_OutOfRange Warning",Internal SensorSupply1OutputVoltage out of range. Valid range 10.80 to 13.20 V.,TRUE
+2169,ERROR,"Drive B [0x3330, 1730] InternalSupply ExtGndTripped Fault",Set when HW EXT_GND_TRIP signal is detected. Reset of node required to clear error. Events related to speed feedback and motor temp measurement may follow this event.,TRUE
+2170,ERROR,"Drive B [0x3410, 10000] Application ThrottleBadSignal Fault",Throttle pot is out of range.,TRUE
+2171,ERROR,"Drive B [0x7210, 1600] MotorSinCosSensor Signal1GainOutOfRange Fault",Signal 1 gain out of range. The adapted gain is too high or low.,TRUE
+2172,ERROR,"Drive B [0x7211, 1601] MotorSinCosSensor Signal2GainOutOfRange Fault",Signal 2 gain out of range. The adapted gain is too high or low.,TRUE
+2173,ERROR,"Drive B [0x7212, 1602] MotorSinCosSensor Signal1OffsetOutOfRange Fault",Signal 1 offset out of range. The adapted offset is too high or low.,TRUE
+2174,ERROR,"Drive B [0x7213, 1603] MotorSinCosSensor Signal2OffsetOutOfRange Fault",Signal 2 offset out of range. The adapted offset is too high or low.,TRUE
+2175,ERROR,"Drive B [0x7214, 1604] MotorSinCosSensor Signal1SaturatedHigh Fault",Signal 1 raw AD value saturated high. Indicates short circuit.,TRUE
+2176,ERROR,"Drive B [0x7215, 1605] MotorSinCosSensor Signal1SaturatedLow Fault",Signal 1 raw AD value saturated low. Indicates short circuit.,TRUE
+2177,ERROR,"Drive B [0x7216, 1606] MotorSinCosSensor Signal2SaturatedHigh Fault",Signal 2 raw AD value saturated high. Indicates short circuit.,TRUE
+2178,ERROR,"Drive B [0x7217, 1607] MotorSinCosSensor Signal2SaturatedLow Fault",Signal 2 raw AD value saturated low. Indicates short circuit.,TRUE
+2179,ERROR,"Drive B [0x7218, 1608] MotorSinCosSensor SinCosSensorNotConnected Fault",Check that unit circle is constant. Will detect one broken signal even if sensor is not rotating.The equation x^2 + y^2 = 1 should always be valid for a SinCosSensor.,TRUE
+2180,ERROR,"Drive B [0x8420, 1900] StartupTest CpuTest Fault",Startup test of CPU failed.,TRUE
+2181,ERROR,"Drive B [0x8420, 1901] StartupTest Watchdog Fault",Startup test of Watchdog failed.,TRUE
+2182,ERROR,"Drive B [0x8420, 1903] StartupTest Checkpoint1 Fault",Startup test of Checkpoint1 Control flow failed.,TRUE
+2183,ERROR,"Drive B [0x8420, 1904] StartupTest FullRamMarch Fault",Startup test of Full Ram March failed.,TRUE
+2184,ERROR,"Drive B [0x8420, 1905] StartupTest SwitchOffPll Fault",Startup failed do switch off PLL.,TRUE
+2185,ERROR,"Drive B [0x8420, 1906] StartupTest LsiStart Fault",Failed to start LSI.,TRUE
+2186,ERROR,"Drive B [0x8420, 1907] StartupTest HseStart Fault",Failed to start HSE.,TRUE
+2187,ERROR,"Drive B [0x8420, 1908] StartupTest HsiHse Fault",Startup test of HSI HSE switch failed.,TRUE
+2188,ERROR,"Drive B [0x8420, 1909] StartupTest ExtSource Fault",Startup test of Ext source failed.,TRUE
+2189,ERROR,"Drive B [0x8420, 1910] StartupTest ClockFreq Fault",Startup test of Clock frequency failed.,TRUE
+2190,ERROR,"Drive B [0x8420, 1911] StartupTest Checkpoint2 Fault",Startup test of Checkpoint2 Control flow failed.,TRUE
+2191,ERROR,"Drive B [0x8420, 1912] StartupTest IncompatibleSwHwConfiguration Fault",The sofware configuration regarding OVP/HVL does not match the hardware configuration.Evaluation conditionAt Startup.,TRUE
+2999,ERROR,Drive B Unknown Fault,Drive B has emitted a fault that is not in the lookup table. Please check logs.,TRUE

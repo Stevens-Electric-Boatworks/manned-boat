@@ -52,6 +52,7 @@ rosidl_generate_interfaces(${PROJECT_NAME}
   "msg/CANThermistor.msg"
   "srv/AlarmRaise.srv"
   "srv/AlarmDelatch.srv"
+  "srv/MotorAlarmRaise.srv"
   DEPENDENCIES builtin_interfaces
 )
 

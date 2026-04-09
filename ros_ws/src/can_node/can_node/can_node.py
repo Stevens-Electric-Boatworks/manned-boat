@@ -35,16 +35,15 @@ class MotorNode(Node):
 
         file_path = self.get_parameter('dummy_epf').get_parameter_value().string_value
         self.can = CANBus(self._logger, os.path.expanduser(file_path), self.motorA_pub, self.motorB_pub,
-                          self.context.ok, self.declare_alarm, rclpy.shutdown, self.unlatch_all_alarms,
+                          self.context.ok, self.declare_alarm, self.declare_motor_alarm, rclpy.shutdown,
+                          self.unlatch_all_alarms,
                           bms_pack_sum_pub=self.bms_pack_sum_pub, bms_thermistor_pub=self.bms_thermistor_pub,
                           bms_mcu_sum_pub=self.bms_mcu_sum_pub, bms_soc_sum_pub=self.bms_soc_sum_pub,
                           bms_cell_volt_pub=self.bms_cell_volt_pub, can_thermistor_pub=self.can_thermistor_pub)
-        
-        
+
         self.create_service(Empty, "/can/restart_bus", self.restart_bus)
         self.create_service(Empty, "/can/flush_bus", self.flush_bus)
 
-        
         self.create_timer(0.5, self.publish_bus_state)
         self.can.setup_can()
 
@@ -63,6 +62,9 @@ class MotorNode(Node):
         msg = CANBusStatus()
         msg.bus_state = self.can.get_bus_state()
         self.can_bus_status_publisher.publish(msg)
+
+    def declare_motor_alarm(self, is_motor_a, eventId):
+        self._alarm_publisher.publish_motor_alarm(is_motor_a, eventId)
 
     def declare_alarm(self, alarm: Alarm):
         self._alarm_publisher.publish_alarm(alarm)

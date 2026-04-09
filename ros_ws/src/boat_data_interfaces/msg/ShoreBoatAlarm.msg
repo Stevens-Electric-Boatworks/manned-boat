@@ -1,3 +1,4 @@
 int16 error_code
 string message
+string severity
 builtin_interfaces/Time timestamp

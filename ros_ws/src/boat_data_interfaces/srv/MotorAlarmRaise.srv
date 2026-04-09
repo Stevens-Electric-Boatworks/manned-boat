@@ -1,0 +1,10 @@
+int16 event_id
+bool is_motor_a
+builtin_interfaces/Time timestamp
+---
+int8 STICKY_NOT_RAISED_BEFORE=0
+int8 STICKY_ALREADY_RAISED=1
+int8 RAISED=2
+int8 UNKNOWN=-1
+
+int8 result
