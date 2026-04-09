@@ -1,2 +1,0 @@
-int16 pack_voltage_raw
-int16 pack_current_raw

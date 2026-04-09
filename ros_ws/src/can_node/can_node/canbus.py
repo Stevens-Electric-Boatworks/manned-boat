@@ -1,5 +1,6 @@
 import math
 import subprocess
+import threading
 import time
 import traceback
 from sys import exec_prefix
@@ -14,7 +15,7 @@ from rclpy.publisher import Publisher
 
 from boat_common_libs.alarm_lib.alarms import Alarm
 from boat_data_interfaces.msg import CANMotorData, CANBusStatus, BMSSOCSummary, BMSThermistor, BMSCellVoltage, \
-    BMSPackSummary, BMSMcuSummary
+    BMSPackSummary, BMSMcuSummary, CANThermistor
 
 
 def is_can_interface_up(interface: str = "can0") -> bool:
@@ -35,8 +36,9 @@ class CANBus:
     def __init__(self, logger: RcutilsLogger, dummy_efp, motorA_pub, motorB_pub, is_node_ok, declare_alarm,
                  shutdown_node,
                  unlatch_all_alarms, bms_pack_sum_pub, bms_mcu_sum_pub, bms_cell_volt_pub, bms_thermistor_pub,
-                 bms_soc_sum_pub):
-        self.network: Network = None
+                 bms_soc_sum_pub, can_thermistor_pub):
+        self.bms_thread = None
+        self.network = None
         self.sdo = None
         self.start_time = None
         self.can_thread = None
@@ -58,11 +60,11 @@ class CANBus:
         self.bms_soc_sum_pub: Publisher = bms_soc_sum_pub
         self.bms_thermistor_pub: Publisher = bms_thermistor_pub
 
-    def setup_can(self):
-        # This is to ensure that we can publish alarms
-        time.sleep(1.5)
-        self.logger.info("Setting up the old can...")
+        self.can_thermistor_pub: Publisher = can_thermistor_pub
 
+        self._sdo_lock = threading.Lock()
+
+    def setup_can(self):
         # test for can0 open
         self.configure()
 
@@ -95,7 +97,8 @@ class CANBus:
 
         self.logger.info("Connected to SocketCAN")
         # Subscribe to messages
-        self.network.subscribe(1, self.on_msg_receive)
+        self.network.subscribe(0x293, self.on_bms_data)
+        self.network.subscribe(0xbe, self.on_thermistor_data)
         self.logger.info("Using a dummy EDS file at \"" + self.dummy_efp + "\".")
         self.motorA = canopen.BaseNode402(7, canopen.import_od(self.dummy_efp))  # Use a dummy EDS here
         self.motorB = canopen.BaseNode402(6, canopen.import_od(self.dummy_efp))  # Use a dummy EDS here
@@ -109,7 +112,7 @@ class CANBus:
 
 
         self.bms_thread = Thread(
-            target=self.bms_thread_callback, args=[], daemon=True)
+            target=self._bms_request_loop, args=[], daemon=True)
         self.bms_thread.start()
 
     def request_bms_status_data(self):
@@ -130,72 +133,82 @@ class CANBus:
 
         send([0x01, 0x01, 0x01, 0x01, 0x01, 0x01, 0x01, 0x01])
 
-    def query_bms(self):
-        self.request_bms_status_data()
-        msg = self.network.bus.recv(timeout=0.5)
-        if msg is None:
-            return
-        sid = msg.arbitration_id
-        data = msg.data
+    def on_bms_data(self, can_id: int, data: bytearray, timestamp: float):
+        b0 = data[0]  # Message type identifier
 
-        if sid == 0x293:  # PDO2 MISO — Status Data Reply
-            b0 = data[0]  # Message type identifier
+        if b0 == 0x01:  # MCU Summary
+            charge_state = data[4]
+            plug_state = data[5]
+            alerts = int.from_bytes(data[5:7], "little", signed=False)
+            a_hardware = bool((alerts >> 6) & 1)
+            a_ccenus = bool((alerts >> 5) & 1)
+            a_tcenus = bool((alerts >> 4) & 1)
+            a_hvc = bool((alerts >> 3) & 1)
+            a_lvc = bool((alerts >> 2) & 1)
+            a_hitemp = bool((alerts >> 1) & 1)
+            a_lowtemp = bool((alerts >> 0) & 1)
 
-            if b0 == 0x01:  # MCU Summary
-                charge_state = data[4]
-                plug_state = data[5]
-                alerts = data[6]
+            if a_hardware:
+                self.declare_alarm(Alarm.BMS_HARDWARE_FAULT)
+            if a_ccenus:
+                self.declare_alarm(Alarm.BMS_CCENUS_FAULT)
+            if a_tcenus:
+                self.declare_alarm(Alarm.BMS_TCENCUS_FAULT)
+            if a_hvc:
+                self.declare_alarm(Alarm.BMS_HIGH_VOLTAGE_FAULT)
+            if a_lvc:
+                self.declare_alarm(Alarm.BMS_LOW_VOLTAGE_FAULT)
+            if a_hitemp:
+                self.declare_alarm(Alarm.BMS_HIGH_TEMP_FAULT)
+            if a_lowtemp:
+                self.declare_alarm(Alarm.BMS_LOW_TEMP_FAULT)
 
-                self.bms_mcu_sum_pub.publish(
-                    BMSMcuSummary(charge_state=charge_state, plug_state=plug_state, alerts=alerts))
-                print(f"MCU Summary — ChargeState={charge_state}, PlugState={plug_state}, Alerts={alerts}")
+            self.bms_mcu_sum_pub.publish(
+                BMSMcuSummary(charge_state=charge_state, plug_state=plug_state, alerts=alerts))
+            # print(f"MCU Summary — ChargeState={charge_state}, PlugState={plug_state}, Alerts={alerts}")
+        #
+        elif b0 == 0x02:  # Pack Summary
+            pack_voltage_raw = int.from_bytes(data[2:4], 'little', signed=False) / 10.0
+            pack_current_raw = abs(int.from_bytes(data[4:6], 'little', signed=True))
+            # Scale factors depend on your firmware config; check the doc for your version
+            self.bms_pack_sum_pub.publish(
+                BMSPackSummary(pack_voltage_raw=float(pack_voltage_raw), pack_current_raw=float(pack_current_raw)))
+            # print(f"Pack Summary — Voltage bytes={data[2:4].hex()}, Current bytes={data[4:6].hex()}")
 
-            elif b0 == 0x02:  # Pack Summary
-                print(str(data))
-                pack_voltage_raw = int.from_bytes(data[2:4], 'little', signed=False)
-                pack_current_raw = int.from_bytes(data[4:6], 'little', signed=False)
-                # Scale factors depend on your firmware config; check the doc for your version
-                self.bms_pack_sum_pub.publish(
-                    BMSPackSummary(pack_voltage_raw=pack_voltage_raw, pack_current_raw=pack_current_raw))
-                print(f"Pack Summary — Voltage bytes={data[2:4].hex()}, Current bytes={data[4:6].hex()}")
+        elif b0 == 0x03:  # Cell Voltage Summary
+            cv_low = int.from_bytes(data[2:4], 'little', signed=False)
+            cv_mean = int.from_bytes(data[4:6], 'little', signed=False)
+            cv_hi = int.from_bytes(data[6:8], 'little', signed=False)
+            cv_low_v = cv_low / 1000.0
+            cv_mean_v = cv_mean / 1000.0
+            cv_hi_v = cv_hi / 1000.0
+            self.bms_cell_volt_pub.publish(BMSCellVoltage(low=int(cv_low_v), mean=int(cv_mean_v), high=int(cv_hi_v)))
+            # print(f"Cell Voltage — Low={cv_low}, Mean={cv_mean}, High={cv_hi}")
 
-            elif b0 == 0x03:  # Cell Voltage Summary
-                cv_low = int.from_bytes(data[2:4], 'little')
-                cv_mean = int.from_bytes(data[4:6], 'little')
-                cv_hi = int.from_bytes(data[6:8], 'little')
-                self.bms_cell_volt_pub.publish(BMSCellVoltage(low=cv_low, mean=cv_mean, high=cv_hi))
-                print(f"Cell Voltage — Low={cv_low}, Mean={cv_mean}, High={cv_hi}")
+        elif b0 == 0x04:  # Thermistor Summary
+            th_min = data[1]
+            th_max = data[2]
+            self.bms_thermistor_pub.publish(BMSThermistor(min=th_min, max=th_max))
+            # print(f"Thermistor — Min={th_min}, Max={th_max}")
 
-            elif b0 == 0x04:  # Thermistor Summary
-                th_min = data[1]
-                th_max = data[2]
-                self.bms_thermistor_pub.publish(BMSThermistor(min=th_min, max=th_max))
-                print(f"Thermistor — Min={th_min}, Max={th_max}")
+        elif b0 == 0x05:  # SOC Summary
+            soc = int.from_bytes(data[1:2], 'little')
+            pack_kwhr = int.from_bytes(data[2:4], 'little')
+            pack_max_kwhr = int.from_bytes(data[6:8], 'little')
+            self.bms_soc_sum_pub.publish(
+                BMSSOCSummary(soc_percent=float(soc), pack_kwhr=pack_kwhr, pack_max_kwhr=pack_max_kwhr))
+            # print(f"SOC Summary — SOC={soc}%, PackKWHr={pack_kwhr}, MaxKWHr={pack_max_kwhr}")
 
-            elif b0 == 0x05:  # SOC Summary
-                soc = data[1]
-                pack_kwhr = int.from_bytes(data[2:4], 'little')
-                pack_max_kwhr = int.from_bytes(data[6:8], 'little')
-                self.bms_soc_sum_pub.publish(BMSSOCSummary(pack_kwhr=pack_kwhr, pack_max_kwhr=pack_max_kwhr))
-                print(f"SOC Summary — SOC={soc}%, PackKWHr={pack_kwhr}, MaxKWHr={pack_max_kwhr}")
+    def on_thermistor_data(self, can_id: int, data: bytearray, timestamp: float):
+        temp = int.from_bytes(data[0:2], 'little', signed=True) / 100
+        self.can_thermistor_pub.publish(CANThermistor(temp=float(temp)))
 
-        elif sid == 0x193:  # PDO1 MISO — Configuration Data Reply
-            print(f"Config reply: {data.hex()}")
-
-        elif sid == 0xbe:
-            number = int.from_bytes(data[1:2], 'little')
-            print(f"Number: {number}")
-
-        # if msg and msg.arbitration_id == 0x293:
-        #     print(f"Status [{msg.data[0]:#04x}]: {msg.data.hex()}")
-
-        # This read runs in the background to query data from the BMS
-
-    def bms_thread_callback(self):
+    def _bms_request_loop(self):
         while True:
             if self.network is None:
                 return
-            self.query_bms()
+            self.request_bms_status_data()
+            time.sleep(0.5)
 
     def read_can_messages(self, motorA_pub, motorB_pub):
         while True:
@@ -206,7 +219,7 @@ class CANBus:
 
                 self.publish_sdo_data(self.motorA, motorA_pub)
                 self.publish_sdo_data(self.motorB, motorB_pub)
-                time.sleep(0.5)
+                time.sleep(0.2)
             except Exception as e:
                 time.sleep(0.8)
                 self.logger.error(f"Error reading CAN message: {e}")
@@ -214,13 +227,6 @@ class CANBus:
                 self.logger.error(str(traceback.format_exc()))
                 self.declare_alarm(Alarm.INVALID_CAN_PACKET_READ)
                 self.can_bus_state = CANBusStatus.OFFLINE
-
-    def on_msg_receive(self, node_id: int, data: bytearray, subindex: float):
-        self.logger.info(f"""The following message was received from the CAN Bus.
-                    Node_ID: %s
-                    Data: %s
-                    SubIndex: %s
-                    """.format(str(node_id), str(data), str(subindex)))
 
     # The SDO index (or address) is found in the parameters.csv file.
     def read_and_log_sdo(self, motor: BaseNode402, index, subindex, tries=0):
@@ -237,15 +243,11 @@ class CANBus:
             self.logger.error(f"SDO communication error [{hex(index)}:{subindex}]: {e}")
             self.declare_alarm(Alarm.ERROR_READING_CAN_SDO)
             self.can_bus_state = CANBusStatus.OFFLINE
-            self.network.add_node(self.motorB)
-            self.network.add_node(self.motorA)
             return self.read_and_log_sdo(motor, index, subindex, tries + 1)
         except RuntimeError as e:
             self.logger.error(f"Error reading SDO [{hex(index)}:{subindex}]: {e}")
             self.declare_alarm(Alarm.ERROR_READING_CAN_SDO)
             self.can_bus_state = CANBusStatus.OFFLINE
-            self.network.add_node(self.motorA)
-            self.network.add_node(self.motorB)
             return -1
 
     # These are SDOs retrieved from the controller via CANbus using above function
@@ -253,28 +255,31 @@ class CANBus:
     # Feel free to browse the parameter list which is in testing/parameters.csv
     def publish_sdo_data(self, motor, publisher):
         voltage = self.read_and_log_sdo(motor, 0x2030, 2) * 0.01  # Volts
-        throttle_percent = self.read_and_log_sdo(motor, 0x2029, 6)  # mV
+        throttle_percent = self.read_and_log_sdo(motor, 0x2029, 6) / 10  # %
         rpm = self.read_and_log_sdo(motor, 0x2052, 1)  # rpm
         current = self.read_and_log_sdo(motor, 0x2073, 1)  # Arms
         if motor == self.motorB:
             temperature = self.read_and_log_sdo(motor, 0x2040, 2)  # deg C
         else:
             temperature = -1
-        throttle_percent = throttle_percent / 10
         # this torque must be converted to lb*ft, because it is preferred
-        torque = current * 0.15  # Nm
-
+        torque = self.read_and_log_sdo(motor, 0x2076, 2) * 0.1  # Nm
+        enabled_raw = self.read_and_log_sdo(motor, 0x2000, 1)
+        enabled = enabled_raw & (1 << 3)
+        if enabled == -1:
+            enabled = False
         power = voltage * current
 
         msg = CANMotorData()
-        msg.voltage = int(voltage)
-        msg.throttle_mv = int(throttle_percent)
+        msg.voltage = float(voltage)
+        msg.throttle_mv = -1
         msg.throttle_percentage = int(throttle_percent)
         msg.rpm = int(rpm)
-        msg.torque = int(torque)
-        msg.motor_temp = int(temperature)
-        msg.current = abs(int(current))
-        msg.power = int(power)
+        msg.torque = float(torque)
+        msg.motor_temp = float(temperature)
+        msg.current = float(current)
+        msg.power = float(power)
+        msg.enabled = bool(enabled)
 
         if self.can_bus_state == CANBusStatus.ONLINE:
             publisher.publish(msg)

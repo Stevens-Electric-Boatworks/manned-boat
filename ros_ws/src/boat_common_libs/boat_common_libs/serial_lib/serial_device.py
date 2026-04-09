@@ -51,7 +51,7 @@ class SerialDevice:
     def _device_connect_thread(self):
         while True:
             try:
-                self.device = serial.Serial(self.serial_port, self.baudrate, timeout=self.timeout)
+                self.device = serial.Serial(self.serial_port, self.baudrate, timeout=self.timeout, rtscts=True, dsrdtr=True)
                 self.device.flush()
                 self.valid = True
                 self._unlatch_all()

@@ -16,3 +16,10 @@ ID,Type,Message,Condition,Sticky
 18,FAULT,Serial Device IO Error,There was an IO error thrown when trying to read from the serial device, false
 30,WARN,Cellular Signal Quality POOR WARNING,Cellular signal quality is poor.,true
 31,FAULT,Cellular Authentication Mode NOT READY,AT+CPIN? is not READY,true
+40,WARN,BMS Ccenus Fault,BMS Reports a CCENUS Fault,TRUE
+41,WARN,BMS Tcencus Fault,BMS Reports a Tcencus Fault,TRUE
+42,FAULT,BMS High Voltage Fault,BMS Reports a High Voltage Fault,TRUE
+43,FAULT,BMS Low Voltage Fault,BMS Reports a Low Voltage Fault,TRUE
+44,FAULT,BMS High Temp Fault,BMS Reports a Temperature too High,TRUE
+45,FAULT,BMS Low Temp Fault,BMS Reports a Temperature too Low,TRUE
+46,FAULT,BMS Hardware Fault,BMS Reports a Hardware Fault,TRUE

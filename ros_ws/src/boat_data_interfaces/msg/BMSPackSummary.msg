@@ -1,0 +1,2 @@
+float32 pack_voltage_raw
+float32 pack_current_raw
