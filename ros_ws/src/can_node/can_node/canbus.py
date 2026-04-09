@@ -127,7 +127,29 @@ class CANBus:
         if b0 == 0x01:  # MCU Summary
             charge_state = data[4]
             plug_state = data[5]
-            alerts = data[6]
+            alerts = int.from_bytes(data[5:7], "little", signed=False)
+            a_hardware = bool((alerts >> 6) & 1)
+            a_ccenus = bool((alerts >> 5) & 1)
+            a_tcenus = bool((alerts >> 4) & 1)
+            a_hvc = bool((alerts >> 3) & 1)
+            a_lvc = bool((alerts >> 2) & 1)
+            a_hitemp = bool((alerts >> 1) & 1)
+            a_lowtemp = bool((alerts >> 0) & 1)
+
+            if a_hardware:
+                self.declare_alarm(Alarm.BMS_HARDWARE_FAULT)
+            if a_ccenus:
+                self.declare_alarm(Alarm.BMS_CCENUS_FAULT)
+            if a_tcenus:
+                self.declare_alarm(Alarm.BMS_TCENCUS_FAULT)
+            if a_hvc:
+                self.declare_alarm(Alarm.BMS_HIGH_VOLTAGE_FAULT)
+            if a_lvc:
+                self.declare_alarm(Alarm.BMS_LOW_VOLTAGE_FAULT)
+            if a_hitemp:
+                self.declare_alarm(Alarm.BMS_HIGH_TEMP_FAULT)
+            if a_lowtemp:
+                self.declare_alarm(Alarm.BMS_LOW_TEMP_FAULT)
 
             self.bms_mcu_sum_pub.publish(
                 BMSMcuSummary(charge_state=charge_state, plug_state=plug_state, alerts=alerts))

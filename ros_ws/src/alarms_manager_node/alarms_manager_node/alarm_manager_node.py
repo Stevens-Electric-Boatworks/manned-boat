@@ -62,7 +62,7 @@ class AlarmsWatchdog(Node):
 
         already_raised = self.raised_sticky_alarms.__contains__(error_code)
         if sticky and already_raised:
-            self._logger.info(f"Alarm ID {error_code} is sticky, and has already been raised")
+            self.get_logger().info(f"Alarm ID {error_code} is sticky, and has already been raised", throttle_duration_sec=1)
             response.result = AlarmRaise.Response.STICKY_ALREADY_RAISED
             return response
         elif sticky and not already_raised:
