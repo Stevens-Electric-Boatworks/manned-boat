@@ -6,7 +6,7 @@ from rclpy.executors import ExternalShutdownException
 
 from boat_common_libs.smooth_random import SmoothRandom
 from boat_data_interfaces.msg import CANMotorData, CANBusStatus, BMSCellVoltage, BMSPackSummary, BMSSOCSummary, \
-    BMSMcuSummary, BMSThermistor
+    BMSMcuSummary, BMSThermistor, CANThermistor
 
 
 class CANMotorTestingDataNode(Node):
@@ -34,9 +34,11 @@ class CANMotorTestingDataNode(Node):
             "power": SmoothRandom(0, 60, 0, 6000),  # int16, up to ~6 kW
             "enabled": False
         }
+        self.cooling_temp = SmoothRandom(19.5, 0.5, 0, 50)
         self.can_motor_a_pub = self.create_publisher(CANMotorData, '/motors/motorA', 10)
         self.can_motor_b_pub = self.create_publisher(CANMotorData, '/motors/motorB', 10)
         self.can_bus_status_publisher = self.create_publisher(CANBusStatus, '/motors/can_bus_state', 10)
+        self.cooling_temp_pub = self.create_publisher(CANThermistor, "/can/cooling_temp", 10)
 
         # raw = mV / 40  →  3300mV=82, 3700mV=92, 4200mV=105  (fits int8)
         self._cell_voltage = {
@@ -83,6 +85,7 @@ class CANMotorTestingDataNode(Node):
         self._thermistor_pub = self.create_publisher(BMSThermistor, "/bms/thermistor", 10)
 
         # Timers at different intervals
+        self.create_timer(1.0, self.publish_can_cooling)
         self.create_timer(0.1, self._publish_cell_voltage)  # 10 Hz  — fast cell monitoring
         self.create_timer(0.5, self._publish_pack_summary)  # 2 Hz   — pack voltage/current
         self.create_timer(1.0, self._publish_soc_summary)  # 1 Hz   — SOC changes slowly
@@ -91,6 +94,9 @@ class CANMotorTestingDataNode(Node):
 
         self.create_timer(0.3, self.publish_test_data)
         self.create_timer(1, self.publish_bus_state)
+
+    def publish_can_cooling(self):
+        self.cooling_temp_pub.publish(CANThermistor(temp=float(self.cooling_temp.next())))
 
     def publish_test_data(self):
         motor_a_msg = CANMotorData()
@@ -103,7 +109,7 @@ class CANMotorTestingDataNode(Node):
         motor_a_msg.current = float(self.motorA["current"].next())
         motor_a_msg.power = float(self.motorA["power"].next())
         motor_a_msg.enabled = True
-        
+
         motor_b_msg = CANMotorData()
         motor_b_msg.voltage = float(self.motorB["voltage"].next())
         motor_b_msg.throttle_mv = int(self.motorB["throttle_mv"].next())
@@ -155,6 +161,7 @@ class CANMotorTestingDataNode(Node):
         msg.min = int(self._thermistor["min"].next())
         msg.max = int(self._thermistor["max"].next())
         self._thermistor_pub.publish(msg)
+
 
 def main(args=None):
     try:
