@@ -32,6 +32,8 @@ class Alarm(Enum):
     """FAULT: Serial Device In-Use — The serial device is in use and is locked."""
     SERIAL_IO_ERROR = 18
     """FAULT: Serial Device IO Error — There was an IO error thrown when trying to read from the serial device."""
+    DRIVE_MOTOR_FAULT = 19
+    """FAULT: Drive Motor Fault - There was a fault raised by the inmotion controllers"""
     CELL_SIGNAL_QUALITY_POOR = 30
     """WARN: Cellular Signal Quality POOR WARNING — Cellular signal quality is poor."""
     CELL_AUTH_MODE_NOT_READY = 31
