@@ -9,7 +9,7 @@ from threading import Thread
 import can
 import canopen
 from can import CanError
-from canopen import BaseNode402, SdoCommunicationError, SdoAbortedError
+from canopen import BaseNode402, SdoCommunicationError, SdoAbortedError, Network
 from rclpy.impl.rcutils_logger import RcutilsLogger
 from rclpy.publisher import Publisher
 
@@ -66,11 +66,21 @@ class CANBus:
 
     def setup_can(self):
         # test for can0 open
+        self.configure()
+
+    def configure(self):
         if not is_can_interface_up():
             self.logger.error("can0 is not up. Aborting startup!!")
             self.declare_alarm(Alarm.CAN0_INTERFACE_NOT_UP)
             self.can_bus_state = CANBusStatus.OFFLINE
             return
+
+        if self.network is not None:
+            self.is_node_ok = False
+            self.network.clear()
+            self.network.bus.shutdown()
+            print("shutting down bus...")
+            time.sleep(1)
 
         # Start with creating a new network representing one CAN bus
         self.network = canopen.Network()
@@ -97,7 +107,9 @@ class CANBus:
 
         self.can_thread = Thread(
             target=self.read_can_messages, args=[self.motorA_pub, self.motorB_pub], daemon=True)
+        self.is_node_ok = True
         self.can_thread.start()
+
 
         self.bms_thread = Thread(
             target=self._bms_request_loop, args=[], daemon=True)
@@ -193,6 +205,8 @@ class CANBus:
 
     def _bms_request_loop(self):
         while True:
+            if self.network is None:
+                return
             self.request_bms_status_data()
             time.sleep(0.5)
 
@@ -272,3 +286,13 @@ class CANBus:
 
     def get_bus_state(self):
         return self.can_bus_state
+
+    def restart_bus(self):
+        self.logger.error("[DANGEROUS] Restarting CAN Bus via a service call")
+        self.configure()
+
+    def flush_bus(self):
+        if self.network is None:
+            return
+        self.network.clear()
+        self.network.bus.flush_tx_buffer()

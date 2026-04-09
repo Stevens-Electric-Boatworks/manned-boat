@@ -2,6 +2,8 @@ import threading
 from time import sleep
 
 import rclpy
+from std_srvs.srv import Empty
+
 from boat_common_libs.alarm_lib.alarm_helper import AlarmPublisher
 from boat_common_libs.serial_lib.devices.cell_serial_device import (
     CellData,
@@ -20,6 +22,12 @@ class CellNode(Node):
         self.alarm_pub = AlarmPublisher(self)
         self.cell = CellSerialDevice(self, self.alarm_pub, self._on_cell_data_rec)
         self.timer = threading.Thread(target=self.timer_callback).start()
+        self.reconfig_srv = self.create_service(Empty, "/cell/reconfigure", self.on_reconfigure)
+
+    def on_reconfigure(self, _, __):
+        self._logger.info("Reconfiguring cell node from service call")
+        self.cell.configure_then_signal()
+        return Empty()
 
     def _on_cell_data_rec(self, data: CellData):
         # publish

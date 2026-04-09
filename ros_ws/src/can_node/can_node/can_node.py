@@ -4,6 +4,7 @@ import rclpy
 from rcl_interfaces.msg import ParameterDescriptor
 from rclpy.executors import ExternalShutdownException
 from rclpy.node import Node
+from std_srvs.srv import Empty
 
 from boat_common_libs.alarm_lib import alarm_helper
 from boat_common_libs.alarm_lib.alarms import Alarm
@@ -38,8 +39,25 @@ class MotorNode(Node):
                           bms_pack_sum_pub=self.bms_pack_sum_pub, bms_thermistor_pub=self.bms_thermistor_pub,
                           bms_mcu_sum_pub=self.bms_mcu_sum_pub, bms_soc_sum_pub=self.bms_soc_sum_pub,
                           bms_cell_volt_pub=self.bms_cell_volt_pub, can_thermistor_pub=self.can_thermistor_pub)
+        
+        
+        self.create_service(Empty, "/can/restart_bus", self.restart_bus)
+        self.create_service(Empty, "/can/flush_bus", self.flush_bus)
+
+        
         self.create_timer(0.5, self.publish_bus_state)
         self.can.setup_can()
+
+    # noinspection PyUnusedLocal
+    def restart_bus(self, req: Empty, res: Empty):
+        self._logger.info("Restarting bus via a service call")
+        self.can.restart_bus()
+        return res
+
+    def flush_bus(self, req: Empty, res: Empty):
+        self._logger.info("Flushing bus via a service call")
+        self.can.flush_bus()
+        return res
 
     def publish_bus_state(self):
         msg = CANBusStatus()
