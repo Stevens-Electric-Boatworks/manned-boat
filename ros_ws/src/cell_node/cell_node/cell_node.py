@@ -27,7 +27,7 @@ class CellNode(Node):
     def on_reconfigure(self, _, __):
         self._logger.info("Reconfiguring cell node from service call")
         self.cell.configure_then_signal()
-        return Empty()
+        return __
 
     def _on_cell_data_rec(self, data: CellData):
         # publish
