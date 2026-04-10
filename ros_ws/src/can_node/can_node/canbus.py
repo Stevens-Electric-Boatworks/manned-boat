@@ -93,6 +93,8 @@ class CANBus:
         self.motorA_Faults = []
         self.motorB_Faults = []
 
+        self.bms_faults = [False * 7]
+
         # Start with creating a new network representing one CAN bus
         self.network = canopen.Network()
 
@@ -166,32 +168,40 @@ class CANBus:
 
             if a_hardware:
                 self.declare_alarm(Alarm.BMS_HARDWARE_FAULT)
-            else:
+            elif self.bms_faults[6]:
                 self.unlatch_alarm(Alarm.BMS_HARDWARE_FAULT)
             if a_ccenus:
                 self.declare_alarm(Alarm.BMS_CCENUS_FAULT)
-            else:
+            elif self.bms_faults[5]:
                 self.unlatch_alarm(Alarm.BMS_CCENUS_FAULT)
             if a_tcenus:
                 self.declare_alarm(Alarm.BMS_TCENCUS_FAULT)
-            else:
+            elif self.bms_faults[4]:
                 self.unlatch_alarm(Alarm.BMS_TCENCUS_FAULT)
             if a_hvc:
                 self.declare_alarm(Alarm.BMS_HIGH_VOLTAGE_FAULT)
-            else:
+            elif self.bms_faults[3]:
                 self.unlatch_alarm(Alarm.BMS_HIGH_VOLTAGE_FAULT)
             if a_lvc:
                 self.declare_alarm(Alarm.BMS_LOW_VOLTAGE_FAULT)
-            else:
+            elif self.bms_faults[2]:
                 self.unlatch_alarm(Alarm.BMS_LOW_VOLTAGE_FAULT)
             if a_hitemp:
                 self.declare_alarm(Alarm.BMS_HIGH_TEMP_FAULT)
-            else:
+            elif self.bms_faults[1]:
                 self.unlatch_alarm(Alarm.BMS_HIGH_TEMP_FAULT)
             if a_lowtemp:
                 self.declare_alarm(Alarm.BMS_LOW_TEMP_FAULT)
-            else:
+            elif self.bms_faults[0]:
                 self.unlatch_alarm(Alarm.BMS_LOW_TEMP_FAULT)
+
+            self.bms_faults[6] = a_hardware
+            self.bms_faults[5] = a_ccenus
+            self.bms_faults[4] = a_tcenus
+            self.bms_faults[3] = a_hvc
+            self.bms_faults[2] = a_lvc
+            self.bms_faults[1] = a_hitemp
+            self.bms_faults[0] = a_lowtemp
 
             self.bms_mcu_sum_pub.publish(
                 BMSMcuSummary(charge_state=charge_state, plug_state=plug_state, alerts=alerts))

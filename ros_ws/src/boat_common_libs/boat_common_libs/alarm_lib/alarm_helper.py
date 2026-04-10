@@ -63,7 +63,7 @@ class AlarmPublisher:
         self._alarm_motor_raise_pub = _create_srv_client(node, MotorAlarmRaise, "/alarm/raise/motor")
         self._alarm_raise_pub = _create_srv_client(node, AlarmRaise, "/alarm/raise")
         self._alarm_delatch_pub = _create_srv_client(node, AlarmDelatch, "/alarm/delatch")
-        self._alarm_motor_delatch_pub = _create_srv_client(node, AlarmDelatch, "/alarm/delatch/motor")
+        self._alarm_motor_delatch_pub = _create_srv_client(node, MotorAlarmRaise, "/alarm/delatch/motor")
 
     def publish_motor_alarm(self, isMotorA: bool, eventID: int):
         req = MotorAlarmRaise.Request()
