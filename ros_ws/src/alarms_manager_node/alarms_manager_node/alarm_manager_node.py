@@ -1,22 +1,20 @@
-import csv
-import json
-import os
-
-import rclpy
-from rcl_interfaces.msg import ParameterDescriptor, ParameterType
 from rclpy import QoSProfile
-from rclpy.executors import ExternalShutdownException
-from rclpy.node import Node
 from rclpy.service_introspection import ServiceIntrospectionState
 
-from boat_data_interfaces.msg import BoatAlarm, ShoreBoatAlarm
-from boat_data_interfaces.srv import AlarmDelatch, AlarmRaise, MotorAlarmRaise
+import json
+import os
+import rclpy
+from rcl_interfaces.msg import ParameterDescriptor, ParameterType
+from rclpy.node import Node
+from rclpy.executors import ExternalShutdownException
+from boat_data_interfaces.msg import BoatAlarm
+from boat_data_interfaces.msg import ShoreBoatAlarm
 
+import csv
 
+from boat_data_interfaces.srv import AlarmRaise, AlarmDelatch, MotorAlarmRaise
 class AlarmsWatchdog(Node):
     def __init__(self):
-        super().__init__('alarms_watchdog')
-        description = ParameterDescriptor(description='Defines where to find the exact file for the fault codes csv')
         super().__init__("alarms_watchdog")
         description = ParameterDescriptor(
             description="Defines where to find the exact file for the fault codes csv"
@@ -70,7 +68,7 @@ class AlarmsWatchdog(Node):
             self._logger.info("Watchdog node is in replay mode!")
 
     def on_alarm_raise(
-        self, request: AlarmRaise.Request, response: AlarmRaise.Response
+            self, request: AlarmRaise.Request, response: AlarmRaise.Response
     ) -> AlarmRaise.Response:
         alarm = request.alarm
         if not self.codes.__contains__(alarm.error_code):
@@ -145,7 +143,7 @@ class AlarmsWatchdog(Node):
         return response
 
     def on_alarm_delatch(
-        self, request: AlarmDelatch.Request, response: AlarmDelatch.Response
+            self, request: AlarmDelatch.Request, response: AlarmDelatch.Response
     ) -> AlarmDelatch.Response:
         code = request.error_code
         error_message = self.codes[code][1]
@@ -210,7 +208,7 @@ class AlarmsWatchdog(Node):
         self._logger.info("Loaded " + str(i) + " motor error codes")
 
     def on_motor_alarm_raise(
-        self, request: MotorAlarmRaise.Request, response: MotorAlarmRaise.Response
+            self, request: MotorAlarmRaise.Request, response: MotorAlarmRaise.Response
     ) -> MotorAlarmRaise.Response:
         event_id = request.event_id
         is_motor_a = request.is_motor_a
@@ -261,3 +259,4 @@ def main(args=None):
 
 
 if __name__ == "__main__":
+    main()

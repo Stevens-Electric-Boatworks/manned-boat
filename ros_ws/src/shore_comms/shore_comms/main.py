@@ -1,32 +1,14 @@
-# Websockets
-import asyncio
-import json
-import threading
-
+from builtin_interfaces.msg import Time
+from websockets.exceptions import ConnectionClosed, InvalidStatus
 import rclpy
+from rclpy.executors import ExternalShutdownException
 import rclpy.logging
-from boat_common_libs.alarm_lib import alarm_helper
-from boat_data_interfaces.msg import (
-    ElectricalData,
-    MotionData,
-    BoatAlarm,
-    CANMotorData,
-    CANBusStatus,
-    GPSData,
-    OutletCoolantData,
-    InletCoolantData,
-    GPSVTGData,
-    CellData,
-    ShoreBoatAlarm,
-    SysUtilData,
-    BMSCellVoltage,
-    BMSPackSummary,
-    BMSSOCSummary,
-    BMSMcuSummary,
-    GPSSVData,
-    GPGSAData,
-    CANThermistor,
-)
+from rclpy.node import Node
+
+from boat_common_libs.alarm_lib.alarms import Alarm
+from boat_data_interfaces.msg import ElectricalData, MotionData, BoatAlarm, \
+    CANMotorData, CANBusStatus, GPSData, OutletCoolantData, InletCoolantData, GPSVTGData, CellData, ShoreBoatAlarm, \
+    SysUtilData, BMSCellVoltage, BMSPackSummary, BMSSOCSummary, BMSMcuSummary, GPSSVData, GPGSAData, CANThermistor
 from rcl_interfaces.msg import Log, ParameterDescriptor, SetParametersResult
 from boat_common_libs.alarm_lib import alarm_helper
 
@@ -251,15 +233,15 @@ class ShoreDataCollector(Node):
 
     async def send_alarms_to_shore(self, ignore_empty):
         for alarm in self.resolves:
-          output_data = {"type": "alarm", "action": "resolve", "id": alarm[0]}
-          try:
-              await self.websocket.send(json.dumps(output_data))
-              await self.websocket.ensure_open()
-              self.clear_all_websocket_alarms()
-          except ConnectionClosed or InvalidStatus:
-              self.alarm_publisher.publish_alarm(Alarm.WEBSOCKET_CONNECTION_CLOSED)
-              # Keep alarms because data wasn’t sent
-              return
+            output_data = {"type": "alarm", "action": "resolve", "id": alarm[0]}
+            try:
+                await self.websocket.send(json.dumps(output_data))
+                await self.websocket.ensure_open()
+                self.clear_all_websocket_alarms()
+            except ConnectionClosed or InvalidStatus:
+                self.alarm_publisher.publish_alarm(Alarm.WEBSOCKET_CONNECTION_CLOSED)
+                # Keep alarms because data wasn’t sent
+                return
 
         for alarm in self.alarms:
             output_data = {
@@ -408,23 +390,6 @@ class ShoreDataCollector(Node):
             "line": msg.line,
             "level": msg.level,
             "name": msg.name,
-        }
-        self.logs.append(logged_data)
-
-
-def main(args=None):
-    try:
-        with rclpy.init(args=args):
-            minimal_subscriber = ShoreDataCollector()
-            while rclpy.ok():
-                rclpy.spin_once(minimal_subscriber, timeout_sec=0.05)
-    except (KeyboardInterrupt, ExternalShutdownException):
-        pass
-
-
-if __name__ == "__main__":
-            "level": msg.level,
-            "name": msg.name
         }
         self.logs.append(logged_data)
 
