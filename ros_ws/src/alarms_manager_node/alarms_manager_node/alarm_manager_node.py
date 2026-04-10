@@ -47,6 +47,10 @@ class AlarmsWatchdog(Node):
             MotorAlarmRaise, "/alarm/raise/motor", self.on_motor_alarm_raise
         )
         b = self.create_service(AlarmDelatch, "/alarm/delatch", self.on_alarm_delatch)
+
+        self.create_service(
+            MotorAlarmRaise, "/alarm/delatch/motor", self.on_motor_alarm_delatch
+        )
         # Service introspection is needed for us to be
         a.configure_introspection(
             self._clock,
@@ -63,7 +67,7 @@ class AlarmsWatchdog(Node):
             ShoreBoatAlarm, "/alarm/shore/publish", 10
         )
         self.delatch_pub = self.create_publisher(
-            ShoreBoatAlarm, "/alarm/shore/resolve", 10
+            ShoreBoatAlarm, "/alarm/shore/delatch", 10
         )
 
         if bool(self.get_parameter("replay_mode").get_parameter_value().bool_value):
@@ -234,8 +238,8 @@ class AlarmsWatchdog(Node):
             f"\tEventID:    {event_id}\n"
             f"\tFaultID:    {f_fault_code}\n"
             f"\tEMCY Code:  {entry[1]}\n"
-            f"\tDescription:{self.codes[int(entry[0])][1]}\n"
-            f"\tSeverity:   {self.codes[int(entry[0])][0]}"
+            f"\tDescription:{self.codes[f_fault_code][1]}\n"
+            f"\tSeverity:   {self.codes[f_fault_code][0]}"
         )
 
         self.raised_sticky_alarms.add(f_fault_code)
@@ -249,6 +253,49 @@ class AlarmsWatchdog(Node):
             self.shore_pub.publish(shore_alarm)
 
         response.result = MotorAlarmRaise.Response.RAISED
+        return response
+
+    def on_motor_alarm_delatch(
+            self, request: MotorAlarmRaise.Request, response: MotorAlarmRaise.Response
+    ) -> MotorAlarmRaise.Response:
+        event_id = request.event_id
+        is_motor_a = request.is_motor_a
+        timestamp = request.timestamp
+
+        entry = self.motor_codes.get(event_id)
+        if entry is None:
+            self._logger.error(f"Unknown motor EventID: {event_id}")
+            response.result = MotorAlarmRaise.Response.UNKNOWN
+            return response
+
+        f_event_id = event_id
+        f_fault_code = int(entry[0] if is_motor_a else 1000 + int(entry[0]))
+
+        if f_fault_code not in self.raised_sticky_alarms:
+            response.result = MotorAlarmRaise.Response.STICKY_NOT_RAISED_BEFORE
+            return response
+
+        self._logger.info(
+            f"Motor fault delatched:\n"
+            f"\tEventID:    {event_id}\n"
+            f"\tFaultID:    {f_fault_code}\n"
+            f"\tEMCY Code:  {entry[1]}\n"
+            f"\tDescription:{self.codes[f_fault_code][1]}\n"
+            f"\tSeverity:   {self.codes[int(entry[0])][0]}"
+        )
+
+        self.raised_sticky_alarms.remove(f_fault_code)
+
+        if not bool(self.get_parameter("replay_mode").get_parameter_value().bool_value):
+            shore_alarm = ShoreBoatAlarm()
+            shore_alarm.error_code = f_fault_code
+            shore_alarm.message = f"{self.codes[f_fault_code][1]}"
+            shore_alarm.timestamp = timestamp
+            shore_alarm.severity = str(self.codes[int(entry[0])][0])
+            print("sending the alarm to the shore!")
+            self.delatch_pub.publish(shore_alarm)
+
+        response.result = MotorAlarmRaise.Response.UNKNOWN
         return response
 
 

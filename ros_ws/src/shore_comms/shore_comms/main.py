@@ -221,28 +221,17 @@ class ShoreDataCollector(Node):
         await self.websocket.send(json.dumps(output_data))
         self.data.clear()
 
-    async def send_resolves_to_shore(self):
-        output_data = {"type": "alarm", "action": "resolve", "id": id}
-        try:
-            await self.websocket.send(json.dumps(output_data))
-            await self.websocket.ensure_open()
-            self.alarms.remove(id)
-        except ConnectionClosed or InvalidStatus:
-            self.alarm_publisher.publish_alarm(Alarm.WEBSOCKET_CONNECTION_CLOSED)
-            return
-
     async def send_alarms_to_shore(self, ignore_empty):
         for alarm in self.resolves:
-            output_data = {"type": "alarm", "action": "resolve", "id": alarm[0]}
+            alarmID = alarm.error_code
+            output_data = {"type": "alarm", "action": "resolve", "id": alarmID}
             try:
                 await self.websocket.send(json.dumps(output_data))
                 await self.websocket.ensure_open()
-                self.clear_all_websocket_alarms()
+                self.resolves.remove(alarm)
             except ConnectionClosed or InvalidStatus:
                 self.alarm_publisher.publish_alarm(Alarm.WEBSOCKET_CONNECTION_CLOSED)
-                # Keep alarms because data wasn’t sent
                 return
-
         for alarm in self.alarms:
             output_data = {
                 "type": "alarm",

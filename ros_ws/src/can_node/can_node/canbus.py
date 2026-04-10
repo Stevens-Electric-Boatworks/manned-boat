@@ -6,6 +6,7 @@ import time
 import traceback
 from sys import exec_prefix
 from threading import Thread
+from typing import List
 
 import can
 import canopen
@@ -36,8 +37,10 @@ def is_can_interface_up(interface: str = "can0") -> bool:
 class CANBus:
     def __init__(self, logger: RcutilsLogger, dummy_efp, motorA_pub, motorB_pub, is_node_ok, declare_alarm, declare_motor_alarm,
                  shutdown_node,
-                 unlatch_all_alarms, bms_pack_sum_pub, bms_mcu_sum_pub, bms_cell_volt_pub, bms_thermistor_pub,
+                 unlatch_all_alarms, unlatch_motor_alarm, bms_pack_sum_pub, bms_mcu_sum_pub, bms_cell_volt_pub, bms_thermistor_pub,
                  bms_soc_sum_pub, can_thermistor_pub):
+        self.motorB_Faults:List[int] = None
+        self.motorA_Faults:List[int] = None
         self.bms_thread = None
         self.network = None
         self.sdo = None
@@ -55,6 +58,7 @@ class CANBus:
         self.shutdown_node = shutdown_node
         self.can_bus_state = CANBusStatus.OFFLINE
         self.unlatch_all_alarms = unlatch_all_alarms
+        self.unlatch_motor_alarm = unlatch_motor_alarm
 
         self.bms_pack_sum_pub: Publisher = bms_pack_sum_pub
         self.bms_mcu_sum_pub: Publisher = bms_mcu_sum_pub
@@ -83,6 +87,9 @@ class CANBus:
             self.network.bus.shutdown()
             print("shutting down bus...")
             time.sleep(1)
+
+        self.motorA_Faults = []
+        self.motorB_Faults = []
 
         # Start with creating a new network representing one CAN bus
         self.network = canopen.Network()
@@ -223,7 +230,21 @@ class CANBus:
                 raw = self.read_and_log_sdo(motor, 0x3011, 1)
                 raw_bytes = raw.to_bytes(count * 2, 'little')
                 event_ids = list(struct.unpack(f'{count}H', raw_bytes))
+
+                difference = None
+                # compare between
+                if motor is self.motorA:
+                    difference = list(set(self.motorA_Faults) - set(event_ids))
+                    self.motorA_Faults = event_ids
+                else:
+                    difference = list(set(self.motorB_Faults) - set(event_ids))
+                    self.motorB_faults = event_ids
+
+                for eventId in difference:
+                    # unlatch old alarms no longer there
+                    self.unlatch_motor_alarm(bool(motor is self.motorA), eventId)
                 for event in event_ids:
+                    # unlatch
                     self.declare_motor_alarm(bool(motor is self.motorA), int(event))
 
         while True:

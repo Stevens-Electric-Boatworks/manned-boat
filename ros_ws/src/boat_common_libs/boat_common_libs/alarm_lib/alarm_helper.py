@@ -63,6 +63,7 @@ class AlarmPublisher:
         self._alarm_motor_raise_pub = _create_srv_client(node, MotorAlarmRaise, "/alarm/raise/motor")
         self._alarm_raise_pub = _create_srv_client(node, AlarmRaise, "/alarm/raise")
         self._alarm_delatch_pub = _create_srv_client(node, AlarmDelatch, "/alarm/delatch")
+        self._alarm_motor_delatch_pub = _create_srv_client(node, AlarmDelatch, "/alarm/delatch/motor")
 
     def publish_motor_alarm(self, isMotorA: bool, eventID: int):
         req = MotorAlarmRaise.Request()
@@ -72,6 +73,21 @@ class AlarmPublisher:
 
         try:
             self._alarm_motor_raise_pub.call_async(req)
+            return None
+        except TypeError:
+            self._node.get_logger().error(
+                "[ALARM LIB] The alarm publisher is using the wrong type for the service! Investigate this issue at once!",
+                once=True)
+            return None
+
+    def unlatch_motor_alarm(self, isMotorA: bool, eventID: int):
+        req = MotorAlarmRaise.Request()
+        req.event_id = eventID
+        req.is_motor_a = isMotorA
+        req.timestamp = self._node.get_clock().now().to_msg()
+
+        try:
+            self._alarm_motor_delatch_pub.call_async(req)
             return None
         except TypeError:
             self._node.get_logger().error(
