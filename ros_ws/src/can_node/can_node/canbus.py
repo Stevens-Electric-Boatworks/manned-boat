@@ -38,7 +38,7 @@ class CANBus:
     def __init__(self, logger: RcutilsLogger, dummy_efp, motorA_pub, motorB_pub, is_node_ok, declare_alarm, declare_motor_alarm,
                  shutdown_node,
                  unlatch_all_alarms, unlatch_motor_alarm, bms_pack_sum_pub, bms_mcu_sum_pub, bms_cell_volt_pub, bms_thermistor_pub,
-                 bms_soc_sum_pub, can_thermistor_pub):
+                 bms_soc_sum_pub, can_thermistor_pub, bms_booster_thermistor_pub):
         self.motorB_Faults:List[int] = None
         self.motorA_Faults:List[int] = None
         self.bms_thread = None
@@ -65,6 +65,7 @@ class CANBus:
         self.bms_cell_volt_pub: Publisher = bms_cell_volt_pub
         self.bms_soc_sum_pub: Publisher = bms_soc_sum_pub
         self.bms_thermistor_pub: Publisher = bms_thermistor_pub
+        self.bms_booster_thermistor_pub: Publisher = bms_booster_thermistor_pub
 
         self.can_thermistor_pub: Publisher = can_thermistor_pub
 
@@ -107,7 +108,10 @@ class CANBus:
         self.logger.info("Connected to SocketCAN")
         # Subscribe to messages
         self.network.subscribe(0x293, self.on_bms_data)
-        self.network.subscribe(0xbe, self.on_thermistor_data)
+        self.network.subscribe(0xbe, self.on_cooling_thermistor_data)
+        self.network.subscribe(0xbd, self.on_bms_booster_thermistor_data)
+
+        # EMCY messages
         self.network.subscribe(0x80 + 7, self.on_motor_a_fault)
         self.network.subscribe(0x80 + 6, self.on_motor_b_fault)
         self.logger.info("Using a dummy EDS file at \"" + self.dummy_efp + "\".")
@@ -210,9 +214,13 @@ class CANBus:
                 BMSSOCSummary(soc_percent=float(soc), pack_kwhr=pack_kwhr, pack_max_kwhr=pack_max_kwhr))
             # print(f"SOC Summary — SOC={soc}%, PackKWHr={pack_kwhr}, MaxKWHr={pack_max_kwhr}")
 
-    def on_thermistor_data(self, can_id: int, data: bytearray, timestamp: float):
+    def on_cooling_thermistor_data(self, can_id: int, data: bytearray, timestamp: float):
         temp = int.from_bytes(data[0:2], 'little', signed=True) / 100
         self.can_thermistor_pub.publish(CANThermistor(temp=float(temp)))
+
+    def on_bms_booster_thermistor_data(self, can_id: int, data: bytearray, timestamp: float):
+        temp = int.from_bytes(data[0:2], 'little', signed=True) / 100
+        self.bms_booster_thermistor_pub.publish(CANThermistor(temp=float(temp)))
 
     def _bms_request_loop(self):
         while True:

@@ -39,6 +39,7 @@ class CANMotorTestingDataNode(Node):
         self.can_motor_b_pub = self.create_publisher(CANMotorData, '/motors/motorB', 10)
         self.can_bus_status_publisher = self.create_publisher(CANBusStatus, '/motors/can_bus_state', 10)
         self.cooling_temp_pub = self.create_publisher(CANThermistor, "/can/cooling_temp", 10)
+        self.bms_booster_thermistor_pub = self.create_publisher(CANThermistor, "/can/bms_thermistor", 10)
 
         # raw = mV / 40  →  3300mV=82, 3700mV=92, 4200mV=105  (fits int8)
         self._cell_voltage = {
@@ -85,7 +86,7 @@ class CANMotorTestingDataNode(Node):
         self._thermistor_pub = self.create_publisher(BMSThermistor, "/bms/thermistor", 10)
 
         # Timers at different intervals
-        self.create_timer(1.0, self.publish_can_cooling)
+        self.create_timer(1.0, self.publish_can_thermistor)
         self.create_timer(0.1, self._publish_cell_voltage)  # 10 Hz  — fast cell monitoring
         self.create_timer(0.5, self._publish_pack_summary)  # 2 Hz   — pack voltage/current
         self.create_timer(1.0, self._publish_soc_summary)  # 1 Hz   — SOC changes slowly
@@ -95,8 +96,9 @@ class CANMotorTestingDataNode(Node):
         self.create_timer(0.3, self.publish_test_data)
         self.create_timer(1, self.publish_bus_state)
 
-    def publish_can_cooling(self):
+    def publish_can_thermistor(self):
         self.cooling_temp_pub.publish(CANThermistor(temp=float(self.cooling_temp.next())))
+        self.bms_booster_thermistor_pub.publish(CANThermistor(temp=float(self.cooling_temp.next())))
 
     def publish_test_data(self):
         motor_a_msg = CANMotorData()
