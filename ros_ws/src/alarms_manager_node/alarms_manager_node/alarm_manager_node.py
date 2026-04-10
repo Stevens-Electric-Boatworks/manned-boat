@@ -13,6 +13,8 @@ from boat_data_interfaces.msg import ShoreBoatAlarm
 import csv
 
 from boat_data_interfaces.srv import AlarmRaise, AlarmDelatch, MotorAlarmRaise
+
+
 class AlarmsWatchdog(Node):
     def __init__(self):
         super().__init__("alarms_watchdog")
