@@ -37,7 +37,7 @@ def is_can_interface_up(interface: str = "can0") -> bool:
 class CANBus:
     def __init__(self, logger: RcutilsLogger, dummy_efp, motorA_pub, motorB_pub, is_node_ok, declare_alarm, declare_motor_alarm,
                  shutdown_node,
-                 unlatch_all_alarms, unlatch_motor_alarm, bms_pack_sum_pub, bms_mcu_sum_pub, bms_cell_volt_pub, bms_thermistor_pub,
+                 unlatch_all_alarms, unlatch_motor_alarm, unlatch_alarm, bms_pack_sum_pub, bms_mcu_sum_pub, bms_cell_volt_pub, bms_thermistor_pub,
                  bms_soc_sum_pub, can_thermistor_pub, bms_booster_thermistor_pub):
         self.motorB_Faults:List[int] = None
         self.motorA_Faults:List[int] = None
@@ -59,6 +59,7 @@ class CANBus:
         self.can_bus_state = CANBusStatus.OFFLINE
         self.unlatch_all_alarms = unlatch_all_alarms
         self.unlatch_motor_alarm = unlatch_motor_alarm
+        self.unlatch_alarm = unlatch_alarm
 
         self.bms_pack_sum_pub: Publisher = bms_pack_sum_pub
         self.bms_mcu_sum_pub: Publisher = bms_mcu_sum_pub
@@ -165,18 +166,32 @@ class CANBus:
 
             if a_hardware:
                 self.declare_alarm(Alarm.BMS_HARDWARE_FAULT)
+            else:
+                self.unlatch_alarm(Alarm.BMS_HARDWARE_FAULT)
             if a_ccenus:
                 self.declare_alarm(Alarm.BMS_CCENUS_FAULT)
+            else:
+                self.unlatch_alarm(Alarm.BMS_CCENUS_FAULT)
             if a_tcenus:
                 self.declare_alarm(Alarm.BMS_TCENCUS_FAULT)
+            else:
+                self.unlatch_alarm(Alarm.BMS_TCENCUS_FAULT)
             if a_hvc:
                 self.declare_alarm(Alarm.BMS_HIGH_VOLTAGE_FAULT)
+            else:
+                self.unlatch_alarm(Alarm.BMS_HIGH_VOLTAGE_FAULT)
             if a_lvc:
                 self.declare_alarm(Alarm.BMS_LOW_VOLTAGE_FAULT)
+            else:
+                self.unlatch_alarm(Alarm.BMS_LOW_VOLTAGE_FAULT)
             if a_hitemp:
                 self.declare_alarm(Alarm.BMS_HIGH_TEMP_FAULT)
+            else:
+                self.unlatch_alarm(Alarm.BMS_HIGH_TEMP_FAULT)
             if a_lowtemp:
                 self.declare_alarm(Alarm.BMS_LOW_TEMP_FAULT)
+            else:
+                self.unlatch_alarm(Alarm.BMS_LOW_TEMP_FAULT)
 
             self.bms_mcu_sum_pub.publish(
                 BMSMcuSummary(charge_state=charge_state, plug_state=plug_state, alerts=alerts))
