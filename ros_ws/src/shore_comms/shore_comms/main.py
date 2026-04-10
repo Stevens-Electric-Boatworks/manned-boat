@@ -1,14 +1,32 @@
-from builtin_interfaces.msg import Time
-from websockets.exceptions import ConnectionClosed, InvalidStatus
-import rclpy
-from rclpy.executors import ExternalShutdownException
-import rclpy.logging
-from rclpy.node import Node
+# Websockets
+import asyncio
+import json
+import threading
 
-from boat_common_libs.alarm_lib.alarms import Alarm
-from boat_data_interfaces.msg import ElectricalData, MotionData, BoatAlarm, \
-    CANMotorData, CANBusStatus, GPSData, OutletCoolantData, InletCoolantData, GPSVTGData, CellData, ShoreBoatAlarm, \
-    SysUtilData, BMSCellVoltage, BMSPackSummary, BMSSOCSummary, BMSMcuSummary, GPSSVData, GPGSAData, CANThermistor
+import rclpy
+import rclpy.logging
+from boat_common_libs.alarm_lib import alarm_helper
+from boat_data_interfaces.msg import (
+    ElectricalData,
+    MotionData,
+    BoatAlarm,
+    CANMotorData,
+    CANBusStatus,
+    GPSData,
+    OutletCoolantData,
+    InletCoolantData,
+    GPSVTGData,
+    CellData,
+    ShoreBoatAlarm,
+    SysUtilData,
+    BMSCellVoltage,
+    BMSPackSummary,
+    BMSSOCSummary,
+    BMSMcuSummary,
+    GPSSVData,
+    GPGSAData,
+    CANThermistor,
+)
 from rcl_interfaces.msg import Log, ParameterDescriptor, SetParametersResult
 from boat_common_libs.alarm_lib import alarm_helper
 
@@ -25,22 +43,32 @@ SHORE_URI = "wss://shore.stevenseboat.org/api"
 
 # SHORE_URI = "ws://localhost:5001/api"
 
+
 def get_time_in_ms(time: Time):
-    return time.sec * 1000 + (time.nanosec / 1e+6)
+    return time.sec * 1000 + (time.nanosec / 1e6)
 
 
 class ShoreDataCollector(Node):
-
     def __init__(self):
-        super().__init__('shore_comms')
+        super().__init__("shore_comms")
         self.alarms = []
+        self.resolves = []
         self.create_sub(ShoreBoatAlarm, "/alarm/shore/publish", self.alarms_collector)
+        self.create_sub(ShoreBoatAlarm, "/alarm/shore/delatch", self.delatch_collector)
 
-        self.declare_parameter("data_send", 0.1, ParameterDescriptor(
-            description='How often shore_comms should send data to the shore server.'))
+        self.declare_parameter(
+            "data_send",
+            0.1,
+            ParameterDescriptor(
+                description="How often shore_comms should send data to the shore server."
+            ),
+        )
 
-        self.declare_parameter("replay_mode", False,
-                               ParameterDescriptor(description='Is the shore node trying to replay data?'))
+        self.declare_parameter(
+            "replay_mode",
+            False,
+            ParameterDescriptor(description="Is the shore node trying to replay data?"),
+        )
 
         self.websocket: WebSocketClientProtocol = None
         self.data = {}
@@ -50,9 +78,13 @@ class ShoreDataCollector(Node):
         self.alarm_publisher = alarm_helper.create_alarm_publisher(self)
 
         ros_out_topic = "/rosout"
-        self.isReplay = self.get_parameter("replay_mode").get_parameter_value().bool_value
+        self.isReplay = (
+            self.get_parameter("replay_mode").get_parameter_value().bool_value
+        )
         if self.isReplay:
-            self._logger.info("The SHORE node is in replay mode. Now replaying log files from /logout")
+            self._logger.info(
+                "The SHORE node is in replay mode. Now replaying log files from /logout"
+            )
             ros_out_topic = "/logout"
             logged_data = {
                 "timestamp": get_time_in_ms(self._clock.now().to_msg()),
@@ -61,14 +93,21 @@ class ShoreDataCollector(Node):
                 "function": "REPLAY MODE",
                 "line": 67,
                 "level": 40,
-                "name": "REPLAY MODE"
+                "name": "REPLAY MODE",
             }
             self.logs.append(logged_data)
 
         self.create_sub(Log, ros_out_topic, self.logs_collector)
-        self.create_sub(InletCoolantData, "/electrical/temp_sensors/in", self.electrical_coolant_temp_collector_inlet)
-        self.create_sub(OutletCoolantData, "/electrical/temp_sensors/out",
-                        self.electrical_coolant_temp_collector_outlet)
+        self.create_sub(
+            InletCoolantData,
+            "/electrical/temp_sensors/in",
+            self.electrical_coolant_temp_collector_inlet,
+        )
+        self.create_sub(
+            OutletCoolantData,
+            "/electrical/temp_sensors/out",
+            self.electrical_coolant_temp_collector_outlet,
+        )
         self.create_sub(GPSData, "/motion/gps", self.gps_location_collector)
         self.create_sub(GPSVTGData, "/motion/vtg", self.gps_speed_collector)
         self.create_sub(GPSSVData, "/motion/sv", self.gps_sats_collector)
@@ -83,7 +122,9 @@ class ShoreDataCollector(Node):
         self.create_sub(BMSSOCSummary, "/bms/soc_summary", self.bms_soc_summary)
         self.create_sub(BMSMcuSummary, "/bms/mcu_summary", self.bms_mcu_summary)
 
-        self.create_sub(CANThermistor, "/can/cooling_temp", self.can_cooling_temp_collector)
+        self.create_sub(
+            CANThermistor, "/can/cooling_temp", self.can_cooling_temp_collector
+        )
 
         self.create_sub(Time, "/boat_time", self.time_collector)
         self.create_sub(SysUtilData, "/sys_utilization", self.sys_util_collector)
@@ -92,11 +133,17 @@ class ShoreDataCollector(Node):
         threading.Thread(target=self._run_asyncio_loop, daemon=True).start()
 
     def on_param_change_callback(self, param_list):
-        self._logger.info("Data send rate was changed to " + str(param_list[0].value) + "s via a parameter callback")
+        self._logger.info(
+            "Data send rate was changed to "
+            + str(param_list[0].value)
+            + "s via a parameter callback"
+        )
         return SetParametersResult(successful=True)
 
     def create_sub(self, data_type, topic, callback):
-        self._logger.info("Logging <" + topic + "> with custom msg of <" + data_type.__name__ + ">")
+        self._logger.info(
+            "Logging <" + topic + "> with custom msg of <" + data_type.__name__ + ">"
+        )
         self.create_subscription(data_type, topic, callback, 10)
 
     def _run_asyncio_loop(self):
@@ -110,7 +157,7 @@ class ShoreDataCollector(Node):
         """
         self.data[data_name] = data
 
-    def add_alarm(self, error_code: int, timestamp, msg: str, type:str):
+    def add_alarm(self, error_code: int, timestamp, msg: str, type: str):
         """
         Queues an alarm to be sent to the shore server.
          param error_code - The error code based on the spreadsheet
@@ -128,20 +175,26 @@ class ShoreDataCollector(Node):
         """
         Starts the background task to send the data to the shore server. Is automatically called every DATA_SEND ms
         """
-        self._logger.info(f"Attempting to connect to the Shore Server via a Websocket at {SHORE_URI}")
+        self._logger.info(
+            f"Attempting to connect to the Shore Server via a Websocket at {SHORE_URI}"
+        )
         async for self.websocket in connect(SHORE_URI):
             try:
                 if not self.websocket.open:
                     self._logger.error("Unable to open a connect to the shore server.")
                     self._logger.error(f"Attempted URI: {SHORE_URI}. SHUTTING DOWN...")
-                    self.alarm_publisher.publish_alarm(Alarm.WEBSOCKET_INITIAL_CONNECTION_FAILURE)  # ALARM:
+                    self.alarm_publisher.publish_alarm(
+                        Alarm.WEBSOCKET_INITIAL_CONNECTION_FAILURE
+                    )  # ALARM:
                     # Shore Comms Node Shutdown
                     self.destroy_node()
                     return
                 await self.send_initial_ident()
                 await self.send_data_to_shore(False)
                 self._logger.info(f"Connected to the websocket at {SHORE_URI} ✅")
-                self._logger.info(f"Data will be sent every {self.get_parameter("data_send").value}s")
+                self._logger.info(
+                    f"Data will be sent every {self.get_parameter('data_send').value}s"
+                )
                 self.clear_all_websocket_alarms()
                 while True:
                     await self.send_data_to_shore(True)
@@ -160,36 +213,53 @@ class ShoreDataCollector(Node):
         self._logger.debug("[Websocket Watchdog] running callback")
         if not hasattr(self, "websocket") or self.websocket is None:
             self._logger.warn("[Websocket Watchdog] Websocket is not opened yet...")
-            self.alarm_publisher.publish_alarm(Alarm.WEBSOCKET_IS_NOT_INITIALLY_OPENED_YET)  # ALARM:
+            self.alarm_publisher.publish_alarm(
+                Alarm.WEBSOCKET_IS_NOT_INITIALLY_OPENED_YET
+            )  # ALARM:
             # Shore Comms Websocket failure
 
         elif not self.websocket.open:
-            self._logger.error("[Websocket Watchdog] The node is not connected to the shore server via the websocket.")
-            self.alarm_publisher.publish_alarm(Alarm.WEBSOCKET_NOT_OPENED)  # ALARM: Shore Comms Websocket failure
+            self._logger.error(
+                "[Websocket Watchdog] The node is not connected to the shore server via the websocket."
+            )
+            self.alarm_publisher.publish_alarm(
+                Alarm.WEBSOCKET_NOT_OPENED
+            )  # ALARM: Shore Comms Websocket failure
 
     async def send_initial_ident(self):
-        output_data = {
-            "type": "ident",
-            "message": "boat"
-        }
+        output_data = {"type": "ident", "message": "boat"}
         await self.websocket.send(json.dumps(output_data))
 
     async def send_data_to_shore(self, ignore_empty):
         if len(self.data) == 0 and ignore_empty:
             return
-        output_data = {
-            "type": "data",
-            "payload": self.data
-        }
+        output_data = {"type": "data", "payload": self.data}
         if self.isReplay:
             output_data["replay"] = True
         await self.websocket.send(json.dumps(output_data))
         self.data.clear()
 
-    async def send_alarms_to_shore(self, ignore_empty):
-        if len(self.alarms) == 0 and ignore_empty:
+    async def send_resolves_to_shore(self):
+        output_data = {"type": "alarm", "action": "resolve", "id": id}
+        try:
+            await self.websocket.send(json.dumps(output_data))
+            await self.websocket.ensure_open()
+            self.alarms.remove(id)
+        except ConnectionClosed or InvalidStatus:
+            self.alarm_publisher.publish_alarm(Alarm.WEBSOCKET_CONNECTION_CLOSED)
             return
-        # go through all alarms in the queue
+
+    async def send_alarms_to_shore(self, ignore_empty):
+        for alarm in self.resolves:
+          output_data = {"type": "alarm", "action": "resolve", "id": alarm[0]}
+          try:
+              await self.websocket.send(json.dumps(output_data))
+              await self.websocket.ensure_open()
+              self.clear_all_websocket_alarms()
+          except ConnectionClosed or InvalidStatus:
+              self.alarm_publisher.publish_alarm(Alarm.WEBSOCKET_CONNECTION_CLOSED)
+              # Keep alarms because data wasn’t sent
+              return
 
         for alarm in self.alarms:
             output_data = {
@@ -199,8 +269,8 @@ class ShoreDataCollector(Node):
                     "id": alarm[0],
                     "timestamp": alarm[1],
                     "message": alarm[2],
-                    "type": alarm[3]
-                }
+                    "type": alarm[3],
+                },
             }
             try:
                 await self.websocket.send(json.dumps(output_data))
@@ -217,10 +287,7 @@ class ShoreDataCollector(Node):
         if len(self.logs) == 0:
             return
 
-        output_data = {
-            "type": "log",
-            "payload": self.logs
-        }
+        output_data = {"type": "log", "payload": self.logs}
         try:
             await self.websocket.send(json.dumps(output_data))
             await self.websocket.ensure_open()
@@ -233,10 +300,7 @@ class ShoreDataCollector(Node):
         self.logs.clear()
 
     async def send_bus_state_to_shore(self):
-        output_data = {
-            "type": "can_bus",
-            "state": self.can_bus_state
-        }
+        output_data = {"type": "can_bus", "state": self.can_bus_state}
         await self.websocket.send(json.dumps(output_data))
 
         # IMPORTANT: Parameter name MUST be "msg"
@@ -325,7 +389,15 @@ class ShoreDataCollector(Node):
         self.add_data("rpi.net.rx_mb", msg.rx_mb)
 
     def alarms_collector(self, msg: ShoreBoatAlarm):
-        self.add_alarm(msg.error_code, get_time_in_ms(msg.timestamp), msg.message, str(msg.severity))
+        self.add_alarm(
+            msg.error_code,
+            get_time_in_ms(msg.timestamp),
+            msg.message,
+            str(msg.severity),
+        )
+
+    def delatch_collector(self, msg: ShoreBoatAlarm):
+        self.resolves.append(msg)
 
     def logs_collector(self, msg: Log):
         logged_data = {
@@ -334,6 +406,23 @@ class ShoreDataCollector(Node):
             "file": msg.file,
             "function": msg.function,
             "line": msg.line,
+            "level": msg.level,
+            "name": msg.name,
+        }
+        self.logs.append(logged_data)
+
+
+def main(args=None):
+    try:
+        with rclpy.init(args=args):
+            minimal_subscriber = ShoreDataCollector()
+            while rclpy.ok():
+                rclpy.spin_once(minimal_subscriber, timeout_sec=0.05)
+    except (KeyboardInterrupt, ExternalShutdownException):
+        pass
+
+
+if __name__ == "__main__":
             "level": msg.level,
             "name": msg.name
         }
