@@ -291,9 +291,13 @@ class CANBus:
                     query_alarms(self.motorB)
 
                 n = (n + 1) % 10
-                self.publish_sdo_data(self.motorA, motorA_pub)
-                self.publish_sdo_data(self.motorB, motorB_pub)
-                time.sleep(0.2)
+                t_a = Thread(target=self.publish_sdo_data, args=[self.motorA, motorA_pub], daemon=True)
+                t_b = Thread(target=self.publish_sdo_data, args=[self.motorB, motorB_pub], daemon=True)
+                t_a.start()
+                t_b.start()
+                t_a.join()
+                t_b.join()
+                time.sleep(0.05)
             except Exception as e:
                 time.sleep(0.8)
                 self.logger.error(f"Error reading CAN message: {e}")
@@ -347,32 +351,30 @@ class CANBus:
     # There is a wide list of sensor data that can be read, but these are the useful ones.
     # Feel free to browse the parameter list which is in testing/parameters.csv
     def publish_sdo_data(self, motor, publisher):
-        voltage = self.read_and_log_sdo(motor, 0x2030, 2) * 0.01  # Volts
-        throttle_percent = self.read_and_log_sdo(motor, 0x2029, 6) / 10  # %
-        rpm = self.read_and_log_sdo(motor, 0x2052, 1)  # rpm
-        current = self.read_and_log_sdo(motor, 0x2073, 1)  # Arms
-        if motor == self.motorB:
+        with self._sdo_lock:
+            voltage = self.read_and_log_sdo(motor, 0x2030, 2) * 0.01  # Volts
+            throttle_percent = self.read_and_log_sdo(motor, 0x2029, 6) / 10  # %
+            rpm = self.read_and_log_sdo(motor, 0x2052, 1)  # rpm
+            current = self.read_and_log_sdo(motor, 0x2073, 1)  # Arms
             temperature = self.read_and_log_sdo(motor, 0x2040, 2)  # deg C
-        else:
-            temperature = -1
-        # this torque must be converted to lb*ft, because it is preferred
-        torque = self.read_and_log_sdo(motor, 0x2076, 2) * 0.1  # Nm
-        enabled_raw = self.read_and_log_sdo(motor, 0x2000, 1)
-        enabled = enabled_raw & (1 << 3)
-        if enabled == -1:
-            enabled = False
-        power = voltage * current
+            # this torque must be converted to lb*ft, because it is preferred
+            torque = self.read_and_log_sdo(motor, 0x2076, 2) * 0.1  # Nm
+            enabled_raw = self.read_and_log_sdo(motor, 0x2000, 1)
+            enabled = enabled_raw & (1 << 3)
+            if enabled == -1:
+                enabled = False
+            power = voltage * current
 
-        msg = CANMotorData()
-        msg.voltage = float(voltage)
-        msg.throttle_mv = -1
-        msg.throttle_percentage = int(throttle_percent)
-        msg.rpm = int(rpm)
-        msg.torque = float(torque)
-        msg.motor_temp = float(temperature)
-        msg.current = float(current)
-        msg.power = float(power)
-        msg.enabled = bool(enabled)
+            msg = CANMotorData()
+            msg.voltage = float(voltage)
+            msg.throttle_mv = -1
+            msg.throttle_percentage = int(throttle_percent)
+            msg.rpm = int(rpm)
+            msg.torque = float(torque)
+            msg.motor_temp = float(temperature)
+            msg.current = float(current)
+            msg.power = float(power)
+            msg.enabled = bool(enabled)
 
         if self.can_bus_state == CANBusStatus.ONLINE:
             publisher.publish(msg)
