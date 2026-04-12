@@ -1,16 +1,16 @@
-import math
+import struct
 import struct
 import subprocess
 import threading
 import time
 import traceback
-from sys import exec_prefix
 from threading import Thread
+from typing import List
 
 import can
 import canopen
 from can import CanError
-from canopen import BaseNode402, SdoCommunicationError, SdoAbortedError, Network
+from canopen import BaseNode402, SdoAbortedError
 from rclpy.impl.rcutils_logger import RcutilsLogger
 from rclpy.publisher import Publisher
 
@@ -36,8 +36,10 @@ def is_can_interface_up(interface: str = "can0") -> bool:
 class CANBus:
     def __init__(self, logger: RcutilsLogger, dummy_efp, motorA_pub, motorB_pub, is_node_ok, declare_alarm, declare_motor_alarm,
                  shutdown_node,
-                 unlatch_all_alarms, bms_pack_sum_pub, bms_mcu_sum_pub, bms_cell_volt_pub, bms_thermistor_pub,
-                 bms_soc_sum_pub, can_thermistor_pub):
+                 unlatch_all_alarms, unlatch_motor_alarm, unlatch_alarm, bms_pack_sum_pub, bms_mcu_sum_pub, bms_cell_volt_pub, bms_thermistor_pub,
+                 bms_soc_sum_pub, can_thermistor_pub, bms_booster_thermistor_pub):
+        self.motorB_Faults:List[int] = None
+        self.motorA_Faults:List[int] = None
         self.bms_thread = None
         self.network = None
         self.sdo = None
@@ -55,12 +57,15 @@ class CANBus:
         self.shutdown_node = shutdown_node
         self.can_bus_state = CANBusStatus.OFFLINE
         self.unlatch_all_alarms = unlatch_all_alarms
+        self.unlatch_motor_alarm = unlatch_motor_alarm
+        self.unlatch_alarm = unlatch_alarm
 
         self.bms_pack_sum_pub: Publisher = bms_pack_sum_pub
         self.bms_mcu_sum_pub: Publisher = bms_mcu_sum_pub
         self.bms_cell_volt_pub: Publisher = bms_cell_volt_pub
         self.bms_soc_sum_pub: Publisher = bms_soc_sum_pub
         self.bms_thermistor_pub: Publisher = bms_thermistor_pub
+        self.bms_booster_thermistor_pub: Publisher = bms_booster_thermistor_pub
 
         self.can_thermistor_pub: Publisher = can_thermistor_pub
 
@@ -84,6 +89,11 @@ class CANBus:
             print("shutting down bus...")
             time.sleep(1)
 
+        self.motorA_Faults = []
+        self.motorB_Faults = []
+
+        self.bms_faults = [False] * 7
+
         # Start with creating a new network representing one CAN bus
         self.network = canopen.Network()
 
@@ -100,9 +110,9 @@ class CANBus:
         self.logger.info("Connected to SocketCAN")
         # Subscribe to messages
         self.network.subscribe(0x293, self.on_bms_data)
-        self.network.subscribe(0xbe, self.on_thermistor_data)
-        self.network.subscribe(0x80 + 7, self.on_motor_a_fault)
-        self.network.subscribe(0x80 + 6, self.on_motor_b_fault)
+        self.network.subscribe(0xbe, self.on_cooling_thermistor_data)
+        self.network.subscribe(0xbd, self.on_bms_booster_thermistor_data)
+
         self.logger.info("Using a dummy EDS file at \"" + self.dummy_efp + "\".")
         self.motorA = canopen.BaseNode402(7, canopen.import_od(self.dummy_efp))  # Use a dummy EDS here
         self.motorB = canopen.BaseNode402(6, canopen.import_od(self.dummy_efp))  # Use a dummy EDS here
@@ -154,18 +164,40 @@ class CANBus:
 
             if a_hardware:
                 self.declare_alarm(Alarm.BMS_HARDWARE_FAULT)
+            elif self.bms_faults[6]:
+                self.unlatch_alarm(Alarm.BMS_HARDWARE_FAULT)
             if a_ccenus:
                 self.declare_alarm(Alarm.BMS_CCENUS_FAULT)
+            elif self.bms_faults[5]:
+                self.unlatch_alarm(Alarm.BMS_CCENUS_FAULT)
             if a_tcenus:
                 self.declare_alarm(Alarm.BMS_TCENCUS_FAULT)
+            elif self.bms_faults[4]:
+                self.unlatch_alarm(Alarm.BMS_TCENCUS_FAULT)
             if a_hvc:
                 self.declare_alarm(Alarm.BMS_HIGH_VOLTAGE_FAULT)
+            elif self.bms_faults[3]:
+                self.unlatch_alarm(Alarm.BMS_HIGH_VOLTAGE_FAULT)
             if a_lvc:
                 self.declare_alarm(Alarm.BMS_LOW_VOLTAGE_FAULT)
+            elif self.bms_faults[2]:
+                self.unlatch_alarm(Alarm.BMS_LOW_VOLTAGE_FAULT)
             if a_hitemp:
                 self.declare_alarm(Alarm.BMS_HIGH_TEMP_FAULT)
+            elif self.bms_faults[1]:
+                self.unlatch_alarm(Alarm.BMS_HIGH_TEMP_FAULT)
             if a_lowtemp:
                 self.declare_alarm(Alarm.BMS_LOW_TEMP_FAULT)
+            elif self.bms_faults[0]:
+                self.unlatch_alarm(Alarm.BMS_LOW_TEMP_FAULT)
+
+            self.bms_faults[6] = a_hardware
+            self.bms_faults[5] = a_ccenus
+            self.bms_faults[4] = a_tcenus
+            self.bms_faults[3] = a_hvc
+            self.bms_faults[2] = a_lvc
+            self.bms_faults[1] = a_hitemp
+            self.bms_faults[0] = a_lowtemp
 
             self.bms_mcu_sum_pub.publish(
                 BMSMcuSummary(charge_state=charge_state, plug_state=plug_state, alerts=alerts))
@@ -203,9 +235,13 @@ class CANBus:
                 BMSSOCSummary(soc_percent=float(soc), pack_kwhr=pack_kwhr, pack_max_kwhr=pack_max_kwhr))
             # print(f"SOC Summary — SOC={soc}%, PackKWHr={pack_kwhr}, MaxKWHr={pack_max_kwhr}")
 
-    def on_thermistor_data(self, can_id: int, data: bytearray, timestamp: float):
+    def on_cooling_thermistor_data(self, can_id: int, data: bytearray, timestamp: float):
         temp = int.from_bytes(data[0:2], 'little', signed=True) / 100
         self.can_thermistor_pub.publish(CANThermistor(temp=float(temp)))
+
+    def on_bms_booster_thermistor_data(self, can_id: int, data: bytearray, timestamp: float):
+        temp = int.from_bytes(data[0:2], 'little', signed=True) / 100
+        self.bms_booster_thermistor_pub.publish(CANThermistor(temp=float(temp)))
 
     def _bms_request_loop(self):
         while True:
@@ -223,7 +259,21 @@ class CANBus:
                 raw = self.read_and_log_sdo(motor, 0x3011, 1)
                 raw_bytes = raw.to_bytes(count * 2, 'little')
                 event_ids = list(struct.unpack(f'{count}H', raw_bytes))
+
+                difference = None
+                # compare between
+                if motor is self.motorA:
+                    difference = list(set(self.motorA_Faults) - set(event_ids))
+                    self.motorA_Faults = event_ids
+                else:
+                    difference = list(set(self.motorB_Faults) - set(event_ids))
+                    self.motorB_faults = event_ids
+
+                for eventId in difference:
+                    # unlatch old alarms no longer there
+                    self.unlatch_motor_alarm(bool(motor is self.motorA), eventId)
                 for event in event_ids:
+                    # unlatch
                     self.declare_motor_alarm(bool(motor is self.motorA), int(event))
 
         while True:
@@ -236,10 +286,14 @@ class CANBus:
                     query_alarms(self.motorA)
                     query_alarms(self.motorB)
 
-                n = (n + 1) % 10
-                self.publish_sdo_data(self.motorA, motorA_pub)
-                self.publish_sdo_data(self.motorB, motorB_pub)
-                time.sleep(0.2)
+                n = (n + 1) % 30
+                t_a = Thread(target=self.publish_sdo_data, args=[self.motorA, motorA_pub], daemon=True)
+                t_b = Thread(target=self.publish_sdo_data, args=[self.motorB, motorB_pub], daemon=True)
+                t_a.start()
+                t_b.start()
+                t_a.join()
+                t_b.join()
+                time.sleep(0.025)
             except Exception as e:
                 time.sleep(0.8)
                 self.logger.error(f"Error reading CAN message: {e}")
@@ -253,7 +307,7 @@ class CANBus:
             return None
         try:
             motor.sdo[index].raw = 0x01
-            self.unlatch_all_alarms()
+            # self.unlatch_all_alarms()
             self.can_bus_state = CANBusStatus.ONLINE
         except canopen.sdo.exceptions.SdoCommunicationError as e:
             return self.read_and_log_sdo(motor, index, subindex, tries + 1)
@@ -273,7 +327,6 @@ class CANBus:
             return -1
         try:
             value = motor.sdo[index][subindex].raw
-            self.unlatch_all_alarms()
             self.can_bus_state = CANBusStatus.ONLINE
             return value
         except canopen.sdo.exceptions.SdoCommunicationError as e:
@@ -297,10 +350,7 @@ class CANBus:
         throttle_percent = self.read_and_log_sdo(motor, 0x2029, 6) / 10  # %
         rpm = self.read_and_log_sdo(motor, 0x2052, 1)  # rpm
         current = self.read_and_log_sdo(motor, 0x2073, 1)  # Arms
-        if motor == self.motorB:
-            temperature = self.read_and_log_sdo(motor, 0x2040, 2)  # deg C
-        else:
-            temperature = -1
+        temperature = self.read_and_log_sdo(motor, 0x2040, 2)  # deg C
         # this torque must be converted to lb*ft, because it is preferred
         torque = self.read_and_log_sdo(motor, 0x2076, 2) * 0.1  # Nm
         enabled_raw = self.read_and_log_sdo(motor, 0x2000, 1)
@@ -313,7 +363,7 @@ class CANBus:
         msg.voltage = float(voltage)
         msg.throttle_mv = -1
         msg.throttle_percentage = int(throttle_percent)
-        msg.rpm = int(rpm)
+        msg.rpm = int(-rpm)
         msg.torque = float(torque)
         msg.motor_temp = float(temperature)
         msg.current = float(current)
@@ -334,12 +384,6 @@ class CANBus:
             if entry != -1:
                 errors.append(entry)
         return errors
-
-    def on_motor_a_fault(self, can_id, data, timestamp):
-        self.on_motor_fault(can_id, data, timestamp, "MotorA")
-
-    def on_motor_b_fault(self, can_id, data, timestamp):
-        self.on_motor_fault(can_id, data, timestamp, "MotorB")
 
     def get_bus_state(self):
         return self.can_bus_state

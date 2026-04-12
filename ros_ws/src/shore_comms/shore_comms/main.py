@@ -80,16 +80,16 @@ class ShoreDataCollector(Node):
             self.logs.append(logged_data)
 
         self.create_sub(Log, ros_out_topic, self.logs_collector)
-        self.create_sub(
-            InletCoolantData,
-            "/electrical/temp_sensors/in",
-            self.electrical_coolant_temp_collector_inlet,
-        )
-        self.create_sub(
-            OutletCoolantData,
-            "/electrical/temp_sensors/out",
-            self.electrical_coolant_temp_collector_outlet,
-        )
+        # self.create_sub(
+        #     InletCoolantData,
+        #     "/electrical/temp_sensors/in",
+        #     self.electrical_coolant_temp_collector_inlet,
+        # )
+        # self.create_sub(
+        #     OutletCoolantData,
+        #     "/electrical/temp_sensors/out",
+        #     self.electrical_coolant_temp_collector_outlet,
+        # )
         self.create_sub(GPSData, "/motion/gps", self.gps_location_collector)
         self.create_sub(GPSVTGData, "/motion/vtg", self.gps_speed_collector)
         self.create_sub(GPSSVData, "/motion/sv", self.gps_sats_collector)
@@ -104,9 +104,8 @@ class ShoreDataCollector(Node):
         self.create_sub(BMSSOCSummary, "/bms/soc_summary", self.bms_soc_summary)
         self.create_sub(BMSMcuSummary, "/bms/mcu_summary", self.bms_mcu_summary)
 
-        self.create_sub(
-            CANThermistor, "/can/cooling_temp", self.can_cooling_temp_collector
-        )
+        self.create_sub(CANThermistor, "/can/cooling_temp", self.can_cooling_temp_collector)
+        self.create_sub(CANThermistor, "/can/bms_thermistor", self.can_booster_temp_collector)
 
         self.create_sub(Time, "/boat_time", self.time_collector)
         self.create_sub(SysUtilData, "/sys_utilization", self.sys_util_collector)
@@ -221,28 +220,17 @@ class ShoreDataCollector(Node):
         await self.websocket.send(json.dumps(output_data))
         self.data.clear()
 
-    async def send_resolves_to_shore(self):
-        output_data = {"type": "alarm", "action": "resolve", "id": id}
-        try:
-            await self.websocket.send(json.dumps(output_data))
-            await self.websocket.ensure_open()
-            self.alarms.remove(id)
-        except ConnectionClosed or InvalidStatus:
-            self.alarm_publisher.publish_alarm(Alarm.WEBSOCKET_CONNECTION_CLOSED)
-            return
-
     async def send_alarms_to_shore(self, ignore_empty):
         for alarm in self.resolves:
-            output_data = {"type": "alarm", "action": "resolve", "id": alarm[0]}
+            alarmID = alarm.error_code
+            output_data = {"type": "alarm", "action": "resolve", "id": alarmID}
             try:
                 await self.websocket.send(json.dumps(output_data))
                 await self.websocket.ensure_open()
-                self.clear_all_websocket_alarms()
+                self.resolves.remove(alarm)
             except ConnectionClosed or InvalidStatus:
                 self.alarm_publisher.publish_alarm(Alarm.WEBSOCKET_CONNECTION_CLOSED)
-                # Keep alarms because data wasn’t sent
                 return
-
         for alarm in self.alarms:
             output_data = {
                 "type": "alarm",
@@ -352,6 +340,9 @@ class ShoreDataCollector(Node):
 
     def can_cooling_temp_collector(self, msg: CANThermistor):
         self.add_data("cooling_temp", msg.temp)
+
+    def can_booster_temp_collector(self, msg: CANThermistor):
+        self.add_data("booster_temp", msg.temp)
 
     def bus_state_collector(self, msg: CANBusStatus):
         self.can_bus_state = msg.bus_state

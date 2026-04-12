@@ -32,19 +32,26 @@ class MotorNode(Node):
         self.bms_thermistor_pub = self.create_publisher(BMSThermistor, '/bms/thermistor', 10)
 
         self.can_thermistor_pub = self.create_publisher(CANThermistor, "/can/cooling_temp", 10)
+        self.bms_booster_thermistor_pub = self.create_publisher(CANThermistor, "/can/bms_thermistor", 10)
 
         file_path = self.get_parameter('dummy_epf').get_parameter_value().string_value
         self.can = CANBus(self._logger, os.path.expanduser(file_path), self.motorA_pub, self.motorB_pub,
                           self.context.ok, self.declare_alarm, self.declare_motor_alarm, rclpy.shutdown,
-                          self.unlatch_all_alarms,
+                          self.unlatch_all_motor_alarms, self.unlatch_motor_alarm, self.unlatch_alarm,
                           bms_pack_sum_pub=self.bms_pack_sum_pub, bms_thermistor_pub=self.bms_thermistor_pub,
                           bms_mcu_sum_pub=self.bms_mcu_sum_pub, bms_soc_sum_pub=self.bms_soc_sum_pub,
-                          bms_cell_volt_pub=self.bms_cell_volt_pub, can_thermistor_pub=self.can_thermistor_pub)
+                          bms_cell_volt_pub=self.bms_cell_volt_pub, can_thermistor_pub=self.can_thermistor_pub,
+                          bms_booster_thermistor_pub=self.bms_booster_thermistor_pub)
 
         self.create_service(Empty, "/can/restart_bus", self.restart_bus)
         self.create_service(Empty, "/can/flush_bus", self.flush_bus)
 
-        self.create_timer(0.5, self.publish_bus_state)
+        self.alarms = []
+        self.unlatchedAlarms = []
+        self.motorAlarms = []
+        self.unlatchedMotorAlarms = []
+        self.create_timer(1, self.publish_bus_state)
+        self.create_timer(1, self._publish_alarms)
         self.can.setup_can()
 
     # noinspection PyUnusedLocal
@@ -58,22 +65,49 @@ class MotorNode(Node):
         self.can.flush_bus()
         return res
 
+    def _publish_alarms(self):
+        for alarm in self.alarms:
+            self._alarm_publisher.publish_alarm(alarm)
+        self.alarms.clear()
+        for motorAlarm in self.motorAlarms:
+            self._alarm_publisher.publish_motor_alarm(motorAlarm[0], motorAlarm[1])
+        self.motorAlarms.clear()
+
+        for alarm in self.unlatchedAlarms:
+            self._alarm_publisher.delatch_alarm(alarm)
+
+        self.unlatchedAlarms.clear()
+
+        for motorAlarm in self.unlatchedMotorAlarms:
+            self._alarm_publisher.unlatch_motor_alarm(motorAlarm[0], motorAlarm[1])
+
+        self.unlatchedMotorAlarms.clear()
+
     def publish_bus_state(self):
         msg = CANBusStatus()
         msg.bus_state = self.can.get_bus_state()
         self.can_bus_status_publisher.publish(msg)
+        if self.can.get_bus_state == CANBusStatus.ONLINE:
+            self.unlatch_all_motor_alarms()
 
     def declare_motor_alarm(self, is_motor_a, eventId):
-        self._alarm_publisher.publish_motor_alarm(is_motor_a, eventId)
+        self.motorAlarms.append((is_motor_a, eventId))
+
+    def unlatch_motor_alarm(self, is_motor_a, eventId):
+        self.unlatchedMotorAlarms.append((is_motor_a, eventId))
+
+    def unlatch_alarm(self, alarm: Alarm):
+        self.alarms.append(alarm)
 
     def declare_alarm(self, alarm: Alarm):
-        self._alarm_publisher.publish_alarm(alarm)
+        self.alarms.append(alarm)
 
-    def unlatch_all_alarms(self):
-        self._alarm_publisher.delatch_alarm(Alarm.CAN0_INTERFACE_NOT_UP)
-        self._alarm_publisher.delatch_alarm(Alarm.ERROR_READING_CAN_SDO)
-        self._alarm_publisher.delatch_alarm(Alarm.FAILED_CAN_NETWORK_INIT)
-        self._alarm_publisher.delatch_alarm(Alarm.INVALID_CAN_PACKET_READ)
+    def unlatch_all_motor_alarms(self):
+        self.unlatch_alarm(Alarm.CAN0_INTERFACE_NOT_UP)
+        self.unlatch_alarm(Alarm.CAN0_INTERFACE_NOT_UP)
+        self.unlatch_alarm(Alarm.ERROR_READING_CAN_SDO)
+        self.unlatch_alarm(Alarm.FAILED_CAN_NETWORK_INIT)
+        self.unlatch_alarm(Alarm.INVALID_CAN_PACKET_READ)
 
 
 def main(args=None):
