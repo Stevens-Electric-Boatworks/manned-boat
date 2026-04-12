@@ -91,16 +91,16 @@ class MotorNode(Node):
             self.unlatch_all_motor_alarms()
 
     def declare_motor_alarm(self, is_motor_a, eventId):
-        self.motorAlarms += (is_motor_a, eventId)
+        self.motorAlarms.append((is_motor_a, eventId))
 
     def unlatch_motor_alarm(self, is_motor_a, eventId):
-        self.unlatchedMotorAlarms += (is_motor_a, eventId)
+        self.unlatchedMotorAlarms.append((is_motor_a, eventId))
 
     def unlatch_alarm(self, alarm: Alarm):
-        self.unlatchedMotorAlarms += alarm
+        self.unlatchedMotorAlarms.append(alarm)
 
     def declare_alarm(self, alarm: Alarm):
-        self.alarms += alarm
+        self.alarms.append(alarm)
 
     def unlatch_all_motor_alarms(self):
         self.unlatch_alarm(Alarm.CAN0_INTERFACE_NOT_UP)
