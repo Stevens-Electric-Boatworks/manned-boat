@@ -26,7 +26,7 @@ cd $ROS_WS
 
 
 #echo "Starting up the CAN bus"
-#sudo ip link set can0 type can bitrate 500000 
+#sudo ip link set can0 type can bitrate 500000 tailscale serve --https 9090 9090
 #sudo ip link set up can0
 
 # Source the install.bash
@@ -49,6 +49,10 @@ echo "Started recording through ROSBag"
 echo "Launching launch/$LAUNCH_FILE"
 
 ros2 launch $ROS_WS/launch/$LAUNCH_FILE &
+
+
+echo "Starting Tailscale Serve"
+tailscale serve --https 9090 9090
 
 echo "Finshed running startup script"
 
