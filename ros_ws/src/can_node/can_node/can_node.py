@@ -97,7 +97,7 @@ class MotorNode(Node):
         self.unlatchedMotorAlarms.append((is_motor_a, eventId))
 
     def unlatch_alarm(self, alarm: Alarm):
-        self.unlatchedMotorAlarms.append(alarm)
+        self.alarms.append(alarm)
 
     def declare_alarm(self, alarm: Alarm):
         self.alarms.append(alarm)
