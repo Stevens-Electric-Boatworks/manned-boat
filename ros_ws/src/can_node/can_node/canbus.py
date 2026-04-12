@@ -375,8 +375,8 @@ class CANBus:
         msg.power = float(power)
         msg.enabled = bool(enabled)
 
-    if self.can_bus_state == CANBusStatus.ONLINE:
-        publisher.publish(msg)
+        if self.can_bus_state == CANBusStatus.ONLINE:
+            publisher.publish(msg)
 
     def read_error_log(self, motor: BaseNode402) -> list[int]:
         """Read stored emergency error codes from the controller's error log."""
