@@ -163,7 +163,7 @@ class AlarmsWatchdog(Node):
             shoreAlarm = ShoreBoatAlarm()
             shoreAlarm.error_code = request.error_code
             shoreAlarm.message = error_message
-            shoreAlarm.timestamp = 0
+            shoreAlarm.timestamp = self.get_clock().now().to_msg()
             shoreAlarm.severity = error_type
             self.delatch_pub.publish(shoreAlarm)
 
