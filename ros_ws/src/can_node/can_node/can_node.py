@@ -68,14 +68,20 @@ class MotorNode(Node):
     def _publish_alarms(self):
         for alarm in self.alarms:
             self._alarm_publisher.publish_alarm(alarm)
+        self.alarms.clear()
         for motorAlarm in self.motorAlarms:
             self._alarm_publisher.publish_motor_alarm(motorAlarm[0], motorAlarm[1])
+        self.motorAlarms.clear()
 
         for alarm in self.unlatchedAlarms:
             self._alarm_publisher.delatch_alarm(alarm)
 
+        self.unlatchedAlarms.clear()
+
         for motorAlarm in self.unlatchedMotorAlarms:
             self._alarm_publisher.unlatch_motor_alarm(motorAlarm[0], motorAlarm[1])
+
+        self.unlatchedMotorAlarms.clear()
 
     def publish_bus_state(self):
         msg = CANBusStatus()
