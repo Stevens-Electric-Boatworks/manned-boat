@@ -290,7 +290,7 @@ class CANBus:
                     query_alarms(self.motorA)
                     query_alarms(self.motorB)
 
-                n = (n + 1) % 10
+                n = (n + 1) % 30
                 t_a = Thread(target=self.publish_sdo_data, args=[self.motorA, motorA_pub], daemon=True)
                 t_b = Thread(target=self.publish_sdo_data, args=[self.motorB, motorB_pub], daemon=True)
                 t_a.start()
