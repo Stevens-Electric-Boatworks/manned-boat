@@ -311,7 +311,7 @@ class CANBus:
             return None
         try:
             motor.sdo[index].raw = 0x01
-            self.unlatch_all_alarms()
+            # self.unlatch_all_alarms()
             self.can_bus_state = CANBusStatus.ONLINE
         except canopen.sdo.exceptions.SdoCommunicationError as e:
             return self.read_and_log_sdo(motor, index, subindex, tries + 1)
