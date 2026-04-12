@@ -51,7 +51,7 @@ class MotorNode(Node):
         self.motorAlarms = []
         self.unlatchedMotorAlarms = []
         self.create_timer(1, self.publish_bus_state)
-        self.create_timer(1, self.declare_alarms)
+        self.create_timer(1, self._publish_alarms)
         self.can.setup_can()
 
     # noinspection PyUnusedLocal
