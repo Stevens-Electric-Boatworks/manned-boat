@@ -93,7 +93,7 @@ class CANBus:
         self.motorA_Faults = []
         self.motorB_Faults = []
 
-        self.bms_faults = [False * 7]
+        self.bms_faults = [False] * 7
 
         # Start with creating a new network representing one CAN bus
         self.network = canopen.Network()
