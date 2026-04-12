@@ -351,33 +351,32 @@ class CANBus:
     # There is a wide list of sensor data that can be read, but these are the useful ones.
     # Feel free to browse the parameter list which is in testing/parameters.csv
     def publish_sdo_data(self, motor, publisher):
-        with self._sdo_lock:
-            voltage = self.read_and_log_sdo(motor, 0x2030, 2) * 0.01  # Volts
-            throttle_percent = self.read_and_log_sdo(motor, 0x2029, 6) / 10  # %
-            rpm = self.read_and_log_sdo(motor, 0x2052, 1)  # rpm
-            current = self.read_and_log_sdo(motor, 0x2073, 1)  # Arms
-            temperature = self.read_and_log_sdo(motor, 0x2040, 2)  # deg C
-            # this torque must be converted to lb*ft, because it is preferred
-            torque = self.read_and_log_sdo(motor, 0x2076, 2) * 0.1  # Nm
-            enabled_raw = self.read_and_log_sdo(motor, 0x2000, 1)
-            enabled = enabled_raw & (1 << 3)
-            if enabled == -1:
-                enabled = False
-            power = voltage * current
+        voltage = self.read_and_log_sdo(motor, 0x2030, 2) * 0.01  # Volts
+        throttle_percent = self.read_and_log_sdo(motor, 0x2029, 6) / 10  # %
+        rpm = self.read_and_log_sdo(motor, 0x2052, 1)  # rpm
+        current = self.read_and_log_sdo(motor, 0x2073, 1)  # Arms
+        temperature = self.read_and_log_sdo(motor, 0x2040, 2)  # deg C
+        # this torque must be converted to lb*ft, because it is preferred
+        torque = self.read_and_log_sdo(motor, 0x2076, 2) * 0.1  # Nm
+        enabled_raw = self.read_and_log_sdo(motor, 0x2000, 1)
+        enabled = enabled_raw & (1 << 3)
+        if enabled == -1:
+            enabled = False
+        power = voltage * current
 
-            msg = CANMotorData()
-            msg.voltage = float(voltage)
-            msg.throttle_mv = -1
-            msg.throttle_percentage = int(throttle_percent)
-            msg.rpm = int(rpm)
-            msg.torque = float(torque)
-            msg.motor_temp = float(temperature)
-            msg.current = float(current)
-            msg.power = float(power)
-            msg.enabled = bool(enabled)
+        msg = CANMotorData()
+        msg.voltage = float(voltage)
+        msg.throttle_mv = -1
+        msg.throttle_percentage = int(throttle_percent)
+        msg.rpm = int(rpm)
+        msg.torque = float(torque)
+        msg.motor_temp = float(temperature)
+        msg.current = float(current)
+        msg.power = float(power)
+        msg.enabled = bool(enabled)
 
-        if self.can_bus_state == CANBusStatus.ONLINE:
-            publisher.publish(msg)
+    if self.can_bus_state == CANBusStatus.ONLINE:
+        publisher.publish(msg)
 
     def read_error_log(self, motor: BaseNode402) -> list[int]:
         """Read stored emergency error codes from the controller's error log."""
