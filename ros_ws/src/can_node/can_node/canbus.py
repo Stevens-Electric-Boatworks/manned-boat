@@ -1,17 +1,16 @@
-import math
+import struct
 import struct
 import subprocess
 import threading
 import time
 import traceback
-from sys import exec_prefix
 from threading import Thread
 from typing import List
 
 import can
 import canopen
 from can import CanError
-from canopen import BaseNode402, SdoCommunicationError, SdoAbortedError, Network
+from canopen import BaseNode402, SdoAbortedError
 from rclpy.impl.rcutils_logger import RcutilsLogger
 from rclpy.publisher import Publisher
 
@@ -114,9 +113,6 @@ class CANBus:
         self.network.subscribe(0xbe, self.on_cooling_thermistor_data)
         self.network.subscribe(0xbd, self.on_bms_booster_thermistor_data)
 
-        # EMCY messages
-        self.network.subscribe(0x80 + 7, self.on_motor_a_fault)
-        self.network.subscribe(0x80 + 6, self.on_motor_b_fault)
         self.logger.info("Using a dummy EDS file at \"" + self.dummy_efp + "\".")
         self.motorA = canopen.BaseNode402(7, canopen.import_od(self.dummy_efp))  # Use a dummy EDS here
         self.motorB = canopen.BaseNode402(6, canopen.import_od(self.dummy_efp))  # Use a dummy EDS here
@@ -388,12 +384,6 @@ class CANBus:
             if entry != -1:
                 errors.append(entry)
         return errors
-
-    def on_motor_a_fault(self, can_id, data, timestamp):
-        self.on_motor_fault(can_id, data, timestamp, "MotorA")
-
-    def on_motor_b_fault(self, can_id, data, timestamp):
-        self.on_motor_fault(can_id, data, timestamp, "MotorB")
 
     def get_bus_state(self):
         return self.can_bus_state

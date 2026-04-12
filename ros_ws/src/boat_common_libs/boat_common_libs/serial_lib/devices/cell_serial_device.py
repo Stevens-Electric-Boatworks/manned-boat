@@ -35,7 +35,6 @@ class CellData:
 class CellSerialDevice(SerialDevice):
     def __init__(self, node: Node, alarm_pub: AlarmPublisher, on_cell_data: Callable[[CellData], None]):
         super().__init__(node, "/dev/ttyUSB2", self._on_cell_data_rec, alarm_pub, timeout=1)
-        self.logger.set_level(LoggingSeverity.DEBUG)
         self.node = node
         self.on_cell_data = on_cell_data
         self.data = CellData()
