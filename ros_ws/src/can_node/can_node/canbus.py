@@ -297,7 +297,7 @@ class CANBus:
                 t_b.start()
                 t_a.join()
                 t_b.join()
-                time.sleep(0.05)
+                time.sleep(0.025)
             except Exception as e:
                 time.sleep(0.8)
                 self.logger.error(f"Error reading CAN message: {e}")
