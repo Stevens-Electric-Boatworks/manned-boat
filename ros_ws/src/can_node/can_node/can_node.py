@@ -37,7 +37,7 @@ class MotorNode(Node):
         file_path = self.get_parameter('dummy_epf').get_parameter_value().string_value
         self.can = CANBus(self._logger, os.path.expanduser(file_path), self.motorA_pub, self.motorB_pub,
                           self.context.ok, self.declare_alarm, self.declare_motor_alarm, rclpy.shutdown,
-                          self.unlatch_all_alarms, self.unlatch_motor_alarm, self.unlatch_alarm,
+                          self.unlatch_all_motor_alarms, self.unlatch_motor_alarm, self.unlatch_alarm,
                           bms_pack_sum_pub=self.bms_pack_sum_pub, bms_thermistor_pub=self.bms_thermistor_pub,
                           bms_mcu_sum_pub=self.bms_mcu_sum_pub, bms_soc_sum_pub=self.bms_soc_sum_pub,
                           bms_cell_volt_pub=self.bms_cell_volt_pub, can_thermistor_pub=self.can_thermistor_pub, bms_booster_thermistor_pub=self.bms_booster_thermistor_pub)
@@ -45,7 +45,7 @@ class MotorNode(Node):
         self.create_service(Empty, "/can/restart_bus", self.restart_bus)
         self.create_service(Empty, "/can/flush_bus", self.flush_bus)
 
-        self.create_timer(0.5, self.publish_bus_state)
+        self.create_timer(1, self.publish_bus_state)
         self.can.setup_can()
 
     # noinspection PyUnusedLocal
@@ -63,6 +63,8 @@ class MotorNode(Node):
         msg = CANBusStatus()
         msg.bus_state = self.can.get_bus_state()
         self.can_bus_status_publisher.publish(msg)
+        if self.can.get_bus_state == CANBusStatus.ONLINE:
+            self.unlatch_all_motor_alarms()
 
     def declare_motor_alarm(self, is_motor_a, eventId):
         self._alarm_publisher.publish_motor_alarm(is_motor_a, eventId)
@@ -76,7 +78,7 @@ class MotorNode(Node):
     def declare_alarm(self, alarm: Alarm):
         self._alarm_publisher.publish_alarm(alarm)
 
-    def unlatch_all_alarms(self):
+    def unlatch_all_motor_alarms(self):
         self._alarm_publisher.delatch_alarm(Alarm.CAN0_INTERFACE_NOT_UP)
         self._alarm_publisher.delatch_alarm(Alarm.ERROR_READING_CAN_SDO)
         self._alarm_publisher.delatch_alarm(Alarm.FAILED_CAN_NETWORK_INIT)

@@ -331,7 +331,6 @@ class CANBus:
             return -1
         try:
             value = motor.sdo[index][subindex].raw
-            # self.unlatch_all_alarms()
             self.can_bus_state = CANBusStatus.ONLINE
             return value
         except canopen.sdo.exceptions.SdoCommunicationError as e:
