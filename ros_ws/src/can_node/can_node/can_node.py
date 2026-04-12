@@ -40,12 +40,18 @@ class MotorNode(Node):
                           self.unlatch_all_motor_alarms, self.unlatch_motor_alarm, self.unlatch_alarm,
                           bms_pack_sum_pub=self.bms_pack_sum_pub, bms_thermistor_pub=self.bms_thermistor_pub,
                           bms_mcu_sum_pub=self.bms_mcu_sum_pub, bms_soc_sum_pub=self.bms_soc_sum_pub,
-                          bms_cell_volt_pub=self.bms_cell_volt_pub, can_thermistor_pub=self.can_thermistor_pub, bms_booster_thermistor_pub=self.bms_booster_thermistor_pub)
+                          bms_cell_volt_pub=self.bms_cell_volt_pub, can_thermistor_pub=self.can_thermistor_pub,
+                          bms_booster_thermistor_pub=self.bms_booster_thermistor_pub)
 
         self.create_service(Empty, "/can/restart_bus", self.restart_bus)
         self.create_service(Empty, "/can/flush_bus", self.flush_bus)
 
+        self.alarms = []
+        self.unlatchedAlarms = []
+        self.motorAlarms = []
+        self.unlatchedMotorAlarms = []
         self.create_timer(1, self.publish_bus_state)
+        self.create_timer(1, self.declare_alarms)
         self.can.setup_can()
 
     # noinspection PyUnusedLocal
@@ -59,6 +65,18 @@ class MotorNode(Node):
         self.can.flush_bus()
         return res
 
+    def _publish_alarms(self):
+        for alarm in self.alarms:
+            self._alarm_publisher.publish_alarm(alarm)
+        for motorAlarm in self.motorAlarms:
+            self._alarm_publisher.publish_motor_alarm(motorAlarm[0], motorAlarm[1])
+
+        for alarm in self.unlatchedAlarms:
+            self._alarm_publisher.delatch_alarm(alarm)
+
+        for motorAlarm in self.unlatchedMotorAlarms:
+            self._alarm_publisher.unlatch_motor_alarm(motorAlarm[0], motorAlarm[1])
+
     def publish_bus_state(self):
         msg = CANBusStatus()
         msg.bus_state = self.can.get_bus_state()
@@ -67,22 +85,23 @@ class MotorNode(Node):
             self.unlatch_all_motor_alarms()
 
     def declare_motor_alarm(self, is_motor_a, eventId):
-        self._alarm_publisher.publish_motor_alarm(is_motor_a, eventId)
+        self.motorAlarms += (is_motor_a, eventId)
 
     def unlatch_motor_alarm(self, is_motor_a, eventId):
-        self._alarm_publisher.unlatch_motor_alarm(is_motor_a, eventId)
+        self.unlatchedMotorAlarms += (is_motor_a, eventId)
 
-    def unlatch_alarm(self,alarm: Alarm):
-        self._alarm_publisher.delatch_alarm(alarm)
+    def unlatch_alarm(self, alarm: Alarm):
+        self.unlatchedMotorAlarms += alarm
 
     def declare_alarm(self, alarm: Alarm):
-        self._alarm_publisher.publish_alarm(alarm)
+        self.alarms += alarm
 
     def unlatch_all_motor_alarms(self):
-        self._alarm_publisher.delatch_alarm(Alarm.CAN0_INTERFACE_NOT_UP)
-        self._alarm_publisher.delatch_alarm(Alarm.ERROR_READING_CAN_SDO)
-        self._alarm_publisher.delatch_alarm(Alarm.FAILED_CAN_NETWORK_INIT)
-        self._alarm_publisher.delatch_alarm(Alarm.INVALID_CAN_PACKET_READ)
+        self.unlatch_alarm(Alarm.CAN0_INTERFACE_NOT_UP)
+        self.unlatch_alarm(Alarm.CAN0_INTERFACE_NOT_UP)
+        self.unlatch_alarm(Alarm.ERROR_READING_CAN_SDO)
+        self.unlatch_alarm(Alarm.FAILED_CAN_NETWORK_INIT)
+        self.unlatch_alarm(Alarm.INVALID_CAN_PACKET_READ)
 
 
 def main(args=None):
