@@ -115,7 +115,7 @@ class CANMotorTestingDataNode(Node):
         motor_a_msg.current = float(self.motorA["current"].next())
         motor_a_msg.power = float(self.motorA["power"].next())
         motor_a_msg.enabled = True
-        motor_a_msg.current_limited = False
+        motor_a_msg.current_limited = True
         motor_a_msg.current_limit_reason = 10
 
         motor_b_msg = CANMotorData()
