@@ -351,8 +351,7 @@ class CANBus:
         rpm = self.read_and_log_sdo(motor, 0x2052, 1)  # rpm
         current = self.read_and_log_sdo(motor, 0x2073, 1)  # Arms
         temperature = self.read_and_log_sdo(motor, 0x2040, 2)  # deg C
-        # this torque must be converted to lb*ft, because it is preferred
-        torque = self.read_and_log_sdo(motor, 0x2076, 2) * 0.1  # Nm
+            torque = self.read_and_log_sdo(motor, 0x2076, 2) * 0.1  # Nm
         enabled_raw = self.read_and_log_sdo(motor, 0x2000, 1)
         enabled = enabled_raw & (1 << 3)
         if enabled == -1:
