@@ -21,7 +21,9 @@ class CANMotorTestingDataNode(Node):
             "motor_temp": SmoothRandom(40, 0.5, 20, 150),  # int8, °C (idle warm to overheated)
             "current": SmoothRandom(0, 5.0, 0, 300),  # int8, A
             "power": SmoothRandom(0, 60, 0, 6000),  # int16, up to ~6 kW
-            "enabled": True
+            "enabled": True,
+            "current_limited": False,
+            "current_limit_reason": 16
         }
         self.motorB = {
             "voltage": SmoothRandom(47.5, 1.0, 0, 200),  # int8, ~200 V system
@@ -32,7 +34,9 @@ class CANMotorTestingDataNode(Node):
             "motor_temp": SmoothRandom(40, 0.5, 20, 150),  # int8, °C (idle warm to overheated)
             "current": SmoothRandom(0, 5.0, 0, 300),  # int8, A
             "power": SmoothRandom(0, 60, 0, 6000),  # int16, up to ~6 kW
-            "enabled": False
+            "enabled": True,
+            "current_limited": False,
+            "current_limit_reason": 16
         }
         self.cooling_temp = SmoothRandom(19.5, 0.5, 0, 50)
         self.can_motor_a_pub = self.create_publisher(CANMotorData, '/motors/motorA', 10)
@@ -111,6 +115,8 @@ class CANMotorTestingDataNode(Node):
         motor_a_msg.current = float(self.motorA["current"].next())
         motor_a_msg.power = float(self.motorA["power"].next())
         motor_a_msg.enabled = True
+        motor_a_msg.current_limited = False
+        motor_a_msg.current_limit_reason = 10
 
         motor_b_msg = CANMotorData()
         motor_b_msg.voltage = float(self.motorB["voltage"].next())
@@ -122,6 +128,9 @@ class CANMotorTestingDataNode(Node):
         motor_b_msg.current = float(self.motorB["current"].next())
         motor_b_msg.power = float(self.motorB["power"].next())
         motor_b_msg.enabled = True
+        motor_b_msg.current_limited = False
+        motor_b_msg.current_limit_reason = 12
+
 
         self.can_motor_a_pub.publish(motor_a_msg)
         self.can_motor_b_pub.publish(motor_b_msg)
