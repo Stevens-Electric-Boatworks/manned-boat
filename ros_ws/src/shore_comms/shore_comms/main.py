@@ -357,6 +357,7 @@ class ShoreDataCollector(Node):
     def sys_util_collector(self, msg: SysUtilData):
         self.add_data("rpi.cpu.currentLoad", msg.cpu_percent)
         self.add_data("rpi.cpu.speed", msg.cpu_freq / 1000)
+        self.add_data("rpi.cpu.temp", msg.cpu_temp)
         self.add_data("rpi.memory.total", msg.total_mem * 1000000)
         self.add_data("rpi.memory.used", msg.current_mem * 1000000)
         self.add_data("rpi.memory.percent", msg.percent_mem)
