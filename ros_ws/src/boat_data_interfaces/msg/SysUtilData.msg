@@ -1,5 +1,6 @@
 float32 cpu_percent
 float32 cpu_freq
+float32 cpu_temp
 int32 current_mem
 int32 disk_total
 int32 disk_used

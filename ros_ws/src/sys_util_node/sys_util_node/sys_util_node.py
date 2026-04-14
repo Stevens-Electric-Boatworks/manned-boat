@@ -28,12 +28,14 @@ class SysUtilNode(Node):
         disk_total = psutil.disk_usage("/").total
         disk_used = psutil.disk_usage("/").used
         disk_percent = psutil.disk_usage("/").percent
+        cpu_temp = psutil.sensors_temperatures()
+        print(cpu_temp)
 
         net_tx, net_rx = self._get_network_stats()
 
         self.publisher_.publish(
             SysUtilData(cpu_percent=cpu_percent, cpu_freq=cpu_freq, total_mem=total_mem, current_mem=current_mem,
-                        percent_mem=percent_mem, disk_total=disk_total, disk_used=disk_used, rx_mb=net_rx, tx_mb=net_tx, disk_percent=disk_percent))
+                        percent_mem=percent_mem, disk_total=disk_total, disk_used=disk_used, rx_mb=net_rx, tx_mb=net_tx, disk_percent=disk_percent, cpu_temp=float(-1)))
 
     def _get_network_stats(self) -> tuple:
         total_tx = 0
