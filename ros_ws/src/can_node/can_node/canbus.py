@@ -153,14 +153,33 @@ class CANBus:
         if b0 == 0x01:  # MCU Summary
             charge_state = data[4]
             plug_state = data[5]
-            alerts = int.from_bytes(data[5:7], "little", signed=False)
-            a_hardware = bool((alerts >> 6) & 1)
-            a_ccenus = bool((alerts >> 5) & 1)
-            a_tcenus = bool((alerts >> 4) & 1)
-            a_hvc = bool((alerts >> 3) & 1)
-            a_lvc = bool((alerts >> 2) & 1)
-            a_hitemp = bool((alerts >> 1) & 1)
-            a_lowtemp = bool((alerts >> 0) & 1)
+            alerts = int.from_bytes(data[6:8], "big", signed=False)
+
+            def get_bit(value, n):
+                return bool((value >> n) & 1)
+
+            a_hardware = get_bit(alerts, 6)
+            a_ccenus = get_bit(alerts, 5)
+            a_tcenus = get_bit(alerts, 4)
+            a_hvc = get_bit(alerts, 3)
+            a_lvc = get_bit(alerts, 2)
+            a_hitemp = get_bit(alerts, 1)
+            a_lowtemp = get_bit(alerts, 0)
+
+            # self.logger.info(f"Data: {data}")
+            # self.logger.info(f"alerts binary: {bin(alerts)}")
+            # self.logger.info(f"alerts int: {alerts}")
+            #
+            # self.logger.info(f"{a_hardware}")
+            # self.logger.info(f"{a_ccenus}")
+            # self.logger.info(f"{a_tcenus}")
+            # self.logger.info(f"{a_hvc}")
+            # self.logger.info(f"{a_lvc}")
+            # self.logger.info(f"{a_hitemp}")
+            # self.logger.info(f"{a_lowtemp}")
+            # self.logger.info(f"BMS Faults: {self.bms_faults}\n")
+
+
 
             if a_hardware:
                 self.declare_alarm(Alarm.BMS_HARDWARE_FAULT)
