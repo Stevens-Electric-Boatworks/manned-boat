@@ -30,7 +30,7 @@ class SysUtilNode(Node):
         disk_percent = psutil.disk_usage("/").percent
         cpu_temp = psutil.sensors_temperatures()
         if "cpu_thermal" in cpu_temp.keys():
-            cpu_temp = float(cpu_temp["cpu_thermal"]["current"])
+            cpu_temp = float(cpu_temp["cpu_thermal"].current)
         else:
             cpu_temp = float(-1)
         print(cpu_temp)
