@@ -396,7 +396,7 @@ class CANBus:
         msg.voltage = float(voltage)
         msg.throttle_mv = -1
         msg.throttle_percentage = int(throttle_percent)
-        msg.rpm = int(-rpm)
+        msg.rpm = -int(rpm)
         msg.torque = float(torque)
         msg.motor_temp = float(temperature)
         msg.current = float(current)
