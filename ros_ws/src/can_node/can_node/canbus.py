@@ -358,6 +358,8 @@ class CANBus:
         if enabled == -1:
             enabled = False
         power = voltage * current
+        current_limit_reason = self.read_and_log_sdo(motor, 0x2095, 19)
+        current_limited = self.read_and_log_sdo(motor, 0x2020, 10) & (1 << 10)
 
         msg = CANMotorData()
         msg.voltage = float(voltage)
@@ -369,6 +371,8 @@ class CANBus:
         msg.current = float(current)
         msg.power = float(power)
         msg.enabled = bool(enabled)
+        msg.current_limit_reason = int(current_limit_reason)
+        msg.current_limited = bool(current_limited)
 
         if self.can_bus_state == CANBusStatus.ONLINE:
             publisher.publish(msg)

@@ -308,6 +308,8 @@ class ShoreDataCollector(Node):
         self.add_data("motor_a.current", msg.current)
         self.add_data("motor_a.power", msg.power)
         self.add_data("motor_a.enabled", msg.enabled)
+        self.add_data("motor_a.current_limit_reason", msg.current_limit_reason)
+        self.add_data("motor_a.current_limited", msg.current_limited)
 
     def motorB_collector(self, msg: CANMotorData):
         self.add_data("motor_b.voltage", msg.voltage)
@@ -318,6 +320,8 @@ class ShoreDataCollector(Node):
         self.add_data("motor_b.current", msg.current)
         self.add_data("motor_b.power", msg.power)
         self.add_data("motor_b.enabled", msg.enabled)
+        self.add_data("motor_b.current_limit_reason", msg.current_limit_reason)
+        self.add_data("motor_b.current_limited", msg.current_limited)
 
     def bms_cell_voltage(self, msg: BMSCellVoltage):
         self.add_data("bms.cell_voltage_high", msg.high)

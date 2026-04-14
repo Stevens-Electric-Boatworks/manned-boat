@@ -7,3 +7,5 @@ float32 motor_temp
 float32 current
 float32 power
 bool enabled
+int16 current_limit_reason
+bool current_limited
