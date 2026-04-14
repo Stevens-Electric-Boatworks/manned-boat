@@ -33,7 +33,6 @@ class SysUtilNode(Node):
             cpu_temp = float(cpu_temp["cpu_thermal"][0].current)
         else:
             cpu_temp = float(-1)
-        print(cpu_temp)
 
         net_tx, net_rx = self._get_network_stats()
 
