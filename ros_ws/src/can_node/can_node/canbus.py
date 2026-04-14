@@ -181,35 +181,47 @@ class CANBus:
             # self.logger.info(f"{a_hitemp}")
             # self.logger.info(f"{a_lowtemp}")
             # self.logger.info(f"BMS Faults: {self.bms_faults}\n")
+            
+            def declare_alarm(alarm_id):
+                self.logger.info(f"Data: {data}")
+                self.logger.info(f"alerts binary: {bin(alerts)}")
+                self.logger.info(f"alerts int: {alerts}")
+                self.declare_alarm(alarm_id)
 
+            def unlatch_alarm(alarm_id):
+                self.logger.info(f"Data: {data}")
+                self.logger.info(f"alerts binary: {bin(alerts)}")
+                self.logger.info(f"alerts int: {alerts}")
+                self.unlatch_alarm(alarm_id)
+            
             if a_hardware:
-                self.declare_alarm(Alarm.BMS_HARDWARE_FAULT)
+                declare_alarm(Alarm.BMS_HARDWARE_FAULT)
             elif self.bms_faults[6]:
-                self.unlatch_alarm(Alarm.BMS_HARDWARE_FAULT)
+                unlatch_alarm(Alarm.BMS_HARDWARE_FAULT)
             if a_ccenus:
-                self.declare_alarm(Alarm.BMS_CCENUS_FAULT)
+                declare_alarm(Alarm.BMS_CCENUS_FAULT)
             elif self.bms_faults[5]:
-                self.unlatch_alarm(Alarm.BMS_CCENUS_FAULT)
+                unlatch_alarm(Alarm.BMS_CCENUS_FAULT)
             if a_tcenus:
-                self.declare_alarm(Alarm.BMS_TCENCUS_FAULT)
+                declare_alarm(Alarm.BMS_TCENCUS_FAULT)
             elif self.bms_faults[4]:
-                self.unlatch_alarm(Alarm.BMS_TCENCUS_FAULT)
+                unlatch_alarm(Alarm.BMS_TCENCUS_FAULT)
             if a_hvc:
-                self.declare_alarm(Alarm.BMS_HIGH_VOLTAGE_FAULT)
+                declare_alarm(Alarm.BMS_HIGH_VOLTAGE_FAULT)
             elif self.bms_faults[3]:
-                self.unlatch_alarm(Alarm.BMS_HIGH_VOLTAGE_FAULT)
+                unlatch_alarm(Alarm.BMS_HIGH_VOLTAGE_FAULT)
             if a_lvc:
-                self.declare_alarm(Alarm.BMS_LOW_VOLTAGE_FAULT)
+                declare_alarm(Alarm.BMS_LOW_VOLTAGE_FAULT)
             elif self.bms_faults[2]:
-                self.unlatch_alarm(Alarm.BMS_LOW_VOLTAGE_FAULT)
+                unlatch_alarm(Alarm.BMS_LOW_VOLTAGE_FAULT)
             if a_hitemp:
-                self.declare_alarm(Alarm.BMS_HIGH_TEMP_FAULT)
+                declare_alarm(Alarm.BMS_HIGH_TEMP_FAULT)
             elif self.bms_faults[1]:
-                self.unlatch_alarm(Alarm.BMS_HIGH_TEMP_FAULT)
+                unlatch_alarm(Alarm.BMS_HIGH_TEMP_FAULT)
             if a_lowtemp:
-                self.declare_alarm(Alarm.BMS_LOW_TEMP_FAULT)
+                declare_alarm(Alarm.BMS_LOW_TEMP_FAULT)
             elif self.bms_faults[0]:
-                self.unlatch_alarm(Alarm.BMS_LOW_TEMP_FAULT)
+                unlatch_alarm(Alarm.BMS_LOW_TEMP_FAULT)
 
             self.bms_faults[6] = a_hardware
             self.bms_faults[5] = a_ccenus
