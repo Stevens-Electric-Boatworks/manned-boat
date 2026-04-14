@@ -34,12 +34,16 @@ def is_can_interface_up(interface: str = "can0") -> bool:
 
 
 class CANBus:
-    def __init__(self, logger: RcutilsLogger, dummy_efp, motorA_pub, motorB_pub, is_node_ok, declare_alarm, declare_motor_alarm,
+    def __init__(self, logger: RcutilsLogger, dummy_efp, motorA_pub, motorB_pub, is_node_ok, declare_alarm,
+                 declare_motor_alarm,
                  shutdown_node,
-                 unlatch_all_alarms, unlatch_motor_alarm, unlatch_alarm, bms_pack_sum_pub, bms_mcu_sum_pub, bms_cell_volt_pub, bms_thermistor_pub,
+                 unlatch_all_alarms, unlatch_motor_alarm, unlatch_alarm, bms_pack_sum_pub, bms_mcu_sum_pub,
+                 bms_cell_volt_pub, bms_thermistor_pub,
                  bms_soc_sum_pub, can_thermistor_pub, bms_booster_thermistor_pub):
-        self.motorB_Faults:List[int] = None
-        self.motorA_Faults:List[int] = None
+        self.motorB_Faults: List[int] = None
+        self.motorA_Faults: List[int] = None
+        self.motorA_current_lim_reason = 0
+        self.motorB_current_lim_reason = 0
         self.bms_thread = None
         self.network = None
         self.sdo = None
@@ -124,7 +128,6 @@ class CANBus:
         self.is_node_ok = True
         self.can_thread.start()
 
-
         self.bms_thread = Thread(
             target=self._bms_request_loop, args=[], daemon=True)
         self.bms_thread.start()
@@ -178,8 +181,6 @@ class CANBus:
             # self.logger.info(f"{a_hitemp}")
             # self.logger.info(f"{a_lowtemp}")
             # self.logger.info(f"BMS Faults: {self.bms_faults}\n")
-
-
 
             if a_hardware:
                 self.declare_alarm(Alarm.BMS_HARDWARE_FAULT)
@@ -390,6 +391,28 @@ class CANBus:
         msg.power = float(power)
         msg.enabled = bool(enabled)
         msg.current_limit_reason = int(current_limit_reason)
+
+        def _declare_calarm(alarm_id):
+            if motor == self.motorA:
+                self.motorA_current_lim_reason = alarm_id
+                self.declare_alarm(alarm_id)
+            else:
+                self.motorB_current_lim_reason = 1000 + alarm_id
+                self.declare_alarm(1000 + alarm_id)
+
+        def _undeclare_calarm():
+            if motor == self.motorA and self.motorA_current_lim_reason != 0:
+                self.unlatch_alarm(self.motorA_current_lim_reason)
+                self.motorA_current_lim_reason = 0
+            elif motor == self.motorB and self.motorB_current_lim_reason != 0:
+                self.unlatch_alarm(self.motorB_current_lim_reason)
+                self.motorB_current_lim_reason = 0
+
+        if current_limited == 0:
+            _undeclare_calarm()
+        else:
+            _declare_calarm(1191 + current_limited)
+
         msg.current_limited = bool(current_limited)
 
         if self.can_bus_state == CANBusStatus.ONLINE:

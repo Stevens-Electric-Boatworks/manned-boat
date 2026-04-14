@@ -216,6 +216,21 @@ ID,Type,Message,Condition,Sticky
 1189,ERROR,"Drive A [0x8420, 1910] StartupTest ClockFreq Fault",Startup test of Clock frequency failed.,TRUE
 1190,ERROR,"Drive A [0x8420, 1911] StartupTest Checkpoint2 Fault",Startup test of Checkpoint2 Control flow failed.,TRUE
 1191,ERROR,"Drive A [0x8420, 1912] StartupTest IncompatibleSwHwConfiguration Fault",The sofware configuration regarding OVP/HVL does not match the hardware configuration.Evaluation conditionAt Startup.,TRUE
+1192,ERROR,"Drive A [0x2092:19, 1] Current Trip: Event Limitation",,TRUE
+1193,ERROR,"Drive A [0x2095:19, 2] Current Trip: Motor Temperature Limit",,TRUE
+1194,ERROR,"Drive A [0x2095:19, 3] Current Trip: Low DC Voltage Limitation",,TRUE
+1195,ERROR,"Drive A [0x2095:19, 4] Current Trip: High DC Voltage Limitation",,TRUE
+1196,ERROR,"Drive A [0x2095:19, 5] Current Trip: Low Speed Limitation",,TRUE
+1197,ERROR,"Drive A [0x2095:19, 6] Current Trip: High Speed Limitation",,TRUE
+1198,ERROR,"Drive A [0x2095:19, 7] Current Trip: DC Current Limitation",,TRUE
+1199,ERROR,"Drive A [0x2095:19, 8] Current Trip: DC Power Limitation",,TRUE
+1200,ERROR,"Drive A [0x2095:19, 9] Current Trip: External Current Limitation",,TRUE
+1201,ERROR,"Drive A [0x2095:19, 10] Current Trip: External Torque Limitation",,TRUE
+1202,ERROR,"Drive A [0x2095:19, 11] Current Trip: Heatsink Temp Limitation",,TRUE
+1203,ERROR,"Drive A [0x2095:19, 12] Current Trip: Energy Limitation",,TRUE
+1204,ERROR,"Drive A [0x2095:19, 13] Current Trip: Max Current Limitation",,TRUE
+1205,ERROR,"Drive A [0x2095:19, 14] Current Trip: Max Voltage Angle Limitation",,TRUE
+1206,ERROR,"Drive A [0x2095:19, 15] Current Trip: Switching Frequency Limitation",,TRUE
 1999,ERROR,Drive A Unknown Fault,Drive A has emitted a fault that is not in the lookup table. Please check logs.,TRUE
 2000,ERROR,"Drive B [0x2340, 100] Power Stage ShortCircuit Fault","Hw detected short circuit.If the short circuit protection detects a short circuit, the power stage will be shut down. This is done by Hw without Sw interaction.The Sw will restart the power stage within 500 microseconds.",TRUE
 2001,ERROR,"Drive B [0x2340, 101] Power Stage ShortCircuitCounter Fault",This is an inforamative event that in combination with the ShortCircuit-event can be usefull when analyzing short circuit situations. This event will be cleared when power stage is disabled.,TRUE
@@ -409,4 +424,19 @@ ID,Type,Message,Condition,Sticky
 2189,ERROR,"Drive B [0x8420, 1910] StartupTest ClockFreq Fault",Startup test of Clock frequency failed.,TRUE
 2190,ERROR,"Drive B [0x8420, 1911] StartupTest Checkpoint2 Fault",Startup test of Checkpoint2 Control flow failed.,TRUE
 2191,ERROR,"Drive B [0x8420, 1912] StartupTest IncompatibleSwHwConfiguration Fault",The sofware configuration regarding OVP/HVL does not match the hardware configuration.Evaluation conditionAt Startup.,TRUE
+2192,ERROR,"Drive B [0x2092:19, 1] Current Trip: Event Limitation",1192,TRUE
+2193,ERROR,"Drive B [0x2095:19, 2] Current Trip: Motor Temperature Limit",1193,TRUE
+2194,ERROR,"Drive B [0x2095:19, 3] Current Trip: Low DC Voltage Limitation",1194,TRUE
+2195,ERROR,"Drive B [0x2095:19, 4] Current Trip: High DC Voltage Limitation",1195,TRUE
+2196,ERROR,"Drive B [0x2095:19, 5] Current Trip: Low Speed Limitation",1196,TRUE
+2197,ERROR,"Drive B [0x2095:19, 6] Current Trip: High Speed Limitation",1197,TRUE
+2198,ERROR,"Drive B [0x2095:19, 7] Current Trip: DC Current Limitation",1198,TRUE
+2199,ERROR,"Drive B [0x2095:19, 8] Current Trip: DC Power Limitation",1199,TRUE
+2200,ERROR,"Drive B [0x2095:19, 9] Current Trip: External Current Limitation",1200,TRUE
+2201,ERROR,"Drive B [0x2095:19, 10] Current Trip: External Torque Limitation",1201,TRUE
+2202,ERROR,"Drive B [0x2095:19, 11] Current Trip: Heatsink Temp Limitation",1202,TRUE
+2203,ERROR,"Drive B [0x2095:19, 12] Current Trip: Energy Limitation",1203,TRUE
+2204,ERROR,"Drive B [0x2095:19, 13] Current Trip: Max Current Limitation",1204,TRUE
+2205,ERROR,"Drive B [0x2095:19, 14] Current Trip: Max Voltage Angle Limitation",1205,TRUE
+2206,ERROR,"Drive B [0x2095:19, 15] Current Trip: Switching Frequency Limitation",1206,TRUE
 2999,ERROR,Drive B Unknown Fault,Drive B has emitted a fault that is not in the lookup table. Please check logs.,TRUE
