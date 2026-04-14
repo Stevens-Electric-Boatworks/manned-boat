@@ -410,8 +410,8 @@ class CANBus:
 
         if current_limited == 0:
             _undeclare_calarm()
-        else:
-            _declare_calarm(1191 + current_limited)
+        elif 1 <= current_limited <= 15:
+            _declare_calarm(1191 + current_limit_reason)
 
         msg.current_limited = bool(current_limited)
 
