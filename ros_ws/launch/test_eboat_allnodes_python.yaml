@@ -7,7 +7,7 @@ launch:
         name: "shore_comms"
         param:
           - name: "data_send"
-            value: 0.2
+            value: 0.1
           - name: "replay_mode"
             value: false
 
@@ -24,10 +24,6 @@ launch:
       exec: "test"
       name: "can_node"
 
-#  - node:
-#      pkg: "electrical_node"
-#      exec: "test"
-#      name: "test_electrical_node"
   - node:
       pkg: "motion_node"
       exec: "test"

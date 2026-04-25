@@ -20,14 +20,13 @@ class MotionNode(Node):
         self._sats_pub = self.create_publisher(GPSSVData, '/motion/sv', 10)
         self._sats_mode_pub = self.create_publisher(GPGSAData, '/motion/gsa', 10)
 
-        # GPS coordinates initialized near Hoboken, NJ for realistic test data.
-        # The step is very small to simulate realistic movement.
+
         self.gps_lat = SmoothRandom(start=40.744, step=0.0001, low=40.73, high=40.76)
         self.gps_long = SmoothRandom(start=-74.032, step=0.0001, low=-74.06, high=-74.02)
         self.speed = SmoothRandom(start=5, step=0.5, low=-10, high=40)
         self.heading = SmoothRandom(start=55, step=1, low=0, high=360)
         self.sats = SmoothRandom(start=6, step=0.5, low=0, high=18)
-        self.timer = self.create_timer(2, self.timer_callback)
+        self.timer = self.create_timer(1, self.timer_callback)
 
     def timer_callback(self):
         msg = GPSData()

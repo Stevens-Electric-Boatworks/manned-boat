@@ -19,19 +19,22 @@ launch:
           - name: "faults_file"
             value: "~/eboat_src/data/FAULTS.csv"
 
-#  - node:
-#      pkg: "can_node"
-#      exec: "test"
-#      name: "can_node"
-
   - node:
-      pkg: "electrical_node"
+      pkg: "can_node"
       exec: "test"
-      name: "test_electrical_node"
+      name: "can_node"
+
   - node:
       pkg: "motion_node"
       exec: "test"
       name: "motion_node"
+      param:
+          - name: "gnss_serial_fd"
+            value: "/tmp/ttyUSB1_fake"
+  - node:
+      pkg: "cell_node"
+      exec: "test"
+      name: "cell_node"
   - node:
       pkg: "time_node"
       exec: "time_node"

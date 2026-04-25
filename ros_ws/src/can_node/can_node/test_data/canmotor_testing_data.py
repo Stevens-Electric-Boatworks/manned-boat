@@ -91,13 +91,13 @@ class CANMotorTestingDataNode(Node):
 
         # Timers at different intervals
         self.create_timer(1.0, self.publish_can_thermistor)
-        self.create_timer(0.1, self._publish_cell_voltage)  # 10 Hz  — fast cell monitoring
-        self.create_timer(0.5, self._publish_pack_summary)  # 2 Hz   — pack voltage/current
-        self.create_timer(1.0, self._publish_soc_summary)  # 1 Hz   — SOC changes slowly
-        self.create_timer(1.0, self._publish_mcu_summary)  # 1 Hz   — MCU state
-        self.create_timer(2.0, self._publish_thermistor)  # 0.5 Hz — temps change slowly
+        self.create_timer(0.1, self._publish_cell_voltage)
+        self.create_timer(0.1, self._publish_pack_summary)
+        self.create_timer(0.5, self._publish_soc_summary)
+        self.create_timer(0.3, self._publish_mcu_summary)
+        self.create_timer(1.0, self._publish_thermistor)
 
-        self.create_timer(0.3, self.publish_test_data)
+        self.create_timer(0.02, self.publish_test_data)
         self.create_timer(1, self.publish_bus_state)
 
     def publish_can_thermistor(self):
