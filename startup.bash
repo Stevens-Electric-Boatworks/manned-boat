@@ -1,9 +1,5 @@
 #! /bin/bash
-source /home/rpi/.bashrc
-
-echo "Starting up the Webserver for the Boat Display"
-eval "$(fnm env --use-on-cd --shell bash)"
-    
+source /home/eboat/.bashrc
 
 
 echo "Starting up ROS2"
@@ -13,14 +9,14 @@ echo "Starting up ROS2"
 #ROS_WS="eboat_src/ros_ws"
 
 # Relative to ros_ws/launch
-LAUNCH_FILE="eboat_real_cpp.yaml"
+LAUNCH_FILE="eboat_real_py.yaml"
 
 # Relative to home
 ROS_BAG_LOG_DIR="ros_bag_logs"
 
 
 # For the RPI
-USER_NAME="rpi"
+USER_NAME="eboat"
 ROS_WS="/home/$USER_NAME/eboat_src/ros_ws"
 cd $ROS_WS
 
@@ -33,9 +29,6 @@ cd $ROS_WS
 echo "Sourcing install.bash"
 source install/setup.bash
 
-echo "Starting ROSBridge"
-ros2 launch rosbridge_server rosbridge_websocket_launch.xml &
-
 # Start recording everything through ROSBag
 mkdir -p /home/$USER_NAME/$ROS_BAG_LOG_DIR
 cd /home/$USER_NAME/$ROS_BAG_LOG_DIR || exit
@@ -43,6 +36,11 @@ cd /home/$USER_NAME/$ROS_BAG_LOG_DIR || exit
 echo "Attempting to record through ROSBag"
 ros2 bag record -a &
 echo "Started recording through ROSBag"
+
+
+echo "Starting ROSBridge"
+ros2 launch rosbridge_server rosbridge_websocket_launch.xml &
+
 
 # Go into the launch directory, and launch the nodes in the background
 
@@ -52,7 +50,7 @@ ros2 launch $ROS_WS/launch/$LAUNCH_FILE &
 
 
 echo "Starting Tailscale Serve"
-tailscale serve --https 9090 9090
+tailscale serve --service=svc:rpi-rosbridge --https 9090 9090
 
 echo "Finshed running startup script"
 
