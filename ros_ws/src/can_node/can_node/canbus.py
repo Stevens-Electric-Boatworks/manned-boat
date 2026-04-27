@@ -19,7 +19,7 @@ from boat_data_interfaces.msg import CANMotorData, CANBusStatus, BMSSOCSummary, 
     BMSPackSummary, BMSMcuSummary, CANThermistor
 
 
-def is_can_interface_up(interface: str = "can0") -> bool:
+def is_can_interface_up(interface: str = "vcan0") -> bool:
     try:
         result = subprocess.run(
             ["ip", "link", "show", interface],
@@ -31,6 +31,11 @@ def is_can_interface_up(interface: str = "can0") -> bool:
         return "state UP" in result.stdout
     except subprocess.CalledProcessError:
         return False
+
+
+class Sniffer(can.Listener):
+    def on_message_received(self, msg):
+        print(f"{hex(msg.arbitration_id)} {msg.data}")
 
 
 class CANBus:
@@ -80,11 +85,11 @@ class CANBus:
         self.configure()
 
     def configure(self):
-        if not is_can_interface_up():
-            self.logger.error("can0 is not up. Aborting startup!!")
-            self.declare_alarm(Alarm.CAN0_INTERFACE_NOT_UP)
-            self.can_bus_state = CANBusStatus.OFFLINE
-            return
+        # if not is_can_interface_up():
+        #     self.logger.error("can0 is not up. Aborting startup!!")
+        #     self.declare_alarm(Alarm.CAN0_INTERFACE_NOT_UP)
+        #     self.can_bus_state = CANBusStatus.OFFLINE
+        #     return
 
         if self.network is not None:
             self.is_node_ok = False
@@ -100,10 +105,11 @@ class CANBus:
 
         # Start with creating a new network representing one CAN bus
         self.network = canopen.Network()
+        self.network.listeners.append(Sniffer())
 
         # Connect to the CAN bus
         try:
-            self.network.connect(channel='can0', bustype='socketcan', bitrate=500_000)
+            self.network.connect(channel='vcan0', bustype='socketcan', bitrate=500_000)
         except CanError:
             self.logger.error(
                 f"""Unable to connect to the CAN bus because of the following error: {traceback.format_exc()}""")
@@ -123,6 +129,14 @@ class CANBus:
         self.network.add_node(self.motorA)
         self.network.add_node(self.motorB)
 
+        # start PDO
+
+        # self.motorA.tpdo.read()
+        # self.motorA.tpdo[1].add_callback(self.motor_a_pdo)
+        #
+        # self.motorB.tpdo.read()
+        # self.motorB.tpdo[1].add_callback(self.motor_b_pdo)
+
         self.can_thread = Thread(
             target=self.read_can_messages, args=[self.motorA_pub, self.motorB_pub], daemon=True)
         self.is_node_ok = True
@@ -131,6 +145,19 @@ class CANBus:
         self.bms_thread = Thread(
             target=self._bms_request_loop, args=[], daemon=True)
         self.bms_thread.start()
+
+    def on_any_message(self, can_id: int, data: bytearray, timestamp: float):
+        self.logger.info(f'{hex(can_id)}, {data}')
+
+    def motor_a_pdo(self, message):
+        self.logger.info(f'Motor A PDO: {message.name} received')
+        for var in message:
+            self.logger.info(f'Motor A PDO: {var.name} = {var.raw}')
+
+    def motor_b_pdo(self, message):
+        self.logger.info(f'Motor A PDO: {message.name} received')
+        for var in message:
+            self.logger.info(f'Motor A PDO: {var.name} = {var.raw}')
 
     def request_bms_status_data(self):
         """
@@ -181,7 +208,7 @@ class CANBus:
             # self.logger.info(f"{a_hitemp}")
             # self.logger.info(f"{a_lowtemp}")
             # self.logger.info(f"BMS Faults: {self.bms_faults}\n")
-            
+
             def declare_alarm(alarm_id):
                 self.logger.info(f"Data: {data}")
                 self.logger.info(f"alerts binary: {bin(alerts)}")
@@ -193,7 +220,7 @@ class CANBus:
                 self.logger.info(f"alerts binary: {bin(alerts)}")
                 self.logger.info(f"alerts int: {alerts}")
                 self.unlatch_alarm(alarm_id)
-            
+
             if a_hardware:
                 declare_alarm(Alarm.BMS_HARDWARE_FAULT)
             elif self.bms_faults[6]:
