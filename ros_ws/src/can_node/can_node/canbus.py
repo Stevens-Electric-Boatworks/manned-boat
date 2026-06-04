@@ -120,8 +120,6 @@ class CANBus:
         self.logger.info("Using a dummy EDS file at \"" + self.dummy_efp + "\".")
         self.motorA = canopen.BaseNode402(7, canopen.import_od(self.dummy_efp))
         self.motorB = canopen.BaseNode402(6, canopen.import_od(self.dummy_efp))
-        result = self.network.scanner.search()
-        print(str(result))
         # od = canopen.import_od(self.dummy_efp)
         # canopen.export_od(od, "/home/isayal/motors.eds")
 

@@ -1,6 +1,7 @@
 #include <chrono>
 #include <memory>
 #include <string>
+#include "lely/coapp/slave.hpp"
 
 #include "rclcpp/rclcpp.hpp"
 #include "std_msgs/msg/string.hpp"
