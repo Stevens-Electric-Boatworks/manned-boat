@@ -3,17 +3,17 @@
 // Copyright (c) 2026 Stevens Electric Boatworks.
 
 #pragma once
+
+#include "CANDriver.h"
+
+#include <memory>
 #include <optional>
 #include <string>
+#include <utility>
 #include <variant>
 #include <vector>
-/**
- * Defines a CAN SDO Read that can be used on the motor
- */
-struct MotorSDOParam {
-  std::byte index;
-  int8_t subindex;
-};
+
+namespace eboat {
 
 //TODO: Implement proper motor fault detection
 struct MotorFault {
@@ -27,21 +27,32 @@ class CANMotor {
    * Represents the different kinds of value that an SDO read can have
    */
   typedef std::optional<std::variant<int, double, std::string>> MotorValue;
+
+  /**
+   * The internal Lely CANOpen driver which handles this object
+   */
 public:
   std::string name;
   int8_t can_id;
+  std::shared_ptr<LoopD> canDriver;
   /**
    * The valid list of SDO params that this motor will listen to and can read
    * from
    */
   std::pmr::vector<MotorSDOParam> params;
 
+  explicit CANMotor(std::shared_ptr<CANDriver> can_diver,
+           std::string name,
+           const int8_t can_id,
+           const std::pmr::vector<MotorSDOParam> &params)
+      : name(std::move(name)), can_id(can_id), canDriver(std::move(can_diver)), params(params) {}
+
   /**
    * Reads from the CAN bus
    * @param sdo_param The SDO parameter to read from the CAN bus
    * @return The SDO value read, if it exists.
    */
-  MotorValue read(MotorSDOParam sdo_param);
+  [[nodiscard]] MotorValue read(MotorSDOParam sdo_param) const;
 
   /**
    *
@@ -49,3 +60,4 @@ public:
    */
   std::vector<MotorFault> readMotorFaults();
 };
+}
