@@ -27,7 +27,8 @@ public:
   template <typename T>
   T readSDO(MotorSDOParam sdo_param) {
     Post([this] () {
-      auto future = AsyncRead<T>(0x2030, 5);
+      std::cout << "In post, running read" << "\n";
+      auto future = AsyncRead<T>(0x2030, 2);
       auto value = Wait<T>(future);
       std::cout << value << "\n";
     });
