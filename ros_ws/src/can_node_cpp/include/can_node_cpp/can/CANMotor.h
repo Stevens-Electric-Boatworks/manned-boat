@@ -34,7 +34,7 @@ class CANMotor {
 public:
   std::string name;
   int8_t can_id;
-  std::shared_ptr<LoopD> canDriver;
+  std::shared_ptr<CANDriver> canDriver;
   /**
    * The valid list of SDO params that this motor will listen to and can read
    * from

@@ -12,11 +12,11 @@ void eboat::InitializationState::onSwitch() const {
 void eboat::InitializationState::periodic() const {
         // std::cout<< "Going to run bus service periodic" << "\n";
   // busService.periodic();
-  // std::cout<< "Finished running bus service periodic" << "\n";
 
   auto x = this->busService.motorB->read({
   0x2030,
   2}
   );
+  std::cout<< "Finished running init state periodic" << "\n";
 }
 void eboat::InitializationState::cleanup() const {}

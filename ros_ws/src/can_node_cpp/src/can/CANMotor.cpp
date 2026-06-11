@@ -16,7 +16,6 @@ eboat::CANMotor::MotorValue eboat::CANMotor::read(const MotorSDOParam sdo_param)
   }
 
   auto result = canDriver->readSDO<int16_t>(sdo_param);
-  std::printf("%d \n", static_cast<int16_t>(result));
   return result;
   // std::printf("There was an error!\n");
   // return std::nullopt;
