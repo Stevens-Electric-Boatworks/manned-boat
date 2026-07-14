@@ -26,7 +26,6 @@ class CANMotor {
   /**
    * Represents the different kinds of value that an SDO read can have
    */
-  typedef std::optional<std::variant<int, double, std::string>> MotorValue;
 
   /**
    * The internal Lely CANOpen driver which handles this object
@@ -52,7 +51,7 @@ public:
    * @param sdo_param The SDO parameter to read from the CAN bus
    * @return The SDO value read, if it exists.
    */
-  [[nodiscard]] MotorValue read(MotorSDOParam sdo_param) const;
+  [[nodiscard]] std::optional<std::any> read(SharedStore& shared_store, MotorSDOParam sdo_param) const;
 
   /**
    *

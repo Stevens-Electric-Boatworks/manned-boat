@@ -25,13 +25,14 @@ private:
 
   bool _initialized = false;
 
-  public:
+public:
   std::unique_ptr<CANMotor> motorA;
   std::unique_ptr<CANMotor> motorB;
   std::optional<lely::canopen::AsyncMaster> masterNode;
+  std::unique_ptr<SharedStore> shared_store = {};
   void initBus();
 
-  bool initialized() const;
+  [[nodiscard]] bool initialized() const;
 
   void periodic() const;
 
