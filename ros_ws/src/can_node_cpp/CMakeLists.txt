@@ -1,5 +1,6 @@
 cmake_minimum_required(VERSION 3.20)
 project(can_node_cpp)
+set(CMAKE_CXX_STANDARD 17)
 
 if(CMAKE_COMPILER_IS_GNUCXX OR CMAKE_CXX_COMPILER_ID MATCHES "Clang")
   add_compile_options(-Wall -Wextra -Wpedantic)
@@ -30,7 +31,9 @@ add_executable(can_node src/can_node_cpp.cpp
         src/can/CANMotor.cpp
         src/can/CANBusService.cpp
         src/state_lib/states/InitializationState.cpp
-        src/state_lib/StateManager.cpp
+        src/state_lib/ControlLoop.cpp
+        src/monitor/MonitorLoop.cpp
+        src/can/SharedStore.cpp
 )
 target_link_libraries(can_node PUBLIC rclcpp::rclcpp ${std_msgs_TARGETS} ${LELY_LIBRARIES})
 target_include_directories(
