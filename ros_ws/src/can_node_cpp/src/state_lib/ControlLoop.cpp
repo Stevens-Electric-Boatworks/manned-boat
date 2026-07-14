@@ -2,12 +2,12 @@
 // Created by Ishaan Sayal.
 // Copyright (c) 2026 Stevens Electric Boatworks.
 
-#include "can_node_cpp/state_lib/StateManager.h"
+#include "can_node_cpp/state_lib/ControlLoop.h"
 
 #include "can_node_cpp/state_lib/states/InitializationState.h"
 
 #include <iostream>
-void eboat::StateManager::initialize() {
+void eboat::ControlLoop::initialize() {
   if (this->canBus == nullptr) {
     this->canBus = std::make_shared<CANBusService>();
     this->canBus->initBus();
@@ -21,21 +21,21 @@ void eboat::StateManager::initialize() {
   }
 }
 #include <rclcpp/logging.hpp>
-void eboat::StateManager::tickPeriodic() const {
+void eboat::ControlLoop::tickPeriodic() const {
   if (this->currentState == nullptr) {
         std::cout<< "The current state is null!" << "\n";
     return;
   }
   this->currentState->periodic();
 }
-void eboat::StateManager::tickBus() {
+void eboat::ControlLoop::tickBus() {
   if (this->canBus == nullptr) {
     return;
   }
   canBus->periodic();
 }
 
-void eboat::StateManager::initializeBus() {
+void eboat::ControlLoop::initializeBus() {
 
 }
 

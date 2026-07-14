@@ -7,12 +7,12 @@
 #include "IState.h"
 
 namespace eboat {
-class StateManager {
+class ControlLoop {
   std::unique_ptr<IState> currentState = nullptr;
 public:
   std::shared_ptr<CANBusService> canBus;
 
-  StateManager() = default;
+  ControlLoop() = default;
 
   void initialize();
 
