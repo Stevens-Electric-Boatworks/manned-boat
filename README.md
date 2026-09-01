@@ -1,15 +1,10 @@
 
 ![](/_readme_imgs/logo.png) 
 
+## About
+This repository contains the primary source code for TidalCore, the software which runs directly on the boat. 
 
-Visit us at [stevenseboat.org](https://stevenseboat.org)
-
-## Technical Breakdown
-
-For a comprehensive technical breakdown, visit the [technical breakdown](https://github.com/Stevens-Electric-Boatworks/Manned-Boat/wiki/Technical-Breakdown) wiki page. 
-## Getting Started
-
-To get started, visit the [wiki home](https://github.com/Stevens-Electric-Boatworks/Manned-Boat/wiki), which will contain instructions on how to get started. In the future, the wiki will also contain guides for setting up your development environment, as well as design documents and explanations for the systems. 
+Learn more at our new documentation website at [docs.stevenseboat.org](https://docs.stevenseboat.org).
 
 ## Shore Side
 
