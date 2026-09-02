@@ -17,11 +17,10 @@
 
 using namespace std::chrono_literals;
 
-
-void eboat::CANBusService::initBus() {
+bool eboat::CANBusService::initBus() {
 
   if (_initialized) {
-    return;
+    return true;
   }
 
   std::cout << "Running initBus()" << "\n";
@@ -41,6 +40,7 @@ void eboat::CANBusService::initBus() {
   // by discontinuous jumps in the system time.
   _timer = std::make_shared<lely::io::Timer>(*_poll, exec, CLOCK_MONOTONIC);
   _ctrl = std::make_shared<lely::io::CanController>("vcan0");
+  //TODO add detection for CAN bus not active
   _chan = std::make_shared<lely::io::CanChannel>(*_poll, exec);
   _chan->open(*_ctrl);
 
@@ -68,6 +68,7 @@ void eboat::CANBusService::initBus() {
   this->masterNode.value().Reset();
   std::cout << this->masterNode->GetTimeout().count() << " timeout";
   _initialized = true;
+  return true;
 }
 bool eboat::CANBusService::initialized() const {
   return _initialized;

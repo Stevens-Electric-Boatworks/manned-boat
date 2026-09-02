@@ -7,7 +7,10 @@
 #include <iostream>
 eboat::InitializationState::~InitializationState() =default;
 void eboat::InitializationState::onSwitch() const {
-  this->busService.initBus();
+  bool success = this->busService.initBus();
+  if (success) {
+    switchTo(States::STANDBY);
+  }
 }
 void eboat::InitializationState::periodic() const {
   // ... nothing to do
