@@ -3,14 +3,14 @@
 // Copyright (c) 2026 Stevens Electric Boatworks.
 
 #pragma once
-#include "can_node_cpp/can/CANDriver.h"
+#include "MotorSDOParam.h"
 
 #include <any>
-#include <queue>
-#include <unordered_map>
-#include <optional>
 #include <chrono>
 #include <memory>
+#include <optional>
+#include <queue>
+#include <unordered_map>
 
 namespace eboat {
 struct CANData {

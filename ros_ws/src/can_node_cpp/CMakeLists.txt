@@ -34,6 +34,7 @@ add_executable(can_node src/can_node_cpp.cpp
         src/state_lib/ControlLoop.cpp
         src/monitor/MonitorLoop.cpp
         src/can/SharedStore.cpp
+        include/can_node_cpp/can/MotorSDOParam.h
 )
 target_link_libraries(can_node PUBLIC rclcpp::rclcpp ${std_msgs_TARGETS} ${LELY_LIBRARIES})
 target_include_directories(
