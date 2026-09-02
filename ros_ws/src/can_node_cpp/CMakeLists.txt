@@ -27,7 +27,7 @@ pkg_check_modules(LELY REQUIRED
 # LelyCANOpen END
 
 add_executable(can_node src/can_node_cpp.cpp
-        src/state_lib/states/IdleState.cpp
+        src/state_lib/states/StandbyState.cpp
         src/can/CANMotor.cpp
         src/can/CANBusService.cpp
         src/state_lib/states/InitializationState.cpp

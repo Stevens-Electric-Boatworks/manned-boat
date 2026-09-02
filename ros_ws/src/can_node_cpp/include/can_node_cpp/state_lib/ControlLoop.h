@@ -3,8 +3,9 @@
 // Copyright (c) 2026 Stevens Electric Boatworks.
 
 #pragma once
-#include <can_node_cpp/can/CANBusService.h>
 #include "IState.h"
+#include "states/States.h"
+#include <can_node_cpp/can/CANBusService.h>
 
 namespace eboat {
 class ControlLoop {
@@ -23,5 +24,7 @@ public:
    */
   void tickPeriodic() const;
   void tickBus();
+
+  void switchTo(States state);
 };
 }

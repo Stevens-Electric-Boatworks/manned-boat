@@ -4,6 +4,7 @@
 
 #pragma once
 #include "../IState.h"
+#include "States.h"
 #include "can_node_cpp/can/CANBusService.h"
 
 namespace eboat {
@@ -13,9 +14,10 @@ namespace eboat {
  */
 class InitializationState: public IState {
   CANBusService & busService;
+  std::function<void(States)> switchTo;
 public:
-  explicit InitializationState(CANBusService& canBus) : busService(canBus){};
-  ~InitializationState() override;
+  explicit InitializationState(CANBusService& canBus, const std::function<void(States)>& switchTo)
+      : busService(canBus), switchTo(switchTo) {};  ~InitializationState() override;
   [[nodiscard]] bool isValid() const override {
     return true;
   }

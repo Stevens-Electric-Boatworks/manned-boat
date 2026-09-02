@@ -29,8 +29,8 @@ public:
   std::unique_ptr<CANMotor> motorA;
   std::unique_ptr<CANMotor> motorB;
   std::optional<lely::canopen::AsyncMaster> masterNode;
-  std::unique_ptr<SharedStore> shared_store = {};
-  void initBus();
+  std::unique_ptr<SharedStore> shared_store = std::make_unique<SharedStore>();
+  bool initBus();
 
   [[nodiscard]] bool initialized() const;
 
