@@ -4,8 +4,7 @@
 
 #pragma once
 
-#include "CANDriver.h"
-#include "CANMotor.h"
+#include "MotorSDOParam.h"
 #include "SharedStore.h"
 
 #include <iostream>
@@ -13,19 +12,6 @@
 
 
 namespace eboat {
-
-/**
- * Defines a CAN SDO Read that can be used on the motor
- */
-struct MotorSDOParam {
-  uint16_t index;
-  int8_t subindex;
-  bool operator==(const MotorSDOParam& other) const {
-    return index == other.index && subindex == other.subindex;
-  }
-};
-
-
 
 class CANDriver : public lely::canopen::FiberDriver {
 public:
@@ -43,11 +29,3 @@ public:
   }
 };
 }
-
-template <> struct std::hash<eboat::MotorSDOParam> {
-  std::size_t operator()(const eboat::MotorSDOParam &p) const noexcept {
-    std::size_t h1 = std::hash<int>{}(p.index);
-    std::size_t h2 = std::hash<int>{}(p.subindex);
-    return h1 ^ (h2 << 1);
-  }
-};
