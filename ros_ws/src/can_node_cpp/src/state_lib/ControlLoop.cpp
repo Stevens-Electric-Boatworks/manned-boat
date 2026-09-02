@@ -5,19 +5,19 @@
 #include "can_node_cpp/state_lib/ControlLoop.h"
 
 #include "can_node_cpp/state_lib/states/InitializationState.h"
+#include "can_node_cpp/state_lib/states/StandbyState.h"
 
 #include <iostream>
 void eboat::ControlLoop::initialize() {
   if (this->canBus == nullptr) {
     this->canBus = std::make_shared<CANBusService>();
-    this->canBus->initBus();
   }
   if (currentState == nullptr) {
     std::cout << "new current state" << "\n";
-      currentState = std::make_unique<InitializationState>(*canBus);
-  }
-  else {
-
+      currentState = std::make_unique<InitializationState>(*canBus, [this](const States s) {
+        switchTo(s);
+      });
+      currentState->onSwitch();
   }
 }
 #include <rclcpp/logging.hpp>
@@ -33,6 +33,16 @@ void eboat::ControlLoop::tickBus() {
     return;
   }
   canBus->periodic();
+}
+void eboat::ControlLoop::switchTo(States state) {
+  if (state == States::STANDBY) {
+    currentState->cleanup();
+    currentState = std::make_unique<StandbyState>(*canBus, [this](const States s) {
+        switchTo(s);
+      });
+    currentState->onSwitch();
+    std::cout << "Switched to Standby State!";
+  }
 }
 
 void eboat::ControlLoop::initializeBus() {

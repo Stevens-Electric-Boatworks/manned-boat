@@ -18,10 +18,15 @@ public:
     this->monitoring_Loop_Timer  = create_wall_timer(20ms, [this]() ->  void {
       this->_monitorLoop->tick();
     });
+    this->control_loop_timer  = create_wall_timer(10ms, [this]() ->  void {
+      this->_controlLoop->tickPeriodic();
+
+    });
   }
 
 private:
   rclcpp::TimerBase::SharedPtr monitoring_Loop_Timer;
+  rclcpp::TimerBase::SharedPtr control_loop_timer;
   rclcpp::TimerBase::SharedPtr lely_timer;
   std::shared_ptr<eboat::MonitorLoop> _monitorLoop;
   std::shared_ptr<eboat::ControlLoop> _controlLoop;

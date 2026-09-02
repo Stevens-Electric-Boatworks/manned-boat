@@ -27,7 +27,7 @@ public:
   }
 
 private:
-  std::unique_ptr<std::unordered_map<MotorSDOParam, CANData>> cached{};
-  std::unique_ptr<std::queue<MotorSDOParam>> queuedReads{};
+  std::shared_ptr<std::unordered_map<MotorSDOParam, CANData>> cached =     std::make_shared<std::unordered_map<MotorSDOParam, CANData>>();
+  std::shared_ptr<std::queue<MotorSDOParam>> queuedReads = std::make_shared<std::queue<MotorSDOParam>>();
 };
 }
