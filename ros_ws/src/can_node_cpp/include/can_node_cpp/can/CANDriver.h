@@ -4,6 +4,7 @@
 
 #pragma once
 
+
 #include "MotorSDOParam.h"
 #include "SharedStore.h"
 
@@ -18,14 +19,13 @@ public:
   using FiberDriver::FiberDriver;
 
   template <typename T>
-  T queueReadSDO(SharedStore& shared_store,  MotorSDOParam sdo_param) {
+  void queueReadSDO(SharedStore &shared_store, MotorSDOParam& sdo_param) {
     Post([this, shared_store, sdo_param] () {
       std::cout << "In post, running read" << "\n";
-      auto future = AsyncRead<T>(0x2030, 2);
+      auto future = AsyncRead<T>(sdo_param.index, sdo_param.subindex);
       auto value = Wait<T>(future);
       shared_store.storeSDO(value, sdo_param);
     });
-    return -1;
   }
 };
 }
