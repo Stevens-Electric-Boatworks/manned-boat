@@ -20,14 +20,14 @@ struct CANData {
 class SharedStore {
 public:
   SharedStore() = default;
-  [[nodiscard]] std::optional<CANData> getSDO(MotorSDOParam param) const;
+  [[nodiscard]] std::optional<CANData> getSDO(MotorSDOParam param);
   void storeSDO(MotorSDOParam param, CANData data) const;
-  [[nodiscard]] const std::queue<MotorSDOParam>& get_queued_reads() const {
+  [[nodiscard]] std::queue<MotorSDOParam>& get_queued_reads() {
     return *queuedReads;
   }
 
 private:
-  std::shared_ptr<std::unordered_map<MotorSDOParam, CANData>> cached =     std::make_shared<std::unordered_map<MotorSDOParam, CANData>>();
+  std::shared_ptr<std::unordered_map<MotorSDOParam, CANData>> cached = std::make_shared<std::unordered_map<MotorSDOParam, CANData>>();
   std::shared_ptr<std::queue<MotorSDOParam>> queuedReads = std::make_shared<std::queue<MotorSDOParam>>();
 };
 }

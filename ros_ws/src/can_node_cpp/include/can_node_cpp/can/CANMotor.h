@@ -51,7 +51,8 @@ public:
    * @param sdo_param The SDO parameter to read from the CAN bus
    * @return The SDO value read, if it exists.
    */
-  [[nodiscard]] std::optional<std::any> read(SharedStore& shared_store, MotorSDOParam sdo_param) const;
+  void read(SharedStore &shared_store,
+                          MotorSDOParam sdo_param) const;
 
   /**
    *

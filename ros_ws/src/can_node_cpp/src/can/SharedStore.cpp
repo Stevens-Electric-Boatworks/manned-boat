@@ -4,7 +4,8 @@
 
 #include "can_node_cpp/can/SharedStore.h"
 
-std::optional<eboat::CANData> eboat::SharedStore::getSDO(const MotorSDOParam param) const {
+std::optional<eboat::CANData> eboat::SharedStore::getSDO(MotorSDOParam param) {
+  this->get_queued_reads().push(param);
   if (const auto it = this->cached->find(param); it != this->cached->end()) {
     return it->second;
   }
