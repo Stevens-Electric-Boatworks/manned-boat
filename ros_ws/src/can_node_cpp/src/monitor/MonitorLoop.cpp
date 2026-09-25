@@ -11,12 +11,11 @@ void eboat::MonitorLoop::tick() {
   proccessQueue();
 }
 void eboat::MonitorLoop::proccessQueue() {
-  std::queue<MotorSDOParam> queue = can_bus_service_.shared_store->get_queued_reads();
-   while (!queue.empty()) {
-     MotorSDOParam param = queue.front();
-     // gets send to be read
-      this->can_bus_service_.motorA->read(*can_bus_service_.shared_store, param);
-     queue.pop();
-   }
-
+  auto &queue = can_bus_service_.shared_store->get_queued_reads();
+  while (!queue.empty()) {
+    // std::printf("Going through the queue");
+    MotorSDOParam param = queue.front();
+    this->can_bus_service_.motorA->read(*can_bus_service_.shared_store, param);
+    queue.pop();
+  }
 }

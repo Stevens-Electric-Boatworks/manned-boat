@@ -17,16 +17,16 @@ void eboat::StandbyState::onSwitch() const {
 }
 void eboat::StandbyState::periodic() const {
   // std::cout << "Standby Periodic Called\n";
-  // auto value = busService.shared_store->getSDO(MotorSDOParam{
-  //   .index = 0x2030,
-  //   .subindex = 2
-  // });
-  // if (value) {
-  //   auto can_data = std::any_cast<int16_t>(value.value());
-  //   std::cout << "CAN Data: " << can_data << "\n" << std::endl;
-  // }
-  // else {
-  //   // std::cout << "No value" << std::endl;
-  // }
+  auto value = busService.shared_store->getSDO(MotorSDOParam{
+    .index = 0x2030,
+    .subindex = 2
+  });
+  if (value) {
+    auto can_data = std::any_cast<int16_t>(value.value().value);
+    std::cout << "CAN Data: " << can_data << "\n" << std::endl;
+  }
+  else {
+    // std::cout << "No value" << std::endl;
+  }
 }
 void eboat::StandbyState::cleanup() const {}
