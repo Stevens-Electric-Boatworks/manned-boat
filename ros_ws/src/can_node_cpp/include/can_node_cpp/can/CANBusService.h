@@ -12,6 +12,7 @@
 #include <lely/io2/posix/poll.hpp>
 #include <lely/io2/sys/timer.hpp>
 #include <optional>
+#include <thread>
 
 namespace eboat {
 
@@ -22,7 +23,7 @@ private:
   std::shared_ptr<lely::io::Timer> _timer;
   std::shared_ptr<lely::io::CanController> _ctrl;
   std::shared_ptr<lely::io::CanChannel> _chan;
-
+  std::thread _ioThread;
   bool _initialized = false;
 
 public:

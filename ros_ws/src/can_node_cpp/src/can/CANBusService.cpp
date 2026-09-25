@@ -15,6 +15,7 @@
 #include <lely/io2/sys/sigset.hpp>
 #include <lely/io2/sys/timer.hpp>
 #include <lely/util/diag.h>
+#include <thread>
 
 using namespace std::chrono_literals;
 
@@ -69,6 +70,7 @@ bool eboat::CANBusService::initBus() {
   this->masterNode.value().Reset();
   std::cout << this->masterNode->GetTimeout().count() << " timeout" << std::endl;
   _initialized = true;
+
   return true;
 }
 bool eboat::CANBusService::initialized() const {
@@ -76,5 +78,4 @@ bool eboat::CANBusService::initialized() const {
 }
 void eboat::CANBusService::periodic() const {
   loop->run_one();
-
 }

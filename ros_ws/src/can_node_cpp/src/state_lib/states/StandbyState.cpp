@@ -25,8 +25,13 @@ void eboat::StandbyState::periodic() const {
     auto can_data = std::any_cast<int16_t>(value.value().value);
     std::cout << "CAN Data: " << can_data << "\n" << std::endl;
   }
-  else {
-    // std::cout << "No value" << std::endl;
+  auto value2 = busService.shared_store->getSDO(MotorSDOParam{
+    .index = 0x2030,
+    .subindex = 3
+  });
+  if (value2) {
+    auto can_data = std::any_cast<int16_t>(value2.value().value);
+    std::cout << "CAN Data: " << can_data << "\n" << std::endl;
   }
 }
 void eboat::StandbyState::cleanup() const {}
