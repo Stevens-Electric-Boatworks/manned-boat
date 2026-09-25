@@ -6,8 +6,7 @@
 
 #include <iostream>
 void eboat::CANMotor::read(SharedStore &shared_store,
-                           MotorSDOParam sdo_param) const {
-        // std::cout<< "Going to perform AsyncRead" << "\n";
+                           MotorSDOParam& sdo_param) const {
 
   auto x = 0;
 
@@ -16,7 +15,7 @@ void eboat::CANMotor::read(SharedStore &shared_store,
     return;
   }
   //TODO Implement reading from the CAN bus
-  canDriver->queueReadSDO<MotorSDOParam>(shared_store , sdo_param);
+  canDriver->queueReadSDO<int16_t>(shared_store , sdo_param);
 }
 std::vector<eboat::MotorFault> eboat::CANMotor::readMotorFaults() {
   //TODO: Implement Motor Fault Reading

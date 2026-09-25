@@ -17,7 +17,7 @@ namespace eboat {
 
 class CANBusService {
 private:
-  std::shared_ptr<lely::ev::Loop> _loop;
+  std::shared_ptr<lely::io::Context> ctx;
   std::shared_ptr<lely::io::Poll> _poll;
   std::shared_ptr<lely::io::Timer> _timer;
   std::shared_ptr<lely::io::CanController> _ctrl;
@@ -26,6 +26,7 @@ private:
   bool _initialized = false;
 
 public:
+  std::shared_ptr<lely::ev::Loop> loop;
   std::unique_ptr<CANMotor> motorA;
   std::unique_ptr<CANMotor> motorB;
   std::optional<lely::canopen::AsyncMaster> masterNode;
