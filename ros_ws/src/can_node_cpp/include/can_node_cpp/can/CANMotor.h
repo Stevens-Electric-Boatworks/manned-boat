@@ -52,7 +52,7 @@ public:
    * @return The SDO value read, if it exists.
    */
   void read(SharedStore &shared_store,
-                          MotorSDOParam sdo_param) const;
+                          MotorSDOParam& sdo_param) const;
 
   /**
    *

@@ -15,19 +15,18 @@ public:
     this->_controlLoop = std::make_shared<eboat::ControlLoop>();
     this->_controlLoop->initialize();
     this->_monitorLoop = std::make_shared<eboat::MonitorLoop>(*this->_controlLoop->canBus);
-    this->monitoring_Loop_Timer  = create_wall_timer(20ms, [this]() ->  void {
+    this->monitoring_Loop_Timer  = create_wall_timer(10ms, [this]() ->  void {
       this->_monitorLoop->tick();
     });
-    this->control_loop_timer  = create_wall_timer(10ms, [this]() ->  void {
+    this->control_loop_timer  = create_wall_timer(20ms, [this]() ->  void {
       this->_controlLoop->tickPeriodic();
-
     });
+
   }
 
 private:
   rclcpp::TimerBase::SharedPtr monitoring_Loop_Timer;
   rclcpp::TimerBase::SharedPtr control_loop_timer;
-  rclcpp::TimerBase::SharedPtr lely_timer;
   std::shared_ptr<eboat::MonitorLoop> _monitorLoop;
   std::shared_ptr<eboat::ControlLoop> _controlLoop;
 };
