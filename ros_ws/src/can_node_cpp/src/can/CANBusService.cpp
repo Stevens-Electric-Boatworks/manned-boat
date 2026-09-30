@@ -40,7 +40,7 @@ bool eboat::CANBusService::initBus() {
   const auto exec = loop->get_executor();
   // Create a timer using a monotonic clock, i.e., a clock that is not affected
   // by discontinuous jumps in the system time.
-  _timer = std::make_shared<lely::io::Timer>(*_poll, exec, CLOCK_MONOTONIC);
+  _timer = std::make_shared<lely::io::Timer>(*_poll, exec, CLOCK_REALTIME);
   _ctrl = std::make_shared<lely::io::CanController>("vcan0");
   //TODO add detection for CAN bus not active
   _chan = std::make_shared<lely::io::CanChannel>(*_poll, exec);
@@ -53,7 +53,7 @@ bool eboat::CANBusService::initBus() {
   this->masterNode.emplace(*_timer, *_chan, "/home/isayal/motors.eds", "", 1);
   // Create a driver for the slave with node-ID 6.
   this->motorA = std::make_unique<CANMotor>(
-    std::make_shared<CANDriver>(exec, this->masterNode.value(), 6),
+    std::make_shared<CANDriver>(this->masterNode.value(), 6),
       "Motor A",
       6,
       std::pmr::vector<MotorSDOParam>{}
@@ -61,12 +61,13 @@ bool eboat::CANBusService::initBus() {
 
 
   this->motorB = std::make_unique<CANMotor>(
-  std::make_shared<CANDriver>(exec, this->masterNode.value(), 7),
+  std::make_shared<CANDriver>(this->masterNode.value(), 7),
     "Motor B",
     7,
     std::pmr::vector<MotorSDOParam>{}
 );
 
+  this->masterNode->SetTimeout(50ms);
   this->masterNode.value().Reset();
   std::cout << this->masterNode->GetTimeout().count() << " timeout" << std::endl;
   _initialized = true;

@@ -4,18 +4,19 @@
 
 #pragma once
 
+#include "CANDriver.h"
 #include "MotorSDOParam.h"
 #include "SharedStore.h"
 
 #include <iostream>
-#include <lely/coapp/fiber_driver.hpp>
+#include <lely/coapp/loop_driver.hpp>
 
 namespace eboat {
 
 // CANDriver.h
-class CANDriver : public lely::canopen::FiberDriver {
+class CANDriver : public lely::canopen::LoopDriver {
 public:
-  using FiberDriver::FiberDriver;
+  using LoopDriver::LoopDriver;
 
   void enqueueReadSDO(SharedStore &shared_store, MotorSDOParam sdo_param) {
     bool need_start = false;
@@ -28,6 +29,7 @@ public:
       }
     }
     if (need_start) {
+      // std::cout << "New worker" << std::endl;
       Post([this, &shared_store] { runWorker(shared_store); });
     }
   }
@@ -45,13 +47,16 @@ public:
         pending_.pop();
       }
       try {
-        auto value = Wait(AsyncRead<int16_t>(param.index, param.subindex));
+        // std::cout << "Waiting" << std::endl;
+        auto value = Wait(AsyncRead<uint16_t>(param.index, param.subindex));
+        // std::cout << "Wait over" << std::endl;
         shared_store.storeSDO(param, CANData{value, std::chrono::system_clock::now()});
       } catch (const lely::canopen::SdoError &e) {
         std::cerr << "SDO read failed for " << std::hex << param.index
                    << ":" << +param.subindex << " — " << e.what() << "\n";
       }
     }
+    worker_running_ = false;
   }
 
   void ensureWorkerRunning(SharedStore &shared_store) {
