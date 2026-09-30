@@ -3,22 +3,24 @@
 
 #include <memory>
 #include <string>
-
+#include "std_msgs/msg/int16.hpp"
 #include "rclcpp/rclcpp.hpp"
-
-#include <fmt/core.h>
 
 using namespace std::chrono_literals;
 class CANNode : public rclcpp::Node {
 public:
   CANNode() : Node("can_node_cpp") {
-    this->_controlLoop = std::make_shared<eboat::ControlLoop>();
+
+    this->publisher_ = this->create_publisher<std_msgs::msg::Int16>("topic", 10);
+    this->_controlLoop = std::make_shared<eboat::ControlLoop>(publisher_);
     this->_controlLoop->initialize();
     this->_monitorLoop = std::make_shared<eboat::MonitorLoop>(*this->_controlLoop->canBus);
+
     this->monitoring_Loop_Timer  = create_wall_timer(20ms, [this]() ->  void {
       this->_monitorLoop->tick();
     });
     this->control_loop_timer  = create_wall_timer(20ms, [this]() ->  void {
+      // std::printf("control loop periodic\n");
       this->_controlLoop->tickPeriodic();
     });
     auto ref = _monitorLoop->can_bus_service.loop.get();
@@ -34,6 +36,7 @@ private:
   rclcpp::TimerBase::SharedPtr control_loop_timer;
   std::shared_ptr<eboat::MonitorLoop> _monitorLoop;
   std::shared_ptr<eboat::ControlLoop> _controlLoop;
+  rclcpp::Publisher<std_msgs::msg::Int16>::SharedPtr publisher_;
   std::shared_ptr<std::thread> thread;
 
 };

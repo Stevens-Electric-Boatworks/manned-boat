@@ -11,9 +11,12 @@ namespace eboat {
 /**
  * Defines a CAN SDO Read that can be used on the motor
  */
+enum class SDOType { U8, U16, U32, I8, I16, I32 };
+
 struct MotorSDOParam {
   uint16_t index;
   int8_t subindex;
+  SDOType type;
   bool operator==(const MotorSDOParam&   other) const {
     return index == other.index && subindex == other.subindex;
   }

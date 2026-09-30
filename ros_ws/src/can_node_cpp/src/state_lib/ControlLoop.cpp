@@ -11,6 +11,7 @@
 void eboat::ControlLoop::initialize() {
   if (this->canBus == nullptr) {
     this->canBus = std::make_shared<CANBusService>();
+    this->canBus->initBus(this->publisher);
   }
   if (currentState == nullptr) {
     std::cout << "new current state" << "\n";
@@ -41,7 +42,7 @@ void eboat::ControlLoop::switchTo(States state) {
         switchTo(s);
       });
     currentState->onSwitch();
-    std::cout << "Switched to Standby State!";
+    std::cout << "Switched to Standby State!" << std::endl;
   }
 }
 
