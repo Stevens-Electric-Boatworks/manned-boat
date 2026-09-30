@@ -53,7 +53,7 @@ bool eboat::CANBusService::initBus(rclcpp::Publisher<std_msgs::msg::Int16>::Shar
   // means every user-defined callback for a CANopen event will be posted as a
   // task on the event loop, instead of being invoked during the event
   // processing by the stack.
-  this->masterNode.emplace(*_timer, *_chan, "/home/isayal/motors.eds", "", 1);
+  this->masterNode.emplace(*_timer, *_chan, "/home/isayal/master.dcf", "", 1);
   // Create a driver for the slave with node-ID 6.
   this->motorA = std::make_unique<CANMotor>(
     std::make_shared<CANDriver>(this->masterNode.value(), 6),
