@@ -13,8 +13,7 @@
 #include <lely/io2/sys/timer.hpp>
 #include <optional>
 #include <thread>
-#include <rclcpp/publisher.hpp>
-#include <std_msgs/msg/int16.hpp>
+#include <utility>
 
 namespace eboat {
 
@@ -26,16 +25,21 @@ private:
   std::shared_ptr<lely::io::CanController> _ctrl;
   std::shared_ptr<lely::io::CanChannel> _chan;
   std::thread _ioThread;
+  rclcpp::Node* node;
   bool _initialized = false;
 
 public:
+  explicit CANBusService(rclcpp::Node*  node)
+    : node(node)
+  {
+  }
+
   std::shared_ptr<lely::ev::Loop> loop;
   std::unique_ptr<CANMotor> motorA;
   std::unique_ptr<CANMotor> motorB;
   std::optional<lely::canopen::AsyncMaster> masterNode;
-  std::unique_ptr<SharedStore> shared_store = std::make_unique<SharedStore>();
-  rclcpp::Publisher<std_msgs::msg::Int16>::SharedPtr publisher;
-  bool initBus(rclcpp::Publisher<std_msgs::msg::Int16>::SharedPtr);
+  std::unique_ptr<SharedStore> shared_store;
+  bool initBus();
 
   [[nodiscard]] bool initialized() const;
 
