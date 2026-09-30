@@ -68,10 +68,13 @@ bool eboat::CANBusService::initBus() {
     7
 );
 
-  this->masterNode->SetTimeout(50ms);
+  this->masterNode->SetTimeout(500ms);
   this->masterNode.value().Reset();
-  std::cout << this->masterNode->GetTimeout().count() << " timeout" << std::endl;
-  _initialized = true;
+  this->masterNode->OnTpdo([](int i, std::error_code error_code, const void* p, std::size_t size_t)
+  {
+
+  });
+    _initialized = true;
 
   RCLCPP_INFO(node->get_logger(), "CAN Bus Service finished initializing");
 
