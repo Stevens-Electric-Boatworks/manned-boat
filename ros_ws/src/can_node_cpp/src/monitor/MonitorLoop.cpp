@@ -9,7 +9,7 @@
 void eboat::MonitorLoop::initialize()
 {
     this->can_bus_service.shared_store->onCANDataReceive = [this](const Motors motors,
-                                                                  const MotorSDOParam motor_sdo_param,
+                                                                  const MotorODParam motor_sdo_param,
                                                                   const CANData& can_data)
     {
         onCANDataReceive(motors, motor_sdo_param, can_data);
@@ -41,7 +41,7 @@ void eboat::MonitorLoop::publishQueueSize() const
     can_bus_service.shared_store->pubs->motorB->queue_size->publish(msgB);
 }
 
-void eboat::MonitorLoop::onCANDataReceive(const Motors motorNum, const MotorSDOParam param, const CANData& data) const
+void eboat::MonitorLoop::onCANDataReceive(const Motors motorNum, const MotorODParam param, const CANData& data) const
 {
     const auto motorSub = motorNum == Motors::MOTOR_A
                               ? this->can_bus_service.shared_store->pubs->motorA.get()
@@ -61,17 +61,17 @@ void eboat::MonitorLoop::proccessQueue() const
     auto& queue = can_bus_service.shared_store->get_queued_reads();
     while (!queue.empty())
     {
-        MotorSDOParam param = queue.front();
-        this->can_bus_service.motorA->read(*can_bus_service.shared_store, param);
-        this->can_bus_service.motorB->read(*can_bus_service.shared_store, param);
+        MotorODParam param = queue.front();
+        this->can_bus_service.motorA->read(param);
+        this->can_bus_service.motorB->read(param);
         queue.pop();
     }
 }
 
 void eboat::MonitorLoop::addDefaultParameters() const
 {
-    constexpr MotorSDOParam defaults[] = {
-        {.index = 2030, .subindex = 2, .type = SDOType::I16},
+    constexpr MotorODParam defaults[] = {
+        {.index = 2030, .subindex = 2, .type = ODType::I16},
     };
     for (const auto param : defaults)
     {

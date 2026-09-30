@@ -6,26 +6,26 @@
 
 #include "can_node_cpp/can/Motors.h"
 
-std::optional<eboat::CANData> eboat::SharedStore::getSDO(const Motors motor, const MotorSDOParam param) const
+std::optional<eboat::CANData> eboat::SharedStore::getSDO(const Motors motor, const MotorODParam param) const
 {
   this->get_queued_reads().push(param);
-  if (const auto it = this->cached->find(motor); it != this->cached->end()) {
+  if (const auto it = this->data->find(motor); it != this->data->end()) {
     if (const auto it2 = it->second.find(param); it2 != it->second. end()) {
       return it2->second;
     }
   }
   return std::nullopt;
 }
-void eboat::SharedStore::storeSDO(const Motors motor, const MotorSDOParam param, CANData data) const {
-  if (const auto it = cached->find(motor); it != cached->end()) {
-    it->second.insert_or_assign(param, data);
+void eboat::SharedStore::store(const Motors motor, const MotorODParam param, CANData canData) const {
+  if (const auto it = data->find(motor); it != data->end()) {
+    it->second.insert_or_assign(param, canData);
   } else {
-    std::unordered_map<MotorSDOParam, CANData> map = {{param, data}};
-    cached->insert_or_assign(motor, map);
+    std::unordered_map<MotorODParam, CANData> map = {{param, canData}};
+    data->insert_or_assign(motor, map);
   }
 
   if (this->onCANDataReceive != nullptr)
   {
-    onCANDataReceive(motor, param, data);
+    onCANDataReceive(motor, param, canData);
   }
 }

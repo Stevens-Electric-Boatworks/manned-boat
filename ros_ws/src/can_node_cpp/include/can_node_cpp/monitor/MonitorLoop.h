@@ -19,7 +19,7 @@ public:
   void slowTick();
 
 protected:
-    void onCANDataReceive(const Motors, const MotorSDOParam, const CANData&) const;
+    void onCANDataReceive(const Motors, const MotorODParam, const CANData&) const;
 private:
   void proccessQueue() const;
     void addDefaultParameters() const;

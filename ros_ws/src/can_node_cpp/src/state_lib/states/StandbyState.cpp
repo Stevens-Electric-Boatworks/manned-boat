@@ -19,10 +19,10 @@ void eboat::StandbyState::periodic() const {
   // std::cout << "Standby Periodic Called\n";
   auto value = busService.shared_store->getSDO(
     Motors::MOTOR_A,
-    MotorSDOParam{
+    MotorODParam{
     .index = 0x2030,
     .subindex = 3,
-    .type = SDOType::I16
+    .type = ODType::I16
   });
 
   if (value) {
