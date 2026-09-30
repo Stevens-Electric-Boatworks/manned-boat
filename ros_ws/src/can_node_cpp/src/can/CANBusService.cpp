@@ -56,24 +56,20 @@ bool eboat::CANBusService::initBus() {
   this->masterNode.emplace(*_timer, *_chan, "/home/isayal/master.dcf", "", 1);
   // Create a driver for the slave with node-ID 6.
   this->motorA = std::make_unique<CANMotor>(
-    std::make_shared<CANDriver>(this->masterNode.value(), 6, Motors::MOTOR_A),
+    std::make_shared<CANDriver>(this->shared_store.get(), this->masterNode.value(), 6, Motors::MOTOR_A),
       "Motor A",
       6
   );
 
 
   this->motorB = std::make_unique<CANMotor>(
-  std::make_shared<CANDriver>(this->masterNode.value(), 7, Motors::MOTOR_B),
+  std::make_shared<CANDriver>(this->shared_store.get(), this->masterNode.value(), 7, Motors::MOTOR_B),
     "Motor B",
     7
 );
 
   this->masterNode->SetTimeout(500ms);
   this->masterNode.value().Reset();
-  this->masterNode->OnTpdo([](int i, std::error_code error_code, const void* p, std::size_t size_t)
-  {
-
-  });
     _initialized = true;
 
   RCLCPP_INFO(node->get_logger(), "CAN Bus Service finished initializing");

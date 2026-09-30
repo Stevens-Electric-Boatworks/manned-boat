@@ -44,8 +44,8 @@ public:
    * Reads from the CAN bus
    * @param sdo_param The SDO parameter to read from the CAN bus
    */
-  void read(SharedStore &shared_store,
-                          MotorSDOParam& sdo_param) const;
+  void read(
+    const MotorODParam &sdo_param) const;
 
   [[nodiscard]] uint16_t getQueueLength() const
   {

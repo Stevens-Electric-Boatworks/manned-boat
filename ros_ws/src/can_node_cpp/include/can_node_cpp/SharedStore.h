@@ -3,7 +3,7 @@
 // Copyright (c) 2026 Stevens Electric Boatworks.
 
 #pragma once
-#include "can/MotorSDOParam.h"
+#include "can/MotorODParam.h"
 
 #include <any>
 #include <chrono>
@@ -61,23 +61,24 @@ public:
    */
   rclcpp::Logger logger;
   std::unique_ptr<PubManger> pubs;
-  std::function<void(Motors motor,MotorSDOParam param, CANData data)> onCANDataReceive = nullptr;
+  std::function<void(Motors motor,MotorODParam param, CANData data)> onCANDataReceive = nullptr;
 
   explicit SharedStore(rclcpp::Node* node, rclcpp::Logger  logger) : logger(std::move(logger))
   {
     pubs = std::make_unique<PubManger>(node);
   }
 
-  [[nodiscard]] std::optional<CANData> getSDO(Motors motor, MotorSDOParam param) const;
-  void storeSDO(Motors motor, MotorSDOParam param, CANData data) const;
-  [[nodiscard]] UniqueQueue<MotorSDOParam>& get_queued_reads() const
+  [[nodiscard]] std::optional<CANData> getSDO(Motors motor, MotorODParam param) const;
+  void store(Motors motor, MotorODParam param, CANData data) const;
+
+  [[nodiscard]] UniqueQueue<MotorODParam>& get_queued_reads() const
   {
     return *queuedReads;
   }
 
 private:
-  std::shared_ptr<std::unordered_map<Motors, std::unordered_map<MotorSDOParam, CANData>>> cached = std::make_shared<
-    std::unordered_map<Motors, std::unordered_map<MotorSDOParam, CANData>>>();
-  std::shared_ptr<UniqueQueue<MotorSDOParam>> queuedReads = std::make_shared<UniqueQueue<MotorSDOParam>>();
+  std::shared_ptr<std::unordered_map<Motors, std::unordered_map<MotorODParam, CANData>>> data = std::make_shared<
+    std::unordered_map<Motors, std::unordered_map<MotorODParam, CANData>>>();
+  std::shared_ptr<UniqueQueue<MotorODParam>> queuedReads = std::make_shared<UniqueQueue<MotorODParam>>();
 };
 }

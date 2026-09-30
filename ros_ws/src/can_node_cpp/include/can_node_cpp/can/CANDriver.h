@@ -5,7 +5,7 @@
 #pragma once
 
 #include "CANDriver.h"
-#include "MotorSDOParam.h"
+#include "MotorODParam.h"
 #include "../SharedStore.h"
 
 #include <iostream>
@@ -19,13 +19,12 @@ namespace eboat
     class CANDriver : public lely::canopen::LoopDriver
     {
     public:
-        explicit CANDriver(lely::canopen::AsyncMaster& master, const uint8_t id, const Motors motor)
-            : LoopDriver(master, id), motor_(motor)
-        {}
+        explicit CANDriver(SharedStore* shared_store, lely::canopen::AsyncMaster& master, const uint8_t id, const Motors motor)
+            : LoopDriver(master, id), motor_(motor), shared_store_(shared_store) {}
 
         using LoopDriver::LoopDriver;
 
-        void enqueueReadSDO(SharedStore& shared_store, const MotorSDOParam sdo_param)
+        void enqueueReadSDO(const MotorODParam sdo_param)
         {
             bool need_start = false;
             {
@@ -40,15 +39,15 @@ namespace eboat
             if (need_start)
             {
                 // std::cout << "New worker" << std::endl;
-                Post([this, &shared_store] { runWorker(shared_store); });
+                Post([this] { runWorker(); });
             }
         }
 
-        void runWorker(SharedStore& shared_store)
+        void runWorker()
         {
             for (;;)
             {
-                MotorSDOParam param{};
+                MotorODParam param{};
                 {
                     std::lock_guard<std::mutex> lock(queue_mutex_);
                     if (pending_.empty())
@@ -61,17 +60,20 @@ namespace eboat
                 }
                 switch (param.type)
                 {
-                case SDOType::U8: readOne<uint8_t>(shared_store, param);
+                case ODType::U8: readAndStoreSDO<uint8_t>(param);
                     break;
-                case SDOType::U16: readOne<uint16_t>(shared_store, param);
+                case ODType::U16: readAndStoreSDO<uint16_t>(param);
                     break;
-                case SDOType::U32: readOne<uint32_t>(shared_store, param);
+                case ODType::U32: readAndStoreSDO<uint32_t>(param);
                     break;
-                case SDOType::I8: readOne<int8_t>(shared_store, param);
+                case ODType::I8: readAndStoreSDO<int8_t>(param);
                     break;
-                case SDOType::I16: readOne<int16_t>(shared_store, param);
+                case ODType::I16: readAndStoreSDO<int16_t>(param);
                     break;
-                case SDOType::I32: readOne<int32_t>(shared_store, param);
+                case ODType::I32: readAndStoreSDO<int32_t>(param);
+                    break;
+                default:
+                    RCLCPP_ERROR(shared_store_->logger, "Unknown OD type in SDO Read for [%X:%d]", param.index, param.subindex);
                     break;
                 }
             }
@@ -79,12 +81,12 @@ namespace eboat
         }
 
         template <typename T>
-        void readOne(SharedStore& shared_store, const MotorSDOParam& param)
+        void readAndStoreSDO(const MotorODParam &param)
         {
             try
             {
                 auto value = Wait(AsyncRead<T>(param.index, param.subindex));
-                shared_store.storeSDO(this->motor_, param, CANData{value, std::chrono::system_clock::now()});
+                shared_store_->store(this->motor_, param, CANData{value, std::chrono::system_clock::now()});
             }
             catch (const lely::canopen::SdoError& e)
             {
@@ -93,30 +95,50 @@ namespace eboat
             }
         }
 
-        void ensureWorkerRunning(SharedStore& shared_store)
+        void ensureWorkerRunning()
         {
             if (worker_running_) return;
             worker_running_ = true;
 
-            Post([this, &shared_store] { runWorker(shared_store); });
+            Post([this] { runWorker(); });
         }
 
-        uint16_t getQueueLength() const
+        [[nodiscard]] uint16_t getQueueLength() const
         {
             return pending_.size();
         }
 
 
-    private:
+    protected:
         void OnBoot(lely::canopen::NmtState st, char es, const std::string& what) noexcept override
         {
             std::printf("Boot triggererd!\n");
         }
+        void OnRpdoWrite(uint16_t idx, uint8_t subidx) noexcept override {
+
+            const MotorODParam* param = findParam(idx, subidx);
+            if (!param) {
+                RCLCPP_ERROR(shared_store_->logger, "RPDO [%X:%d] does not exist in known MotorOD Parameters.", idx, subidx);
+                return;
+            }
+
+            std::any value;
+            dispatchType(param->type, [&]([[maybe_unused]] auto tag) { // this is to forcefully convert to the correct type
+                using T = typename decltype(tag)::type;
+                T v = rpdo_mapped[idx][subidx];
+                value = v;
+            });
+
+
+            shared_store_->store(motor_, *param,
+                CANData{std::move(value), std::chrono::system_clock::now()});
+        }
 
     private:
         std::mutex queue_mutex_;
-        std::queue<MotorSDOParam> pending_;
+        std::queue<MotorODParam> pending_;
         bool worker_running_ = false;
         Motors motor_;
+        SharedStore* shared_store_;
     };
 } // namespace eboat
