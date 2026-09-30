@@ -8,10 +8,10 @@
 #include "can_node_cpp/state_lib/states/StandbyState.h"
 
 #include <iostream>
-void eboat::ControlLoop::initialize() {
+void eboat::ControlLoop::initialize(rclcpp::Node* node) {
   if (this->canBus == nullptr) {
-    this->canBus = std::make_shared<CANBusService>();
-    this->canBus->initBus(this->publisher);
+    this->canBus = std::make_shared<CANBusService>(node);
+    this->canBus->initBus();
   }
   if (currentState == nullptr) {
     std::cout << "new current state" << "\n";

@@ -3,7 +3,7 @@
 // Copyright (c) 2026 Stevens Electric Boatworks.
 
 #pragma once
-#include "MotorSDOParam.h"
+#include "can/MotorSDOParam.h"
 
 #include <any>
 #include <chrono>
@@ -12,6 +12,8 @@
 #include <queue>
 #include <unordered_map>
 
+#include "PubManager.h"
+
 namespace eboat {
 struct CANData {
   std::any value;
@@ -19,7 +21,16 @@ struct CANData {
 };
 class SharedStore {
 public:
-  SharedStore() = default;
+  /**
+   * All of the publishers available, including motor publishers
+   */
+  std::unique_ptr<PubManger> pubs;
+
+  explicit SharedStore(rclcpp::Node* node)
+  {
+    pubs = std::make_unique<PubManger>(node);
+  }
+
   [[nodiscard]] std::optional<CANData> getSDO(MotorSDOParam param);
   void storeSDO(MotorSDOParam param, CANData data) const;
   [[nodiscard]] std::queue<MotorSDOParam>& get_queued_reads() {

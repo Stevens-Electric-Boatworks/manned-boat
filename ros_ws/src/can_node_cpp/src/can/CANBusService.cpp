@@ -20,13 +20,12 @@
 
 using namespace std::chrono_literals;
 
-bool eboat::CANBusService::initBus(rclcpp::Publisher<std_msgs::msg::Int16>::SharedPtr publisher) {
+bool eboat::CANBusService::initBus() {
 
   if (_initialized) {
     return true;
   }
-
-  this->publisher = std::move(publisher);
+  shared_store = std::make_unique<SharedStore>(node);
 
   std::cout << "Running initBus()" << "\n";
 

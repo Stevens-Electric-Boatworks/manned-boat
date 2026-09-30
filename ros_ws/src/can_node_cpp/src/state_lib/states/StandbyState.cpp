@@ -24,10 +24,9 @@ void eboat::StandbyState::periodic() const {
   });
 
   if (value) {
-    // std::printf("%d\n", std::any_cast<int16_t>(value.value().value));
     auto message = std_msgs::msg::Int16();
     message.data = std::any_cast<int16_t>(value.value().value);
-    this->busService.publisher->publish(message);
+    this->busService.shared_store->pubs->genericStatus->publish(message);
   }
   // auto val2 = busService.shared_store->getSDO(MotorSDOParam{
   //   .index = 0x2071,
