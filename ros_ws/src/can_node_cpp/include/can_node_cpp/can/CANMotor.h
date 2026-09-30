@@ -12,7 +12,6 @@
 #include <utility>
 #include <variant>
 #include <vector>
-
 namespace eboat {
 
 //TODO: Implement proper motor fault detection
@@ -35,17 +34,11 @@ public:
   std::string name;
   int8_t can_id;
   std::shared_ptr<CANDriver> canDriver;
-  /**
-   * The valid list of SDO params that this motor will listen to and can read
-   * from
-   */
-  std::pmr::vector<MotorSDOParam> params;
-
   explicit CANMotor(std::shared_ptr<CANDriver> can_diver,
            std::string name,
-           const int8_t can_id,
-           const std::pmr::vector<MotorSDOParam> &params)
-      : name(std::move(name)), can_id(can_id), canDriver(std::move(can_diver)), params(params) {}
+           const int8_t can_id
+  )
+      : name(std::move(name)), can_id(can_id), canDriver(std::move(can_diver)) {}
 
   /**
    * Reads from the CAN bus
