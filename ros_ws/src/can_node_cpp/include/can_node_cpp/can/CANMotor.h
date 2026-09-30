@@ -47,6 +47,11 @@ public:
   void read(SharedStore &shared_store,
                           MotorSDOParam& sdo_param) const;
 
+  [[nodiscard]] uint16_t getQueueLength() const
+  {
+    return canDriver->getQueueLength();
+  }
+
   /**
    *
    * @return Reads the list of motor faults from the Motor Controller

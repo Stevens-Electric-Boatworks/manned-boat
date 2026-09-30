@@ -56,14 +56,14 @@ bool eboat::CANBusService::initBus() {
   this->masterNode.emplace(*_timer, *_chan, "/home/isayal/master.dcf", "", 1);
   // Create a driver for the slave with node-ID 6.
   this->motorA = std::make_unique<CANMotor>(
-    std::make_shared<CANDriver>(this->masterNode.value(), 6),
+    std::make_shared<CANDriver>(this->masterNode.value(), 6, Motors::MOTOR_A),
       "Motor A",
       6
   );
 
 
   this->motorB = std::make_unique<CANMotor>(
-  std::make_shared<CANDriver>(this->masterNode.value(), 7),
+  std::make_shared<CANDriver>(this->masterNode.value(), 7, Motors::MOTOR_B),
     "Motor B",
     7
 );

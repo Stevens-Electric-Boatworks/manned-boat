@@ -19,11 +19,9 @@ namespace eboat
     class CANDriver : public lely::canopen::LoopDriver
     {
     public:
-        CANDriver(lely::canopen::AsyncMaster& master, const uint8_t id, const Motors motor)
+        explicit CANDriver(lely::canopen::AsyncMaster& master, const uint8_t id, const Motors motor)
             : LoopDriver(master, id), motor_(motor)
-        {
-
-        }
+        {}
 
         using LoopDriver::LoopDriver;
 
@@ -101,6 +99,11 @@ namespace eboat
             worker_running_ = true;
 
             Post([this, &shared_store] { runWorker(shared_store); });
+        }
+
+        uint16_t getQueueLength() const
+        {
+            return pending_.size();
         }
 
     private:

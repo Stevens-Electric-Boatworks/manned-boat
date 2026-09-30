@@ -14,7 +14,10 @@ public:
       : can_bus_service(can_bus_service) {}
 
   void initialize();
+  void publishQueueSize() const;
   void tick();
+  void slowTick();
+
 protected:
     void onCANDataReceive(const Motors, const MotorSDOParam, const CANData&) const;
 private:
