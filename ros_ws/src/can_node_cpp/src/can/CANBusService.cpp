@@ -58,16 +58,14 @@ bool eboat::CANBusService::initBus() {
   this->motorA = std::make_unique<CANMotor>(
     std::make_shared<CANDriver>(this->masterNode.value(), 6),
       "Motor A",
-      6,
-      std::pmr::vector<MotorSDOParam>{}
+      6
   );
 
 
   this->motorB = std::make_unique<CANMotor>(
   std::make_shared<CANDriver>(this->masterNode.value(), 7),
     "Motor B",
-    7,
-    std::pmr::vector<MotorSDOParam>{}
+    7
 );
 
   this->masterNode->SetTimeout(50ms);
