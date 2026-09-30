@@ -106,6 +106,7 @@ namespace eboat
             return pending_.size();
         }
 
+
     private:
         void OnBoot(lely::canopen::NmtState st, char es, const std::string& what) noexcept override
         {
