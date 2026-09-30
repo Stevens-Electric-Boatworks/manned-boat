@@ -82,8 +82,8 @@ namespace eboat
             }
             catch (const lely::canopen::SdoError& e)
             {
-                std::cerr << "SDO read failed for " << std::hex << param.index
-                    << ":" << +param.subindex << " — " << e.what() << "\n";
+                // std::cerr << "SDO read failed for " << std::hex << param.index
+                //     << ":" << +param.subindex << " — " << e.what() << "\n";
             }
         }
 
@@ -93,6 +93,12 @@ namespace eboat
             worker_running_ = true;
 
             Post([this, &shared_store] { runWorker(shared_store); });
+        }
+
+    private:
+        void OnBoot(lely::canopen::NmtState st, char es, const std::string& what) noexcept override
+        {
+            std::printf("Boot triggererd!\n");
         }
 
     private:
