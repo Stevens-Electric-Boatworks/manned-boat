@@ -8,16 +8,17 @@
 #include <memory>
 namespace eboat {
 class MonitorLoop {
-
 public:
   eboat::CANBusService& can_bus_service;
   explicit MonitorLoop(eboat::CANBusService &can_bus_service)
       : can_bus_service(can_bus_service) {}
 
   void initialize();
-
   void tick();
+protected:
+    void onCANDataReceive(const Motors, const MotorSDOParam, const CANData&) const;
 private:
-  void proccessQueue();
+  void proccessQueue() const;
+    void addDefaultParameters() const;
 };
 }

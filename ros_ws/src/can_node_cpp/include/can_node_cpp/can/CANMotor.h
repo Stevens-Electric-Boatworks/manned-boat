@@ -19,6 +19,7 @@ namespace eboat {
 struct MotorFault {
   int event_id;
 };
+
 /**
  * Defines an Inmotion DCS CANOpen Motor Controller.
  */
@@ -49,7 +50,6 @@ public:
   /**
    * Reads from the CAN bus
    * @param sdo_param The SDO parameter to read from the CAN bus
-   * @return The SDO value read, if it exists.
    */
   void read(SharedStore &shared_store,
                           MotorSDOParam& sdo_param) const;
