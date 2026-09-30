@@ -5,6 +5,8 @@
 #pragma once
 #include <rclcpp/node.hpp>
 #include <std_msgs/msg/int16.hpp>
+#include <std_msgs/msg/u_int16.hpp>
+#include <utility>
 
 namespace eboat
 {
@@ -15,9 +17,20 @@ namespace eboat
 
     public:
         rclcpp::Publisher<std_msgs::msg::Int16>::SharedPtr voltage;
-        explicit MotorPubs(rclcpp::Node* node, const std::string& motorName)
+        rclcpp::Publisher<std_msgs::msg::UInt16>::SharedPtr queue_size;
+        explicit MotorPubs(rclcpp::Node* node, std::string  motorName) : motorName(std::move(motorName))
         {
-            voltage = node->create_publisher<std_msgs::msg::Int16>("/" + motorName + "/voltage", 10);
+            this->node = node;
+            voltage = createPub<std_msgs::msg::Int16>("voltage");
+            queue_size = createPub<std_msgs::msg::UInt16>("sdo_queue_size");
+        }
+    private:
+        rclcpp::Node* node;
+        std::string motorName;
+        template <typename T>
+        [[nodiscard]] std::shared_ptr<rclcpp::Publisher<T>> createPub(const std::string& topicName)
+        {
+            return node->create_publisher<T>("/" + motorName + "/" + topicName, 10);
         }
     };
 

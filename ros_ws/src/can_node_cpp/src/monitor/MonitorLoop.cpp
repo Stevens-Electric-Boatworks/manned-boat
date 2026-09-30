@@ -22,6 +22,25 @@ void eboat::MonitorLoop::tick()
     proccessQueue();
 }
 
+void eboat::MonitorLoop::slowTick()
+{
+    publishQueueSize();
+}
+
+void eboat::MonitorLoop::publishQueueSize() const
+{
+    auto motorAQueue = this->can_bus_service.motorA->getQueueLength();
+    auto motorBQueue = this->can_bus_service.motorB->getQueueLength();
+
+    auto msgA = std_msgs::msg::UInt16();
+    msgA.data = motorAQueue;
+    can_bus_service.shared_store->pubs->motorA->queue_size->publish(msgA);
+
+    auto msgB = std_msgs::msg::UInt16();
+    msgB.data = motorBQueue;
+    can_bus_service.shared_store->pubs->motorB->queue_size->publish(msgB);
+}
+
 void eboat::MonitorLoop::onCANDataReceive(const Motors motorNum, const MotorSDOParam param, const CANData& data) const
 {
     const auto motorSub = motorNum == Motors::MOTOR_A
@@ -44,7 +63,7 @@ void eboat::MonitorLoop::proccessQueue() const
     {
         MotorSDOParam param = queue.front();
         this->can_bus_service.motorA->read(*can_bus_service.shared_store, param);
-        //TODO: add motor B
+        this->can_bus_service.motorB->read(*can_bus_service.shared_store, param);
         queue.pop();
     }
 }
