@@ -14,7 +14,7 @@
 
 namespace eboat {
 struct CANData {
-  std::any value;
+  uint16_t value;
   std::chrono::system_clock::time_point timestamp;
 };
 class SharedStore {

@@ -21,17 +21,29 @@ void eboat::StandbyState::periodic() const {
     .index = 0x2030,
     .subindex = 2
   });
+
   if (value) {
-    auto can_data = std::any_cast<int16_t>(value.value().value);
-    std::cout << "CAN Data: " << can_data << "\n" << std::endl;
+    std::printf("%d\n", static_cast<uint16_t>(value.value().value));
   }
-  auto value2 = busService.shared_store->getSDO(MotorSDOParam{
+  auto val2 = busService.shared_store->getSDO(MotorSDOParam{
     .index = 0x2030,
     .subindex = 3
   });
-  if (value2) {
-    auto can_data = std::any_cast<int16_t>(value2.value().value);
-    std::cout << "CAN Data: " << can_data << "\n" << std::endl;
+
+  if (val2) {
+    std::printf("%d\n", static_cast<uint16_t>(val2.value().value));
   }
+  busService.shared_store->getSDO(MotorSDOParam{
+    .index = 0x2030,
+    .subindex = 5
+  });
+  busService.shared_store->getSDO(MotorSDOParam{
+  .index = 0x2030,
+  .subindex = 6
+});
+  busService.shared_store->getSDO(MotorSDOParam{
+  .index = 0x2030,
+  .subindex = 7
+});
 }
 void eboat::StandbyState::cleanup() const {}

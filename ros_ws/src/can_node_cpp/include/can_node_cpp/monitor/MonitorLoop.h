@@ -8,11 +8,11 @@
 #include <memory>
 namespace eboat {
 class MonitorLoop {
-  eboat::CANBusService& can_bus_service_;
 
 public:
+  eboat::CANBusService& can_bus_service;
   explicit MonitorLoop(eboat::CANBusService &can_bus_service)
-      : can_bus_service_(can_bus_service) {}
+      : can_bus_service(can_bus_service) {}
 
   void initialize();
 
