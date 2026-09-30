@@ -29,12 +29,6 @@ void eboat::ControlLoop::tickPeriodic() const {
   }
   this->currentState->periodic();
 }
-void eboat::ControlLoop::tickBus() {
-  if (this->canBus == nullptr) {
-    return;
-  }
-  canBus->periodic();
-}
 void eboat::ControlLoop::switchTo(States state) {
   if (state == States::STANDBY) {
     currentState->cleanup();
@@ -44,9 +38,5 @@ void eboat::ControlLoop::switchTo(States state) {
     currentState->onSwitch();
     std::cout << "Switched to Standby State!" << std::endl;
   }
-}
-
-void eboat::ControlLoop::initializeBus() {
-
 }
 

@@ -11,19 +11,27 @@
 #include <iostream>
 #include <lely/coapp/loop_driver.hpp>
 
+#include "Motors.h"
+
 namespace eboat
 {
     // CANDriver.h
     class CANDriver : public lely::canopen::LoopDriver
     {
     public:
+        CANDriver(lely::canopen::AsyncMaster& master, const uint8_t id, const Motors motor)
+            : LoopDriver(master, id), motor_(motor)
+        {
+
+        }
+
         using LoopDriver::LoopDriver;
 
-        void enqueueReadSDO(SharedStore& shared_store, MotorSDOParam sdo_param)
+        void enqueueReadSDO(SharedStore& shared_store, const MotorSDOParam sdo_param)
         {
             bool need_start = false;
             {
-                std::lock_guard<std::mutex> lock(queue_mutex_);
+                std::lock_guard lock(queue_mutex_);
                 pending_.push(sdo_param);
                 if (!worker_running_)
                 {
@@ -42,7 +50,7 @@ namespace eboat
         {
             for (;;)
             {
-                MotorSDOParam param;
+                MotorSDOParam param{};
                 {
                     std::lock_guard<std::mutex> lock(queue_mutex_);
                     if (pending_.empty())
@@ -78,7 +86,7 @@ namespace eboat
             try
             {
                 auto value = Wait(AsyncRead<T>(param.index, param.subindex));
-                shared_store.storeSDO(param, CANData{value, std::chrono::system_clock::now()});
+                shared_store.storeSDO(this->motor_, param, CANData{value, std::chrono::system_clock::now()});
             }
             catch (const lely::canopen::SdoError& e)
             {
@@ -105,5 +113,6 @@ namespace eboat
         std::mutex queue_mutex_;
         std::queue<MotorSDOParam> pending_;
         bool worker_running_ = false;
+        Motors motor_;
     };
 } // namespace eboat
