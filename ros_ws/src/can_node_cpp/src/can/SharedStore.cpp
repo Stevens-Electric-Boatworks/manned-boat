@@ -2,7 +2,7 @@
 // Created by Ishaan Sayal.
 // Copyright (c) 2026 Stevens Electric Boatworks.
 
-#include "can_node_cpp/can/SharedStore.h"
+#include "../../include/can_node_cpp/SharedStore.h"
 
 std::optional<eboat::CANData> eboat::SharedStore::getSDO(MotorSDOParam param) {
   this->get_queued_reads().push(param);

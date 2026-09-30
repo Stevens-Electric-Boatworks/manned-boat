@@ -6,7 +6,7 @@
 
 #include "CANDriver.h"
 #include "MotorSDOParam.h"
-#include "SharedStore.h"
+#include "../SharedStore.h"
 
 #include <iostream>
 #include <lely/coapp/loop_driver.hpp>
@@ -82,8 +82,8 @@ namespace eboat
             }
             catch (const lely::canopen::SdoError& e)
             {
-                // std::cerr << "SDO read failed for " << std::hex << param.index
-                //     << ":" << +param.subindex << " — " << e.what() << "\n";
+                std::cerr << "SDO read failed for " << std::hex << param.index
+                    << ":" << +param.subindex << " — " << e.what() << "\n";
             }
         }
 
