@@ -14,13 +14,10 @@ public:
   std::shared_ptr<CANBusService> canBus;
   void initialize(rclcpp::Node* node);
 
-  void initializeBus();
-
   /**
    * Runs the state machine, and must be called periodically
    */
   void tickPeriodic() const;
-  void tickBus();
 
   void switchTo(States state);
 };

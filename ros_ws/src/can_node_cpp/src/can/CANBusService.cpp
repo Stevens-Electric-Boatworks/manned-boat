@@ -25,9 +25,10 @@ bool eboat::CANBusService::initBus() {
   if (_initialized) {
     return true;
   }
-  shared_store = std::make_unique<SharedStore>(node);
 
-  std::cout << "Running initBus()" << "\n";
+  RCLCPP_INFO(node->get_logger(), "Initializing the CAN Bus Service");
+
+  shared_store = std::make_unique<SharedStore>(node, node->get_logger());
 
   // Create an I/O context to synchronize I/O services during shutdown.
   // Create a platform-specific I/O polling instance to monitor the CAN bus, as
@@ -74,6 +75,9 @@ bool eboat::CANBusService::initBus() {
   std::cout << this->masterNode->GetTimeout().count() << " timeout" << std::endl;
   _initialized = true;
 
+  RCLCPP_INFO(node->get_logger(), "CAN Bus Service finished initializing");
+
+  RCLCPP_INFO(node->get_logger(), "Master Node Timeout: %ldms", this->masterNode->GetTimeout().count());
   return true;
 }
 bool eboat::CANBusService::initialized() const {
