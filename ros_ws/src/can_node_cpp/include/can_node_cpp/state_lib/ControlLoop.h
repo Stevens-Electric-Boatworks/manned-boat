@@ -6,14 +6,21 @@
 #include "IState.h"
 #include "states/States.h"
 #include <can_node_cpp/can/CANBusService.h>
+#include <rclcpp/publisher.hpp>
+#include <std_msgs/msg/int16.hpp>
+#include <utility>
 
 namespace eboat {
 class ControlLoop {
+  rclcpp::Publisher<std_msgs::msg::Int16>::SharedPtr publisher;
   std::unique_ptr<IState> currentState = nullptr;
 public:
   std::shared_ptr<CANBusService> canBus;
 
-  ControlLoop() = default;
+  explicit ControlLoop(rclcpp::Publisher<std_msgs::msg::Int16>::SharedPtr  publisher)
+    : publisher(std::move(publisher))
+  {
+  }
 
   void initialize();
 

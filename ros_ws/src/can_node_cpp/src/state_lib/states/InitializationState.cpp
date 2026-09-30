@@ -7,7 +7,7 @@
 #include <iostream>
 eboat::InitializationState::~InitializationState() =default;
 void eboat::InitializationState::onSwitch() const {
-  bool success = this->busService.initBus();
+  bool success = this->busService.initialized();
   if (success) {
     switchTo(States::STANDBY);
   }

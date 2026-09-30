@@ -16,14 +16,17 @@
 #include <lely/io2/sys/timer.hpp>
 #include <lely/util/diag.h>
 #include <thread>
+#include <utility>
 
 using namespace std::chrono_literals;
 
-bool eboat::CANBusService::initBus() {
+bool eboat::CANBusService::initBus(rclcpp::Publisher<std_msgs::msg::Int16>::SharedPtr publisher) {
 
   if (_initialized) {
     return true;
   }
+
+  this->publisher = std::move(publisher);
 
   std::cout << "Running initBus()" << "\n";
 

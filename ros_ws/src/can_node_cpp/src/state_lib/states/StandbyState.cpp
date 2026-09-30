@@ -19,31 +19,26 @@ void eboat::StandbyState::periodic() const {
   // std::cout << "Standby Periodic Called\n";
   auto value = busService.shared_store->getSDO(MotorSDOParam{
     .index = 0x2030,
-    .subindex = 2
+    .subindex = 3,
+    .type = SDOType::I16
   });
 
   if (value) {
-    std::printf("%d\n", static_cast<uint16_t>(value.value().value));
+    // std::printf("%d\n", std::any_cast<int16_t>(value.value().value));
+    auto message = std_msgs::msg::Int16();
+    message.data = std::any_cast<int16_t>(value.value().value);
+    this->busService.publisher->publish(message);
   }
-  auto val2 = busService.shared_store->getSDO(MotorSDOParam{
-    .index = 0x2030,
-    .subindex = 3
-  });
+  // auto val2 = busService.shared_store->getSDO(MotorSDOParam{
+  //   .index = 0x2071,
+  //   .subindex = 2,
+  //   .type = SDOType::I16
+  // });
+  //
+  // if (val2) {
+  //   std::printf("%d\n", std::any_cast<int16_t>(val2.value().value));
+  // }
 
-  if (val2) {
-    std::printf("%d\n", static_cast<uint16_t>(val2.value().value));
-  }
-  busService.shared_store->getSDO(MotorSDOParam{
-    .index = 0x2030,
-    .subindex = 5
-  });
-  busService.shared_store->getSDO(MotorSDOParam{
-  .index = 0x2030,
-  .subindex = 6
-});
-  busService.shared_store->getSDO(MotorSDOParam{
-  .index = 0x2030,
-  .subindex = 7
-});
+
 }
 void eboat::StandbyState::cleanup() const {}
