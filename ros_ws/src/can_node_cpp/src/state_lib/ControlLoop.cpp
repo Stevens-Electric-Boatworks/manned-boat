@@ -7,7 +7,6 @@
 #include "can_node_cpp/state_lib/states/InitializationState.h"
 #include "can_node_cpp/state_lib/states/StandbyState.h"
 
-#include <iostream>
 void eboat::ControlLoop::initialize(rclcpp::Node* node) {
   if (this->canBus == nullptr) {
     this->canBus = std::make_shared<CANBusService>(node);
@@ -21,12 +20,18 @@ void eboat::ControlLoop::initialize(rclcpp::Node* node) {
   }
 }
 #include <rclcpp/logging.hpp>
-void eboat::ControlLoop::tickPeriodic() const {
+void eboat::ControlLoop::tickPeriodic() {
+  loop_start = std::chrono::steady_clock::now();
   if (this->currentState == nullptr) {
       RCLCPP_ERROR(this->canBus->shared_store->logger, "Current state is null!");
     return;
   }
   this->currentState->periodic();
+
+  auto diff_microsecs = std::chrono::duration_cast<std::chrono::microseconds>(std::chrono::steady_clock::now() - loop_start);
+  auto msg = std_msgs::msg::UInt32();
+  msg.data = diff_microsecs.count();
+  this->canBus->shared_store->pubs->controlLoopTime->publish(msg);
 }
 void eboat::ControlLoop::switchTo(const States state) {
   if (state == States::STANDBY) {

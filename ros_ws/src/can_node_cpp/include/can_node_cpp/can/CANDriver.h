@@ -134,6 +134,8 @@ namespace eboat
                 CANData{.value = std::move(value), .timestamp = std::chrono::system_clock::now()});
         }
 
+
+
     private:
         std::mutex queue_mutex_;
         std::queue<MotorODParam> pending_;
