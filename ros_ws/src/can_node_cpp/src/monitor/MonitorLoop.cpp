@@ -22,8 +22,7 @@ void eboat::MonitorLoop::tick()
     proccessQueue();
 }
 
-void eboat::MonitorLoop::slowTick()
-{
+void eboat::MonitorLoop::slowTick() const {
     publishQueueSize();
 }
 

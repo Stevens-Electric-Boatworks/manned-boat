@@ -90,8 +90,7 @@ namespace eboat
             }
             catch (const lely::canopen::SdoError& e)
             {
-                std::cerr << "SDO read failed for " << std::hex << param.index
-                    << ":" << +param.subindex << " — " << e.what() << "\n";
+                RCLCPP_ERROR(shared_store_->logger, "SDO read failed for [%X:%d] - %s",param.index, param.subindex, e.what());
             }
         }
 
@@ -103,16 +102,17 @@ namespace eboat
             Post([this] { runWorker(); });
         }
 
-        [[nodiscard]] uint16_t getQueueLength() const
+        [[nodiscard]] uint16_t getQueueLength()
         {
-            return pending_.size();
+            std::lock_guard lock(queue_mutex_);
+            return static_cast<uint16_t>(pending_.size());
         }
 
 
     protected:
-        void OnBoot(lely::canopen::NmtState st, char es, const std::string& what) noexcept override
+        void OnBoot(lely::canopen::NmtState, char, const std::string&) noexcept override
         {
-            std::printf("Boot triggererd!\n");
+            RCLCPP_INFO(shared_store_->logger, "[NMT] Motor %s has booted up!", this->motor_ == Motors::MOTOR_A ? "A (ID 6)" : "B (ID 7)");
         }
         void OnRpdoWrite(uint16_t idx, uint8_t subidx) noexcept override {
 
@@ -131,7 +131,7 @@ namespace eboat
 
 
             shared_store_->store(motor_, *param,
-                CANData{std::move(value), std::chrono::system_clock::now()});
+                CANData{.value = std::move(value), .timestamp = std::chrono::system_clock::now()});
         }
 
     private:

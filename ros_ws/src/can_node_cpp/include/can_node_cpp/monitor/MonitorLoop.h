@@ -16,7 +16,7 @@ public:
   void initialize();
   void publishQueueSize() const;
   void tick();
-  void slowTick();
+  void slowTick() const;
 
 protected:
     void onCANDataReceive(const Motors, const MotorODParam, const CANData&) const;
