@@ -17,8 +17,10 @@ public:
   /**
    * Runs the state machine, and must be called periodically
    */
-  void tickPeriodic() const;
+  void tickPeriodic();
 
   void switchTo(States state);
+private:
+  std::chrono::time_point<std::chrono::steady_clock> loop_start;
 };
 }
