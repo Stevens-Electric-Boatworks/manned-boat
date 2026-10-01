@@ -1,0 +1,61 @@
+//
+// Created by Ishaan Sayal.
+// Copyright (c) 2026 Stevens Electric Boatworks.
+
+#pragma once
+
+#include "CANDriver.h"
+
+#include <memory>
+#include <optional>
+#include <string>
+#include <utility>
+#include <variant>
+#include <vector>
+namespace eboat {
+
+//TODO: Implement proper motor fault detection
+struct MotorFault {
+  int event_id;
+};
+
+/**
+ * Defines an Inmotion DCS CANOpen Motor Controller.
+ */
+class CANMotor {
+  /**
+   * Represents the different kinds of value that an SDO read can have
+   */
+
+  /**
+   * The internal Lely CANOpen driver which handles this object
+   */
+public:
+  std::string name;
+  int8_t can_id;
+  std::shared_ptr<CANDriver> canDriver;
+  explicit CANMotor(std::shared_ptr<CANDriver> can_diver,
+           std::string name,
+           const int8_t can_id
+  )
+      : name(std::move(name)), can_id(can_id), canDriver(std::move(can_diver)) {}
+
+  /**
+   * Reads from the CAN bus
+   * @param sdo_param The SDO parameter to read from the CAN bus
+   */
+  void read(
+    const MotorODParam &sdo_param) const;
+
+  [[nodiscard]] uint16_t getQueueLength() const
+  {
+    return canDriver->getQueueLength();
+  }
+
+  /**
+   *
+   * @return Reads the list of motor faults from the Motor Controller
+   */
+  std::vector<MotorFault> readMotorFaults();
+};
+}
