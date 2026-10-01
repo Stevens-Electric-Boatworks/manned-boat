@@ -134,7 +134,68 @@ namespace eboat
                 CANData{.value = std::move(value), .timestamp = std::chrono::system_clock::now()});
         }
 
+        void OnCanError(lely::io::CanError err) noexcept override {
+            using lely::io::CanError;
+            std::string error;
+            switch (err) {  // err is a lely::io::CanError
+                case CanError::BIT:
+                    error = "A single bit error.";
+                    break;
+                case CanError::STUFF:
+                    error = "A bit stuffing error.";
+                    break;
+                case CanError::CRC:
+                    error = "A CRC sequence error.";
+                    break;
+                case CanError::FORM:
+                    error = "A form error.";
+                    break;
+                case CanError::ACK:
+                    error = "An acknowledgment error.";
+                    break;
+                case CanError::OTHER:
+                    error = "One or more other errors. This is all I get, seriously...";
+                    break;
+                case CanError::NONE:
+                    error = "No error.";
+                    break;
+                default:
+                    error = "Unknown error.";
+                    break;
+            }
 
+            RCLCPP_ERROR(shared_store_->logger, "CAN Error Detected for Motor %s: %s", this->motor_ == Motors::MOTOR_A ? "A (ID 6)" : "B (ID 7)", error.c_str());
+        }
+
+        void OnCanState(lely::io::CanState new_state, lely::io::CanState old_state) noexcept override {
+            std::string oldStr;
+            switch (old_state) {
+                case lely::io::CanState::SLEEPING:
+                    oldStr = "SLEEPING"; break;
+                case lely::io::CanState::ACTIVE:
+                    oldStr = "ACTIVE"; break;
+                case lely::io::CanState::BUSOFF:
+                    oldStr = "BUS OFF"; break;
+                case lely::io::CanState::PASSIVE:
+                    oldStr = "PASSIVE"; break;
+                case lely::io::CanState::STOPPED:
+                    oldStr = "STOPPED"; break;
+            }
+            std::string newStr;
+            switch (new_state) {
+                case lely::io::CanState::SLEEPING:
+                     newStr = "SLEEPING"; break;
+                case lely::io::CanState::ACTIVE:
+                    newStr = "ACTIVE"; break;
+                case lely::io::CanState::BUSOFF:
+                    newStr = "BUS OFF"; break;
+                case lely::io::CanState::PASSIVE:
+                    newStr = "PASSIVE"; break;
+                case lely::io::CanState::STOPPED:
+                    newStr = "STOPPED"; break;
+            }
+            std::printf("State changed: %s to %s", oldStr.c_str(), newStr.c_str());
+        }
 
     private:
         std::mutex queue_mutex_;

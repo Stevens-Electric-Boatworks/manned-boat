@@ -68,7 +68,7 @@ bool eboat::CANBusService::initBus() {
     7
 );
 
-  this->masterNode->SetTimeout(500ms);
+  this->masterNode->SetTimeout(10ms);
   this->masterNode.value().Reset();
     _initialized = true;
 
