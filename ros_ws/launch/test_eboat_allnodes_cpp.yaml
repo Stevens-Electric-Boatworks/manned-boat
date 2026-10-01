@@ -20,9 +20,9 @@ launch:
             value: "~/eboat_src/data/FAULTS.csv"
 
   - node:
-      pkg: "can_node"
-      exec: "test"
-      name: "can_node"
+      pkg: "can_node_cpp"
+      exec: "can_node"
+      name: "cpp_can"
 
   - node:
       pkg: "motion_node"

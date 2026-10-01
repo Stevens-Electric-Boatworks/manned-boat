@@ -12,9 +12,7 @@ bool eboat::StandbyState::isValid() const {
   //TODO implement
   return false;
 }
-void eboat::StandbyState::onSwitch() const {
-    std::cout << "Standby onSwitch() called!";
-}
+void eboat::StandbyState::onSwitch() const {}
 void eboat::StandbyState::periodic() const {
   // std::cout << "Standby Periodic Called\n";
   auto value = busService.shared_store->getSDO(
@@ -24,22 +22,5 @@ void eboat::StandbyState::periodic() const {
     .subindex = 3,
     .type = ODType::I16
   });
-
-  if (value) {
-    // auto message = std_msgs::msg::Int16();
-    // message.data = std::any_cast<int16_t>(value.value().value);
-    // this->busService.shared_store->pubs->genericStatus->publish(message);
-  }
-  // auto val2 = busService.shared_store->getSDO(MotorSDOParam{
-  //   .index = 0x2071,
-  //   .subindex = 2,
-  //   .type = SDOType::I16
-  // });
-  //
-  // if (val2) {
-  //   std::printf("%d\n", std::any_cast<int16_t>(val2.value().value));
-  // }
-
-
 }
 void eboat::StandbyState::cleanup() const {}

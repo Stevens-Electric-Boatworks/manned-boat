@@ -14,7 +14,6 @@ void eboat::ControlLoop::initialize(rclcpp::Node* node) {
     this->canBus->initBus();
   }
   if (currentState == nullptr) {
-    std::cout << "new current state" << "\n";
       currentState = std::make_unique<InitializationState>(*canBus, [this](const States s) {
         switchTo(s);
       });
@@ -24,19 +23,19 @@ void eboat::ControlLoop::initialize(rclcpp::Node* node) {
 #include <rclcpp/logging.hpp>
 void eboat::ControlLoop::tickPeriodic() const {
   if (this->currentState == nullptr) {
-        std::cout<< "The current state is null!" << "\n";
+      RCLCPP_ERROR(this->canBus->shared_store->logger, "Current state is null!");
     return;
   }
   this->currentState->periodic();
 }
-void eboat::ControlLoop::switchTo(States state) {
+void eboat::ControlLoop::switchTo(const States state) {
   if (state == States::STANDBY) {
     currentState->cleanup();
     currentState = std::make_unique<StandbyState>(*canBus, [this](const States s) {
         switchTo(s);
       });
     currentState->onSwitch();
-    std::cout << "Switched to Standby State!" << std::endl;
+    RCLCPP_INFO(this->canBus->shared_store->logger, "Switched to STANDBY State");
   }
 }
 
