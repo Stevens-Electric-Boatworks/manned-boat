@@ -16,34 +16,32 @@
 #include <utility>
 
 namespace eboat {
+    class CANBusService {
+    private:
+        std::shared_ptr<lely::io::Context> ctx;
+        std::shared_ptr<lely::io::Poll> _poll;
+        std::shared_ptr<lely::io::Timer> _timer;
+        std::shared_ptr<lely::io::CanController> _ctrl;
+        std::shared_ptr<lely::io::CanChannel> _chan;
+        std::thread _ioThread;
+        rclcpp::Node *node;
+        bool _initialized = false;
 
-class CANBusService {
-private:
-  std::shared_ptr<lely::io::Context> ctx;
-  std::shared_ptr<lely::io::Poll> _poll;
-  std::shared_ptr<lely::io::Timer> _timer;
-  std::shared_ptr<lely::io::CanController> _ctrl;
-  std::shared_ptr<lely::io::CanChannel> _chan;
-  std::thread _ioThread;
-  rclcpp::Node* node;
-  bool _initialized = false;
+    public:
+        explicit CANBusService(rclcpp::Node *node)
+            : node(node) {
+        }
 
-public:
-  explicit CANBusService(rclcpp::Node*  node)
-    : node(node)
-  {
-  }
+        std::shared_ptr<lely::ev::Loop> loop;
+        std::unique_ptr<CANMotor> motorA;
+        std::unique_ptr<CANMotor> motorB;
+        std::optional<lely::canopen::AsyncMaster> masterNode;
+        std::unique_ptr<SharedStore> shared_store;
 
-  std::shared_ptr<lely::ev::Loop> loop;
-  std::unique_ptr<CANMotor> motorA;
-  std::unique_ptr<CANMotor> motorB;
-  std::optional<lely::canopen::AsyncMaster> masterNode;
-  std::unique_ptr<SharedStore> shared_store;
-  bool initBus();
+        bool initBus();
 
-  [[nodiscard]] bool initialized() const;
+        [[nodiscard]] bool initialized() const;
 
-  void periodic() const;
-
-};
+        void periodic() const;
+    };
 }
