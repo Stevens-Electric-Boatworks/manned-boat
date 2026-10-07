@@ -15,7 +15,7 @@ namespace {
             this->_controlLoop->initialize(this);
             this->_monitorLoop = std::make_shared<eboat::MonitorLoop>(*this->_controlLoop->canBus);
             this->_monitorLoop->initialize();
-            this->monitoring_Loop_Timer = create_wall_timer(10ms, [this]() -> void {
+            this->monitoring_Loop_Timer = create_wall_timer(5ms, [this]() -> void {
                 this->_monitorLoop->tick();
             });
             this->slow_monitor_loop_timer = create_wall_timer(50ms, [this]() -> void {
@@ -24,7 +24,7 @@ namespace {
             this->control_loop_timer = create_wall_timer(20ms, [this]() -> void {
                 this->_controlLoop->tickPeriodic();
             });
-            auto ref = _monitorLoop->can_bus_service.loop.get();
+            auto ref = _monitorLoop->can_bus_service.loop;
 
             if (ref == nullptr)
             {
@@ -36,7 +36,7 @@ namespace {
                 return;
             }
 
-            this->thread = std::make_shared<std::thread>([&ref]()-> void {
+            this->thread = std::make_shared<std::thread>([ref]()-> void {
                 ref->run();
             });
         }

@@ -42,7 +42,7 @@ bool eboat::CANBusService::initBus() {
     const auto exec = loop->get_executor();
     // Create a timer using a monotonic clock, i.e., a clock that is not affected
     // by discontinuous jumps in the system time.
-    _timer = std::make_shared<lely::io::Timer>(*_poll, exec, CLOCK_REALTIME);
+    _timer = std::make_shared<lely::io::Timer>(*_poll, exec, CLOCK_MONOTONIC);
     _ctrl = std::make_shared<lely::io::CanController>("vcan0");
     //TODO add detection for CAN bus not active
     _chan = std::make_shared<lely::io::CanChannel>(*_poll, exec);
@@ -67,7 +67,7 @@ bool eboat::CANBusService::initBus() {
         7
     );
 
-    this->masterNode->SetTimeout(10ms);
+    this->masterNode->SetTimeout(100ms);
     this->masterNode.value().Reset();
     _initialized = true;
 
