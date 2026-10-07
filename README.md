@@ -1,5 +1,5 @@
 
-![](/_readme_imgs/logo.png) 
+![](https://docs.stevenseboat.org/assets/images/stevenseboat_logo.png) 
 
 
 # TidalCore
@@ -9,4 +9,4 @@ TidalCore, built on Robot Operating System 2 (ROS2) is the primary software runn
 To get started, please visit the documentation at [docs.stevenseboat.org](https://docs.stevenseboat.org).
 
 ## Contact
-Ishaan Sayal - [isayal@stevens.edu](mailto:isayal@stevens.edu)
+For information to conatct the Controls team, [please check our documenation](https://docs.stevenseboat.org/#contact).
