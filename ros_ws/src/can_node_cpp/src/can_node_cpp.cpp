@@ -26,6 +26,16 @@ namespace {
             });
             auto ref = _monitorLoop->can_bus_service.loop.get();
 
+            if (ref == nullptr)
+            {
+                RCLCPP_ERROR(this->get_logger(), "The reference for the can bus service executor loop is null, unable to continue.");
+                this->monitoring_Loop_Timer->cancel();
+                this->slow_monitor_loop_timer->cancel();
+                this->control_loop_timer->cancel();
+                rclcpp::shutdown();
+                return;
+            }
+
             this->thread = std::make_shared<std::thread>([&ref]()-> void {
                 ref->run();
             });
