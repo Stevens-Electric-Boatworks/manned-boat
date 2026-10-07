@@ -1,1 +1,0 @@
-float32 inlet_temp

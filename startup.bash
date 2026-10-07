@@ -5,7 +5,7 @@ source /home/eboat/.bashrc
 echo "Starting up ROS2"
 
 # For Development
-#USER_NAME="ishaan"
+#USER_NAME="your username"
 #ROS_WS="eboat_src/ros_ws"
 
 # Relative to ros_ws/launch
