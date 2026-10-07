@@ -38,7 +38,7 @@ void eboat::ControlLoop::tickPeriodic() {
 }
 
 void eboat::ControlLoop::switchTo(const States state) {
-    if (state == States::STANDBY ) {
+    if (state == States::STANDBY) {
         auto newState  = std::make_unique<StandbyState>(*canBus, [this](const States s) {
             switchTo(s);
         });

@@ -35,6 +35,9 @@ void eboat::MonitorLoop::publishQueueSize() const {
     can_bus_service.shared_store->pubs->motorB->queue_size->publish(msgB);
 }
 
+/**
+ * This function is used to automatically log certain parameters that we may want to do automatically, or process data constantly.
+ */
 void eboat::MonitorLoop::onCANDataReceive(const Motors motorNum, const MotorODParam param, const CANData &data) const {
     const auto motorSub = motorNum == Motors::MOTOR_A
                               ? this->can_bus_service.shared_store->pubs->motorA.get()
@@ -60,7 +63,7 @@ void eboat::MonitorLoop::proccessQueue() const {
 
 void eboat::MonitorLoop::addDefaultParameters() const {
     constexpr MotorODParam defaults[] = {
-        {.index = 2030, .subindex = 2, .type = ODType::I16},
+        {.index = 0x2030, .subindex = 2, .type = ODType::I16}, // this should already be sent by an PDO
     };
     for (const auto param: defaults) {
         // we can safely discard the data, we are just trying to put onto the queue
