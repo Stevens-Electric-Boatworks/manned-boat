@@ -19,7 +19,7 @@ from boat_data_interfaces.msg import CANMotorData, CANBusStatus, BMSSOCSummary, 
     BMSPackSummary, BMSMcuSummary, CANThermistor
 
 
-def is_can_interface_up(interface: str = "can0") -> bool:
+def is_can_interface_up(interface: str = "vcan0") -> bool:
     try:
         result = subprocess.run(
             ["ip", "link", "show", interface],
@@ -80,11 +80,11 @@ class CANBus:
         self.configure()
 
     def configure(self):
-        if not is_can_interface_up():
-            self.logger.error("can0 is not up. Aborting startup!!")
-            self.declare_alarm(Alarm.CAN0_INTERFACE_NOT_UP)
-            self.can_bus_state = CANBusStatus.OFFLINE
-            return
+        # if not is_can_interface_up():
+        #     self.logger.error("can0 is not up. Aborting startup!!")
+        #     self.declare_alarm(Alarm.CAN0_INTERFACE_NOT_UP)
+        #     self.can_bus_state = CANBusStatus.OFFLINE
+        #     return
 
         if self.network is not None:
             self.is_node_ok = False
@@ -103,7 +103,7 @@ class CANBus:
 
         # Connect to the CAN bus
         try:
-            self.network.connect(channel='can0', bustype='socketcan', bitrate=500_000)
+            self.network.connect(channel='vcan0', bustype='socketcan', bitrate=500_000)
         except CanError:
             self.logger.error(
                 f"""Unable to connect to the CAN bus because of the following error: {traceback.format_exc()}""")
@@ -118,8 +118,11 @@ class CANBus:
         self.network.subscribe(0xbd, self.on_bms_booster_thermistor_data)
 
         self.logger.info("Using a dummy EDS file at \"" + self.dummy_efp + "\".")
-        self.motorA = canopen.BaseNode402(7, canopen.import_od(self.dummy_efp))  # Use a dummy EDS here
-        self.motorB = canopen.BaseNode402(6, canopen.import_od(self.dummy_efp))  # Use a dummy EDS here
+        self.motorA = canopen.BaseNode402(7, canopen.import_od(self.dummy_efp))
+        self.motorB = canopen.BaseNode402(6, canopen.import_od(self.dummy_efp))
+        # od = canopen.import_od(self.dummy_efp)
+        # canopen.export_od(od, "/home/isayal/motors.eds")
+
         self.network.add_node(self.motorA)
         self.network.add_node(self.motorB)
 
@@ -315,16 +318,17 @@ class CANBus:
                     return
 
                 if n == 0:
-                    query_alarms(self.motorA)
-                    query_alarms(self.motorB)
+                    pass
+                    # query_alarms(self.motorA)
+                    # query_alarms(self.motorB)
 
                 n = (n + 1) % 30
                 t_a = Thread(target=self.publish_sdo_data, args=[self.motorA, motorA_pub], daemon=True)
-                t_b = Thread(target=self.publish_sdo_data, args=[self.motorB, motorB_pub], daemon=True)
+                # t_b = Thread(target=self.publish_sdo_data, args=[self.motorB, motorB_pub], daemon=True)
                 t_a.start()
-                t_b.start()
+                # t_b.start()
                 t_a.join()
-                t_b.join()
+                # t_b.join()
                 time.sleep(0.025)
             except Exception as e:
                 time.sleep(0.8)
@@ -358,9 +362,9 @@ class CANBus:
         if tries >= 3:
             return -1
         try:
-            value = motor.sdo[index][subindex].raw
+            val = motor.sdo[index][subindex].raw
             self.can_bus_state = CANBusStatus.ONLINE
-            return value
+            return val
         except canopen.sdo.exceptions.SdoCommunicationError as e:
             return self.read_and_log_sdo(motor, index, subindex, tries + 1)
         except SdoAbortedError as e:
@@ -379,56 +383,57 @@ class CANBus:
     # Feel free to browse the parameter list which is in testing/parameters.csv
     def publish_sdo_data(self, motor, publisher):
         voltage = self.read_and_log_sdo(motor, 0x2030, 2) * 0.01  # Volts
-        throttle_percent = self.read_and_log_sdo(motor, 0x2029, 6) / 10  # %
-        rpm = self.read_and_log_sdo(motor, 0x2052, 1)  # rpm
-        current = self.read_and_log_sdo(motor, 0x2073, 1)  # Arms
-        temperature = self.read_and_log_sdo(motor, 0x2040, 2)  # deg C
-        torque = self.read_and_log_sdo(motor, 0x2076, 2) * 0.1  # Nm
-        enabled_raw = self.read_and_log_sdo(motor, 0x2000, 1)
-        enabled = enabled_raw & (1 << 3)
-        if enabled == -1:
-            enabled = False
-        power = voltage * current
-        current_limit_reason = self.read_and_log_sdo(motor, 0x2095, 19)
-        current_limited = self.read_and_log_sdo(motor, 0x2020, 10) & (1 << 10)
-
-        msg = CANMotorData()
-        msg.voltage = float(voltage)
-        msg.throttle_mv = -1
-        msg.throttle_percentage = int(throttle_percent)
-        msg.rpm = -int(rpm)
-        msg.torque = float(torque)
-        msg.motor_temp = float(temperature)
-        msg.current = float(current)
-        msg.power = float(power)
-        msg.enabled = bool(enabled)
-        msg.current_limit_reason = int(current_limit_reason)
-
-        def _declare_calarm(alarm_id):
-            if motor == self.motorA:
-                self.motorA_current_lim_reason = alarm_id
-                self.declare_alarm(alarm_id)
-            else:
-                self.motorB_current_lim_reason = 1000 + alarm_id
-                self.declare_alarm(1000 + alarm_id)
-
-        def _undeclare_calarm():
-            if motor == self.motorA and self.motorA_current_lim_reason != 0:
-                self.unlatch_alarm(self.motorA_current_lim_reason)
-                self.motorA_current_lim_reason = 0
-            elif motor == self.motorB and self.motorB_current_lim_reason != 0:
-                self.unlatch_alarm(self.motorB_current_lim_reason)
-                self.motorB_current_lim_reason = 0
-
-        if current_limited == 0:
-            _undeclare_calarm()
-        elif 1 <= current_limited <= 15:
-            _declare_calarm(1191 + current_limit_reason)
-
-        msg.current_limited = bool(current_limited)
-
-        if self.can_bus_state == CANBusStatus.ONLINE:
-            publisher.publish(msg)
+        # throttle_percent = self.read_and_log_sdo(motor, 0x2029, 6) / 10  # %
+        print(voltage)
+        # # rpm = self.read_and_log_sdo(motor, 0x2052, 1)  # rpm
+        # # current = self.read_and_log_sdo(motor, 0x2073, 1)  # Arms
+        # # temperature = self.read_and_log_sdo(motor, 0x2040, 2)  # deg C
+        # # torque = self.read_and_log_sdo(motor, 0x2076, 2) * 0.1  # Nm
+        # # enabled_raw = self.read_and_log_sdo(motor, 0x2000, 1)
+        # # enabled = enabled_raw & (1 << 3)
+        # # if enabled == -1:
+        # #     enabled = False
+        # # power = voltage * current
+        # # current_limit_reason = self.read_and_log_sdo(motor, 0x2095, 19)
+        # # current_limited = self.read_and_log_sdo(motor, 0x2020, 10) & (1 << 10)
+        # #
+        # # msg = CANMotorData()
+        # # msg.voltage = float(voltage)
+        # # msg.throttle_mv = -1
+        # # msg.throttle_percentage = int(throttle_percent)
+        # # msg.rpm = -int(rpm)
+        # # msg.torque = float(torque)
+        # # msg.motor_temp = float(temperature)
+        # # msg.current = float(current)
+        # # msg.power = float(power)
+        # # msg.enabled = bool(enabled)
+        # # msg.current_limit_reason = int(current_limit_reason)
+        # #
+        # # def _declare_calarm(alarm_id):
+        # #     if motor == self.motorA:
+        # #         self.motorA_current_lim_reason = alarm_id
+        # #         self.declare_alarm(alarm_id)
+        # #     else:
+        # #         self.motorB_current_lim_reason = 1000 + alarm_id
+        # #         self.declare_alarm(1000 + alarm_id)
+        # #
+        # # def _undeclare_calarm():
+        # #     if motor == self.motorA and self.motorA_current_lim_reason != 0:
+        # #         self.unlatch_alarm(self.motorA_current_lim_reason)
+        # #         self.motorA_current_lim_reason = 0
+        # #     elif motor == self.motorB and self.motorB_current_lim_reason != 0:
+        # #         self.unlatch_alarm(self.motorB_current_lim_reason)
+        # #         self.motorB_current_lim_reason = 0
+        # #
+        # # if current_limited == 0:
+        # #     _undeclare_calarm()
+        # # elif 1 <= current_limited <= 15:
+        # #     _declare_calarm(1191 + current_limit_reason)
+        # #
+        # # msg.current_limited = bool(current_limited)
+        # #
+        # # if self.can_bus_state == CANBusStatus.ONLINE:
+        #     publisher.publish(msg)
 
     def read_error_log(self, motor: BaseNode402) -> list[int]:
         """Read stored emergency error codes from the controller's error log."""

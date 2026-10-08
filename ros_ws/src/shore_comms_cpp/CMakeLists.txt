@@ -29,17 +29,31 @@ find_package(rclcpp REQUIRED)
 find_package(std_msgs REQUIRED)
 find_package(boat_data_interfaces REQUIRED)
 find_package(boat_common_libs_cpp REQUIRED)
+find_package(ixwebsocket REQUIRED)
 
-add_subdirectory(${CMAKE_SOURCE_DIR}/../IXWebSocket IXWebSocket_build)
+
+#add_subdirectory(${CMAKE_SOURCE_DIR}/../IXWebSocket IXWebSocket_build)
 
 # Create library from sources
+target_precompile_headers(shore PRIVATE
+        <rclcpp/rclcpp.hpp>
+        <ixwebsocket/IXWebSocket.h>
+        <string>
+        <vector>
+        <memory>
+        <functional>
+)
+
 target_link_libraries(shore
         PUBLIC
         rclcpp::rclcpp
         ${std_msgs_TARGETS}
         ${boat_data_interfaces_TARGETS}
         ${boat_common_libs_cpp_TARGETS}
-        ixwebsocket
+        ixwebsocket::ixwebsocket
+        ssl
+        crypto
+        z
 )
 
 install(TARGETS shore DESTINATION lib/${PROJECT_NAME})
@@ -64,7 +78,10 @@ if(BUILD_TESTING)
             ${std_msgs_TARGETS}
             ${boat_data_interfaces_TARGETS}
             ${boat_common_libs_cpp_TARGETS}
-            ixwebsocket
+            ixwebsocket::ixwebsocket
+            ssl
+            crypto
+            z
     )
 endif()
 
