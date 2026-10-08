@@ -44,7 +44,7 @@ void eboat::MonitorLoop::onCANDataReceive(const Motors motorNum, const MotorODPa
                               : this->can_bus_service.shared_store->pubs->motorB.get();
 
     //voltage
-    if (param.index == 0x2030 && param.subindex == 3) {
+    if (param.index == 0x2030 && param.subindex == 2) {
         auto msg = std_msgs::msg::Int16();
         msg.data = std::any_cast<int16_t>(data.value);
         motorSub->voltage->publish(msg);
