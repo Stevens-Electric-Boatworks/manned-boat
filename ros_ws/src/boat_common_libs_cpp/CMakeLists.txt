@@ -9,6 +9,21 @@ endif()
 find_package(ament_cmake REQUIRED)
 find_package(rclcpp REQUIRED)
 find_package(boat_data_interfaces REQUIRED)
+
+if (NOT TARGET sockcanpp)
+  # C++11 support
+  set(sockcanpp_CONCEPT_SUPPORT OFF CACHE BOOL "Force C++ standard back to 11")
+
+  add_subdirectory(${CMAKE_CURRENT_SOURCE_DIR}/../libsockcanpp ${CMAKE_CURRENT_SOURCE_DIR}/build/libsockcanpp)
+endif()
+
+# ...
+
+target_link_libraries(
+        # ...
+        sockcanpp
+)
+
 ####################################
 # CPP Shared Library Block [BEGIN] #
 # vvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvv #
@@ -17,6 +32,7 @@ find_package(boat_data_interfaces REQUIRED)
 # into the same shared library called ${PROJECT_NAME}.
 add_library(${PROJECT_NAME} SHARED
         src/AlarmPublisher.cpp
+        src/can/CanIo.cpp
 )
 
 target_link_libraries(boat_common_libs_cpp PUBLIC
