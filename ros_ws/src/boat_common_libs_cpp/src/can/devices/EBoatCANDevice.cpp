@@ -15,7 +15,7 @@ void eboat::can::EBoatCANDevice::on_can_error(const sockcanpp::CanMessage& msg)
 void eboat::can::EBoatCANDevice::on_can_data(const sockcanpp::CanMessage& msg)
 {
     parse_generic_headers(msg);
-    // TODO: pass to children
+    handle_custom_can_data(msg);
 
 }
 

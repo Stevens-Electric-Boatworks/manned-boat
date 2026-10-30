@@ -6,5 +6,5 @@
 
 void eboat::can::CanDeviceManager::register_device(std::unique_ptr<CanDevice> device)
 {
-    this->devices.emplace_back(std::move(device));
+    this->devices.insert({device->get_can_id(), std::move(device)});
 }

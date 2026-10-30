@@ -71,6 +71,12 @@ void eboat::can::CanIo::handleErrorFrame(const sockcanpp::CanMessage& msg) const
 
 void eboat::can::CanIo::handleFrame(const sockcanpp::CanMessage& msg) const
 {
+   // TODO: Proper logging of all CAN bus frames
+    // std::printf("We got a can frame: ID: %d, Data:", *msg.getCanId());
+    // for (unsigned char c : msg.getFrameData()) {
+    //     std::printf("0x%02X ", c);
+    // }
+    // std::printf("\n");
     for (const auto& msg_callback : this->msg_callbacks)
     {
         msg_callback(msg);

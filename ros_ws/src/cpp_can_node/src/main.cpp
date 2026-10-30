@@ -29,7 +29,7 @@ namespace eboat
               io_("vcan0"),
               device_manager_(io_)
         {
-            device_manager_.register_device(std::make_unique<can::device::ExampleCanNode>(10));
+            device_manager_.register_device(std::make_unique<can::device::ExampleCanNode>(0x10));
 
             io_.start_recv_thread();
         }

@@ -12,6 +12,7 @@ void eboat::can::device::ExampleCanNode::handle_custom_can_data(const sockcanpp:
     default:
         break;
     }
+    std::printf("Temp A: %f, %f, %f\n", *temp_a, *temp_b, *temp_c);
 }
 
 const std::optional<float>& eboat::can::device::ExampleCanNode::get_temp_a() const
@@ -34,7 +35,7 @@ void eboat::can::device::ExampleCanNode::parse_cooling_temp_senors_vals(const so
     const auto d = msg.getFrameData();
     temp_a = readU16(d, 1) * 0.01;
     temp_b = readU16(d, 3) * 0.01;
-    temp_b = readU16(d, 5) * 0.01;
+    temp_c = readU16(d, 5) * 0.01;
 }
 
 

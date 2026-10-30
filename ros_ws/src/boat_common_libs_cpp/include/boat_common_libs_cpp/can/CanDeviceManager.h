@@ -10,15 +10,21 @@ namespace eboat::can
     class CanDeviceManager
     {
     public:
-        explicit CanDeviceManager(const CanIo& can_io)
+        explicit CanDeviceManager(CanIo& can_io)
             : can_io_(can_io)
         {
+            can_io.register_msg_callback([this](sockcanpp::CanMessage can_message)
+            {
+                if (const auto it = devices.find(*can_message.getCanId()); it != devices.end()) {
+                    it->second->on_can_data(can_message);
+                }
+            });
         }
 
         void register_device(std::unique_ptr<CanDevice> device);
 
     private:
-        std::vector<std::unique_ptr<CanDevice>> devices = {};
+        std::unordered_map<uint8_t, std::unique_ptr<CanDevice>> devices = {};
         const CanIo& can_io_;
     };
 }
