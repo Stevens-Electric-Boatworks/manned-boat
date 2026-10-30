@@ -18,7 +18,7 @@ AlarmPublisher::AlarmPublisher(const rclcpp::Node::SharedPtr node) {
 void AlarmPublisher::publishAlarm(const Faults fault) const {
     const auto request = std::make_shared<boat_data_interfaces::srv::AlarmRaise::Request>();
     auto alarm = boat_data_interfaces::msg::BoatAlarm();
-    alarm.error_code = static_cast<int8_t>(fault);
+    alarm.error_code = static_cast<uint8_t>(fault);
     alarm.timestamp = this->node->get_clock()->now();
     request->alarm = alarm;
     this->alarmRaiseClient->async_send_request(request);
@@ -26,6 +26,6 @@ void AlarmPublisher::publishAlarm(const Faults fault) const {
 
 void AlarmPublisher::delatchAlarm(Faults fault) const {
     const auto request = std::make_shared<boat_data_interfaces::srv::AlarmDelatch::Request>();
-    request->error_code = static_cast<int8_t>(fault);
+    request->error_code = static_cast<uint8_t>(fault);
     this->alarmDeLatchClient->async_send_request(request);
 }

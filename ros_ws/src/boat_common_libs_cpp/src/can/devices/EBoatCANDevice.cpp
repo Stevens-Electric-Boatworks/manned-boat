@@ -2,7 +2,7 @@
 // Created by Ishaan Sayal.
 // Copyright (c) 2026 Stevens Electric Boatworks.
 
-#include "../../../include/boat_common_libs_cpp/can/devices/EBoatCANDevice.h"
+#include "boat_common_libs_cpp/can/devices/EBoatCANDevice.h"
 
 #include "boat_common_libs_cpp/can/byte_helpers.h"
 

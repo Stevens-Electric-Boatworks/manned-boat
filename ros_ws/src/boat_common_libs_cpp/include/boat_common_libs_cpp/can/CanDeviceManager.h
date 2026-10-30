@@ -13,7 +13,7 @@ namespace eboat::can
         explicit CanDeviceManager(CanIo& can_io)
             : can_io_(can_io)
         {
-            can_io.register_msg_callback([this](sockcanpp::CanMessage can_message)
+            can_io.register_msg_callback([this](const sockcanpp::CanMessage& can_message)
             {
                 if (const auto it = devices.find(*can_message.getCanId()); it != devices.end()) {
                     it->second->on_can_data(can_message);
