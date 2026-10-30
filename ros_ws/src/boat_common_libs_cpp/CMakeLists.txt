@@ -4,25 +4,16 @@ project(boat_common_libs_cpp)
 if(CMAKE_COMPILER_IS_GNUCXX OR CMAKE_CXX_COMPILER_ID MATCHES "Clang")
   add_compile_options(-Wall -Wextra -Wpedantic)
 endif()
-
-# find dependencies
-find_package(ament_cmake REQUIRED)
-find_package(rclcpp REQUIRED)
-find_package(boat_data_interfaces REQUIRED)
-
 if (NOT TARGET sockcanpp)
   # C++11 support
   set(sockcanpp_CONCEPT_SUPPORT OFF CACHE BOOL "Force C++ standard back to 11")
 
   add_subdirectory(${CMAKE_CURRENT_SOURCE_DIR}/../libsockcanpp ${CMAKE_CURRENT_SOURCE_DIR}/build/libsockcanpp)
 endif()
-
-# ...
-
-target_link_libraries(
-        # ...
-        sockcanpp
-)
+# find dependencies
+find_package(ament_cmake REQUIRED)
+find_package(rclcpp REQUIRED)
+find_package(boat_data_interfaces REQUIRED)
 
 ####################################
 # CPP Shared Library Block [BEGIN] #
@@ -32,18 +23,23 @@ target_link_libraries(
 # into the same shared library called ${PROJECT_NAME}.
 add_library(${PROJECT_NAME} SHARED
         src/AlarmPublisher.cpp
+        src/can/CanDeviceManager.cpp
         src/can/CanIo.cpp
+        src/can/devices/EBoatCANDevice.cpp
+        src/can/devices/eboat/ExampleCanNode.cpp
 )
 
 target_link_libraries(boat_common_libs_cpp PUBLIC
         rclcpp::rclcpp
         ${boat_data_interfaces_TARGETS}
+        sockcanpp
 )
 
 target_include_directories(${PROJECT_NAME}
         PUBLIC
         $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/include>
-        $<INSTALL_INTERFACE:include>)
+        $<INSTALL_INTERFACE:include>
+)
 
 ament_export_targets(export_${PROJECT_NAME} HAS_LIBRARY_TARGET)
 ament_export_dependencies(
@@ -80,4 +76,4 @@ if(BUILD_TESTING)
   ament_lint_auto_find_test_dependencies()
 endif()
 
-ament_package()
+ament_package(CONFIG_EXTRAS cmake/boat_common_libs_cpp-extras.cmake)

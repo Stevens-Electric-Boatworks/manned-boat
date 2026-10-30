@@ -15,7 +15,7 @@ add_executable(cpp_can_node
         src/main.cpp
 )
 
-target_link_libraries(cpp_can_node PUBLIC rclcpp::rclcpp ${std_msgs_TARGETS} ${boat_common_libs_cpp_TARGETS})
+target_link_libraries(cpp_can_node PUBLIC rclcpp::rclcpp ${std_msgs_TARGETS} ${boat_common_libs_cpp_TARGETS} )
 target_include_directories(
         cpp_can_node
         PRIVATE "${CMAKE_CURRENT_SOURCE_DIR}/include"
