@@ -8,7 +8,6 @@
 
 void eboat::can::EBoatCANDevice::on_can_error(const sockcanpp::CanMessage& msg)
 {
-
     //TODO: implement error related stuff
 }
 
@@ -16,7 +15,6 @@ void eboat::can::EBoatCANDevice::on_can_data(const sockcanpp::CanMessage& msg)
 {
     parse_generic_headers(msg);
     handle_custom_can_data(msg);
-
 }
 
 uint8_t eboat::can::EBoatCANDevice::get_can_id()
@@ -57,13 +55,18 @@ uint8_t eboat::can::EBoatCANDevice::get_header_byte(const sockcanpp::CanMessage&
 
 void eboat::can::EBoatCANDevice::parse_generic_headers(const sockcanpp::CanMessage& msg)
 {
-    switch (get_header_byte(msg)) {
-    case 0x01: parse_device_status_frame(msg); break;
-    case 0x02: /*TODO implement*/;   break;
-    case 0x03: parse_power_rails_frame(msg); break;
+    switch (get_header_byte(msg))
+    {
+    case 0x01: parse_device_status_frame(msg);
+        break;
+    case 0x02: /*TODO implement*/;
+        break;
+    case 0x03: parse_power_rails_frame(msg);
+        break;
     default:
         break;
-    }}
+    }
+}
 
 void eboat::can::EBoatCANDevice::parse_device_status_frame(const sockcanpp::CanMessage& msg)
 {
@@ -71,7 +74,7 @@ void eboat::can::EBoatCANDevice::parse_device_status_frame(const sockcanpp::CanM
     device_state_ = device_state_from_protocol(readU8(d, 1));
     board_type_ = board_type_from_protocol(readU8(d, 2));
     seconds_since_boot = readU16(d, 3);
-    ms_since_heartbeat =  readU16(d, 5);
+    ms_since_heartbeat = readU16(d, 5);
 
     // bytes 6/7 are unused
 }
@@ -79,8 +82,8 @@ void eboat::can::EBoatCANDevice::parse_device_status_frame(const sockcanpp::CanM
 void eboat::can::EBoatCANDevice::parse_power_rails_frame(const sockcanpp::CanMessage& msg)
 {
     const auto d = msg.getFrameData();
-    rails_ = PowerRails {
-      readU16(d, 1), // input voltage mV
+    rails_ = PowerRails{
+        readU16(d, 1), // input voltage mV
         readU16(d, 3) // input current mA
     };
     // bytes 5-7 are unused

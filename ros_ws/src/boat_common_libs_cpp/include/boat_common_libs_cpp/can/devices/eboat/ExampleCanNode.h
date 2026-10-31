@@ -16,7 +16,8 @@ namespace eboat::can::device
     public:
         explicit ExampleCanNode(const uint8_t can_id)
             : EBoatCANDevice(can_id)
-        {}
+        {
+        }
 
         /**
          * you MUST override this function from EboatCanDevice!!
@@ -43,6 +44,5 @@ namespace eboat::can::device
         std::optional<double> temp_c = std::nullopt;
 
         void parse_cooling_temp_senors_vals(const sockcanpp::CanMessage& msg);
-
     };
 }

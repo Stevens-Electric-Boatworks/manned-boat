@@ -19,13 +19,14 @@ namespace eboat::can
     class CanIo
     {
     public:
-        explicit CanIo(std::string  interface_name)
+        explicit CanIo(std::string interface_name)
             : interface_name(std::move(interface_name))
         {
             driver = std::make_unique<sockcanpp::CanDriver>(this->interface_name, CAN_RAW);
             driver->setDefaultSenderId(sockcanpp::CanId{0x01});
             driver->setErrorFilter(true);
         }
+
         ~CanIo();
         CanIo(const CanIo&) = delete;
         CanIo& operator=(const CanIo&) = delete;
@@ -34,6 +35,7 @@ namespace eboat::can
         void register_error_msg_callback(const msg_callback& func);
         void start_recv_thread();
         void shutdown();
+
     private:
         void handleErrorFrame(const sockcanpp::CanMessage& msg) const;
         void handleFrame(const sockcanpp::CanMessage& msg) const;

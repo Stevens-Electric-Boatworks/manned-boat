@@ -7,15 +7,15 @@
 #include "boat_data_interfaces/srv/alarm_raise.hpp"
 
 
-
-
-AlarmPublisher::AlarmPublisher(const rclcpp::Node::SharedPtr node) {
+AlarmPublisher::AlarmPublisher(const rclcpp::Node::SharedPtr& node)
+{
     this->node = node;
     this->alarmDeLatchClient = node->create_client<boat_data_interfaces::srv::AlarmDelatch>("/alarm/delatch");
     this->alarmRaiseClient = node->create_client<boat_data_interfaces::srv::AlarmRaise>("/alarm/raise");
 }
 
-void AlarmPublisher::publishAlarm(const Faults fault) const {
+void AlarmPublisher::publishAlarm(const Faults fault) const
+{
     const auto request = std::make_shared<boat_data_interfaces::srv::AlarmRaise::Request>();
     auto alarm = boat_data_interfaces::msg::BoatAlarm();
     alarm.error_code = static_cast<uint8_t>(fault);
@@ -24,7 +24,8 @@ void AlarmPublisher::publishAlarm(const Faults fault) const {
     this->alarmRaiseClient->async_send_request(request);
 }
 
-void AlarmPublisher::delatchAlarm(Faults fault) const {
+void AlarmPublisher::delatchAlarm(Faults fault) const
+{
     const auto request = std::make_shared<boat_data_interfaces::srv::AlarmDelatch::Request>();
     request->error_code = static_cast<uint8_t>(fault);
     this->alarmDeLatchClient->async_send_request(request);

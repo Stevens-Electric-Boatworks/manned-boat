@@ -44,6 +44,7 @@ namespace eboat::can
          * @return The byte in the header
          */
         static inline uint8_t get_header_byte(const sockcanpp::CanMessage& msg);
+
     private:
         void parse_generic_headers(const sockcanpp::CanMessage& msg);
         void parse_device_status_frame(const sockcanpp::CanMessage& msg);

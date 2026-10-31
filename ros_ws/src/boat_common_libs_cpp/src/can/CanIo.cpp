@@ -24,7 +24,7 @@ void eboat::can::CanIo::register_error_msg_callback(const msg_callback& func)
 void eboat::can::CanIo::start_recv_thread()
 {
     this->active = true;
-    this->msg_poll_thread = std::thread([this]()
+    this->msg_poll_thread = std::thread([this]
     {
         while (this->active)
         {
@@ -71,7 +71,7 @@ void eboat::can::CanIo::handleErrorFrame(const sockcanpp::CanMessage& msg) const
 
 void eboat::can::CanIo::handleFrame(const sockcanpp::CanMessage& msg) const
 {
-   // TODO: Proper logging of all CAN bus frames
+    // TODO: Proper logging of all CAN bus frames
     // std::printf("We got a can frame: ID: %d, Data:", *msg.getCanId());
     // for (unsigned char c : msg.getFrameData()) {
     //     std::printf("0x%02X ", c);

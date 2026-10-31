@@ -18,6 +18,7 @@ namespace eboat::can
             throw rclcpp::exceptions::UnimplementedError("This function is not implemented yet.");
         }
     };
+
     enum class DeviceState
     {
         INIT,
@@ -25,6 +26,7 @@ namespace eboat::can
         INACTIVE,
         UNKNOWN
     };
+
     enum class BoardType
     {
         COOLING,
@@ -54,6 +56,7 @@ namespace eboat::can
             return DeviceState::UNKNOWN;
         }
     }
+
     inline BoardType board_type_from_protocol(const uint8_t raw_value)
     {
         //TODO use real values
@@ -69,6 +72,4 @@ namespace eboat::can
             return BoardType::UNKNOWN;
         }
     }
-
-
 }

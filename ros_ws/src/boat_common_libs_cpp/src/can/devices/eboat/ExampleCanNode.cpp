@@ -7,8 +7,10 @@
 
 void eboat::can::device::ExampleCanNode::handle_custom_can_data(const sockcanpp::CanMessage& msg)
 {
-    switch (get_header_byte(msg)) {
-    case 0x10: parse_cooling_temp_senors_vals(msg); break;
+    switch (get_header_byte(msg))
+    {
+    case 0x10: parse_cooling_temp_senors_vals(msg);
+        break;
     default:
         break;
     }
@@ -37,5 +39,3 @@ void eboat::can::device::ExampleCanNode::parse_cooling_temp_senors_vals(const so
     temp_b = readU16(d, 3) * 0.01;
     temp_c = readU16(d, 5) * 0.01;
 }
-
-
