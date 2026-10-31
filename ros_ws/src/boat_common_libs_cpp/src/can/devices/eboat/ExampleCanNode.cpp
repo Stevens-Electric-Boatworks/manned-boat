@@ -15,17 +15,17 @@ void eboat::can::device::ExampleCanNode::handle_custom_can_data(const sockcanpp:
     std::printf("Temp A: %f, %f, %f\n", *temp_a, *temp_b, *temp_c);
 }
 
-const std::optional<float>& eboat::can::device::ExampleCanNode::get_temp_a() const
+const std::optional<double>& eboat::can::device::ExampleCanNode::get_temp_a() const
 {
     return temp_a;
 }
 
-const std::optional<float>& eboat::can::device::ExampleCanNode::get_temp_b() const
+const std::optional<double>& eboat::can::device::ExampleCanNode::get_temp_b() const
 {
     return temp_b;
 }
 
-const std::optional<float>& eboat::can::device::ExampleCanNode::get_temp_c() const
+const std::optional<double>& eboat::can::device::ExampleCanNode::get_temp_c() const
 {
     return temp_c;
 }

@@ -25,22 +25,22 @@ namespace eboat::can::device
         /**
          * @return The temp of the rear cooling loop A sensor
          */
-        [[nodiscard]] const std::optional<float>& get_temp_a() const;
+        [[nodiscard]] const std::optional<double>& get_temp_a() const;
 
         /**
          * @return The temp of the rear cooling loop B sensor
          */
-        [[nodiscard]] const std::optional<float>& get_temp_b() const;
+        [[nodiscard]] const std::optional<double>& get_temp_b() const;
 
         /**
          * @return The temp of the rear cooling loop C sensor
          */
-        [[nodiscard]] const std::optional<float>& get_temp_c() const;
+        [[nodiscard]] const std::optional<double>& get_temp_c() const;
 
     private:
-        std::optional<float> temp_a = std::nullopt;
-        std::optional<float> temp_b = std::nullopt;
-        std::optional<float> temp_c = std::nullopt;
+        std::optional<double> temp_a = std::nullopt;
+        std::optional<double> temp_b = std::nullopt;
+        std::optional<double> temp_c = std::nullopt;
 
         void parse_cooling_temp_senors_vals(const sockcanpp::CanMessage& msg);
 
