@@ -1,0 +1,1 @@
+float32 outlet_temp

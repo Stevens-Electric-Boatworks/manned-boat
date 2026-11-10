@@ -1,0 +1,2 @@
+float32 coolant_temp
+uint8 throttle
